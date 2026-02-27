@@ -40,8 +40,8 @@ body {
 }
 
 #app-content {
-  min-height: calc(100% - var(--app-top-pad) - 80px + 1px);
-  padding: var(--app-top-pad) 18px 96px;
+  min-height: calc(100% - var(--app-top-pad, 20px) - 80px + 1px);
+  padding: var(--app-top-pad, 20px) 18px 96px;
 }
 
 /* ---- Typography ---- */
