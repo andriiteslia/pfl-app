@@ -151,11 +151,11 @@ td {
 
 /* Zebra striping */
 tbody tr:nth-child(even) {
-  background: #F5F5F5;
+  background: #F4F5F9;
 }
 
 tbody tr.zebra {
-  background: #F5F5F5;
+  background: #F4F5F9;
 }
 
 tr:last-child td {
