@@ -81,7 +81,7 @@ img {
 .loading-text {
   color: var(--muted);
   font-size: 14px;
-  padding: 12px var(--spacing-md);
+  padding: 12px 0;
   text-align: center;
 }
 
@@ -106,14 +106,14 @@ img {
   justify-content: center;
   text-align: center;
   padding: var(--spacing-2xl) var(--spacing-md);
-  margin-top: var(--spacing-2xl);
+  min-height: calc(100vh - 280px);
 }
 
 .empty-state img {
   width: 160px;
   height: 160px;
   object-fit: contain;
-  margin-bottom: 0;
+  margin-bottom: var(--spacing-md);
 }
 
 .empty-state__text {
