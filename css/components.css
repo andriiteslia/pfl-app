@@ -165,7 +165,7 @@ tbody tr:nth-child(even) {
 }
 
 :root[data-theme="dark"] tbody tr:nth-child(even) {
-  background: var(--brand-bg);
+  background: #273038;
 }
 
 tr:last-child td {
@@ -175,8 +175,9 @@ tr:last-child td {
 /* ---- Table Header (collapsible) ---- */
 .table-header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
+  gap: var(--spacing-md);
   padding: var(--spacing-xs) 0;
   cursor: pointer;
   user-select: none;
@@ -187,6 +188,8 @@ tr:last-child td {
   flex-direction: column;
   align-items: flex-start;
   gap: var(--spacing-sm);
+  flex: 1;
+  min-width: 0;
 }
 
 .table-collapsed {
@@ -200,6 +203,12 @@ tr:last-child td {
 
 .table-content .table-wrap {
   margin-top: 0;
+  border-top: 1px solid #E6EAF4;
+  border-bottom: 1px solid #E6EAF4;
+}
+
+:root[data-theme="dark"] .table-content .table-wrap {
+  border-color: var(--border);
 }
 
 /* ---- Chevron ---- */
@@ -209,6 +218,7 @@ tr:last-child td {
   justify-content: center;
   width: 32px;
   height: 32px;
+  flex-shrink: 0;
   border-radius: 50%;
   color: var(--muted);
   transition: transform var(--transition-normal), background var(--transition-fast);
@@ -260,8 +270,15 @@ tr:last-child td {
 }
 
 .segment.active {
+  background: #ffffff;
+  color: var(--text);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+:root[data-theme="dark"] .segment.active {
   background: var(--card);
   color: var(--text);
+  box-shadow: none;
 }
 
 .segment.disabled {
