@@ -105,15 +105,17 @@
 
 .partner-title {
   margin: 0;
-  font-size: 16px;
-  font-weight: 600;
+  font-family: var(--font-ui);
+  font-size: var(--card-title-font-size);
+  font-weight: 800;
   line-height: 1.3;
   color: var(--text);
 }
 
 .partner-subtitle {
   margin: var(--spacing-xs) 0 0;
-  font-size: 13px;
+  font-family: var(--font-ui);
+  font-size: 15px;
   color: var(--muted);
   line-height: 1.4;
   flex: 1;
