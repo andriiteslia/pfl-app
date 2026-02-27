@@ -81,7 +81,7 @@ img {
 .loading-text {
   color: var(--muted);
   font-size: 14px;
-  padding: var(--spacing-lg);
+  padding: 12px var(--spacing-md);
   text-align: center;
 }
 
