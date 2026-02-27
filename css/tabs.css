@@ -50,7 +50,7 @@
 /* ---- Tab Button ---- */
 .tab-btn {
   flex: 1;
-  height: 56px;
+  height: 54px;
   display: flex;
   flex-direction: column;
   align-items: center;
