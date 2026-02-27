@@ -37,18 +37,22 @@ function normNum(v, fallback = 0) {
 
 // ---- Loader UI ----
 function showLoader(mode = 'loading') {
-  const loader = $('#yearLoader2026Text');
+  const loader = $('#yearLoader2026');
+  const loaderText = $('#yearLoader2026Text');
   const container = $('#fests2026Container');
 
   if (loader) {
-    if (mode === 'empty') {
-      loader.innerHTML = 'Поки стоїть лід, тут пусто…<br>Псс, маєш танту? а як знайду?';
-    } else if (mode === 'error') {
-      loader.innerHTML = 'Не вдалося завантажити дані.<br>Спробуйте оновити сторінку.';
-    } else {
-      loader.innerHTML = 'Зачекайте будь ласка,<br>оновлюю дані...';
+    loader.style.display = 'flex';
+    
+    if (loaderText) {
+      if (mode === 'empty') {
+        loaderText.innerHTML = 'Поки стоїть лід, тут пусто…<br>Псс, маєш танту? а як знайду?';
+      } else if (mode === 'error') {
+        loaderText.innerHTML = 'Не вдалося завантажити дані.<br>Спробуйте оновити сторінку.';
+      } else {
+        loaderText.innerHTML = 'Зачекайте будь ласка,<br>оновлюю дані...';
+      }
     }
-    loader.parentElement.style.display = 'block';
   }
 
   if (container) {
@@ -58,11 +62,11 @@ function showLoader(mode = 'loading') {
 }
 
 function hideLoader() {
-  const loader = $('#yearLoader2026Text');
+  const loader = $('#yearLoader2026');
   const container = $('#fests2026Container');
 
   if (loader) {
-    loader.parentElement.style.display = 'none';
+    loader.style.display = 'none';
   }
 
   if (container) {
