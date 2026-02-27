@@ -37,21 +37,55 @@
 /* ---- Logo Section ---- */
 .partner-tile__logo {
   position: relative;
-  height: 100px;
+  aspect-ratio: 1 / 1;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: var(--spacing-lg);
-  background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+  background: #f8fafc;
+  overflow: hidden;
+}
+
+/* Individual partner logo backgrounds */
+.partner-tile[data-partner="upstream"] .partner-tile__logo {
+  background: #ffffff;
+}
+
+.partner-tile[data-partner="m5craft"] .partner-tile__logo {
+  background: #1a1a1a;
+}
+
+.partner-tile[data-partner="crazyfish"] .partner-tile__logo {
+  background: #ffffff;
+}
+
+.partner-tile[data-partner="themain"] .partner-tile__logo {
+  background: #000000;
 }
 
 :root[data-theme="dark"] .partner-tile__logo {
-  background: linear-gradient(180deg, #2a3441 0%, #1e2832 100%);
+  background: #2a3441;
+}
+
+:root[data-theme="dark"] .partner-tile[data-partner="upstream"] .partner-tile__logo {
+  background: #ffffff;
+}
+
+:root[data-theme="dark"] .partner-tile[data-partner="m5craft"] .partner-tile__logo {
+  background: #1a1a1a;
+}
+
+:root[data-theme="dark"] .partner-tile[data-partner="crazyfish"] .partner-tile__logo {
+  background: #ffffff;
+}
+
+:root[data-theme="dark"] .partner-tile[data-partner="themain"] .partner-tile__logo {
+  background: #000000;
 }
 
 .partner-tile__logo img {
-  max-width: 100%;
-  max-height: 60px;
+  max-width: 80%;
+  max-height: 60%;
   object-fit: contain;
 }
 
