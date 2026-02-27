@@ -7,6 +7,7 @@ import CONFIG from './config.js';
 import { initTabs, onTabActivate, getActiveTab } from './tabs.js';
 import { initFests, loadFestsData, isFestsLoaded } from './fests.js';
 import { initLeaderboard, loadLeaderboard, isLeaderboardLoaded } from './leaderboard.js';
+import { initArena, loadArena, isArenaLoaded } from './arena.js';
 import { fetchAppStyles } from './api.js';
 import { $ } from './utils.js';
 
@@ -16,9 +17,8 @@ function initTheme() {
     // Check for theme override in localStorage
     const override = localStorage.getItem('theme_override');
     if (override === 'dark' || override === 'light') {
-      if (override === 'dark') {
-        document.documentElement.setAttribute('data-theme', 'dark');
-      }
+      document.documentElement.setAttribute('data-theme', override === 'dark' ? 'dark' : '');
+      updateThemeToggleIcon();
       return;
     }
     
@@ -27,8 +27,43 @@ function initTheme() {
     if (tg?.colorScheme === 'dark') {
       document.documentElement.setAttribute('data-theme', 'dark');
     }
+    
+    updateThemeToggleIcon();
   } catch (e) {
     console.warn('[Theme] Error:', e);
+  }
+}
+
+function toggleTheme() {
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  const newTheme = isDark ? 'light' : 'dark';
+  
+  document.documentElement.setAttribute('data-theme', newTheme === 'dark' ? 'dark' : '');
+  
+  try {
+    localStorage.setItem('theme_override', newTheme);
+  } catch (e) {}
+  
+  updateThemeToggleIcon();
+  
+  // Haptic feedback
+  try {
+    window.Telegram?.WebApp?.HapticFeedback?.impactOccurred('light');
+  } catch (e) {}
+}
+
+function updateThemeToggleIcon() {
+  const btn = $('#themeToggle');
+  if (!btn) return;
+  
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  btn.textContent = isDark ? '☀️' : '🌙';
+}
+
+function initThemeToggle() {
+  const btn = $('#themeToggle');
+  if (btn) {
+    btn.addEventListener('click', toggleTheme);
   }
 }
 
@@ -198,10 +233,12 @@ function setupTabCallbacks() {
       loadLeaderboard();
     }
   });
-  
-  // TODO: Add callbacks for other tabs
-  // onTabActivate('arena', () => { ... });
-  // onTabActivate('partners', () => { ... });
+
+  onTabActivate('arena', () => {
+    if (!isArenaLoaded()) {
+      loadArena();
+    }
+  });
 }
 
 // ---- Main Init ----
@@ -210,6 +247,7 @@ async function init() {
   
   // 1. Theme (already applied in head, but re-check)
   initTheme();
+  initThemeToggle();
   
   // 2. Telegram integration
   initTelegram();
@@ -221,6 +259,7 @@ async function init() {
   initTabs();
   initFests();
   initLeaderboard();
+  initArena();
   
   // 5. Setup tab activation callbacks
   setupTabCallbacks();
