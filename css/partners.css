@@ -43,7 +43,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0 var(--spacing-md);
+  padding: 0;
   background: #000000;
   overflow: hidden;
 }
@@ -66,10 +66,10 @@
 }
 
 .partner-tile__logo img {
-  max-width: 85%;
+  width: auto;
   height: 100%;
+  max-width: 100%;
   object-fit: contain;
-  padding: 12px 0;
 }
 
 .logo-fallback {
