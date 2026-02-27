@@ -9,7 +9,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 12px 20px;
+  height: 44px;
+  padding: 0 16px;
   border: none;
   border-radius: var(--radius-full);
   background: linear-gradient(180deg, #1E8FE1 0%, #0F6FC0 100%);
@@ -151,6 +152,11 @@ th {
 
 td {
   font-size: var(--table-font-size);
+  border-bottom: 1px solid #E6EAF4;
+}
+
+:root[data-theme="dark"] td {
+  border-bottom: 1px solid var(--border);
 }
 
 /* Zebra striping */
