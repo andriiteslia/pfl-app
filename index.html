@@ -58,38 +58,92 @@
         </header>
 
         <div class="fests-year-tags" id="festsYearTags">
-          <button class="fests-year-tag active" data-year="2026">2026</button>
-          <button class="fests-year-tag" data-year="2025">2025</button>
+          <button class="fests-year-tag" data-year="2026">2026</button>
+          <button class="fests-year-tag active" data-year="2025">2025</button>
         </div>
 
-        <!-- 2026 Fests -->
-        <div id="festsYear2026">
+        <!-- ===== 2026 Fests ===== -->
+        <div id="festsYear2026" class="fests-year-panel" style="display: none;">
           <div class="card">
             <p class="loading-text" id="yearLoader2026Text">Завантажую дані...</p>
           </div>
         </div>
 
-        <!-- 2025 Fests -->
-        <div id="festsYear2025" style="display: none;">
-          <!-- Perch Cup 2025 -->
+        <!-- ===== 2025 Fests ===== -->
+        <div id="festsYear2025" class="fests-year-panel">
+          
+          <!-- PERCH MASTER -->
           <article class="card">
-            <div class="table-header" id="tableHeader">
+            <div class="table-header" id="tableHeaderPerch">
               <div class="table-header__text">
-                <h2 class="card-title">Perch Cup 2025</h2>
+                <div class="card-title" style="font-weight:800;">PERCH MASTER</div>
+                <div style="font-size:15px; color:var(--muted);">Майдан, Чарівні Озера (07.12.25)</div>
+                <div class="score-tag score-tag--personal">Особистий залік 💪</div>
               </div>
-              <div class="chevron" id="tableChevron">
-                <svg class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <div class="chevron" id="chevronPerch">
+                <svg class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M6 9l6 6 6-6"/>
                 </svg>
               </div>
             </div>
-            <div class="segmented-control" id="perchSegment" style="display: none;">
-              <button class="segment active" data-view="results">Результати</button>
-              <button class="segment" data-view="tours">Тури</button>
+            <div class="segmented-control" id="segmentPerch" style="display: none;">
+              <button class="segment active" type="button" data-view="results">Результати</button>
+              <button class="segment" type="button" data-view="tours">Тури</button>
             </div>
-            <div id="out" class="table-collapsed"></div>
-            <div id="outTours" class="table-collapsed"></div>
+            <div id="outPerchResults" class="table-content table-collapsed"></div>
+            <div id="outPerchTours" class="table-content table-collapsed"></div>
           </article>
+
+          <!-- PREDATOR CUP 2025 -->
+          <article class="card">
+            <div class="table-header" id="tableHeaderPredator">
+              <div class="table-header__text">
+                <div class="card-title" style="font-weight:800;">PREDATOR CUP 2025</div>
+                <div style="font-size:15px; color:var(--muted);">Дідилів, Озеро Дідилів (16.11.25)</div>
+                <div class="score-tag score-tag--combo">Командно-особистий залік 🤘</div>
+              </div>
+              <div class="chevron" id="chevronPredator">
+                <svg class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M6 9l6 6 6-6"/>
+                </svg>
+              </div>
+            </div>
+            <div class="segmented-control" id="segmentPredator" style="display: none;">
+              <button class="segment active" type="button" data-view="personal">Особистий</button>
+              <button class="segment" type="button" data-view="team">Командний</button>
+            </div>
+            <div id="outPredatorPersonal" class="table-content table-collapsed"></div>
+            <div id="outPredatorTeam" class="table-content table-collapsed"></div>
+          </article>
+
+          <!-- Predator 2025 -->
+          <article class="card">
+            <div class="table-header" id="tableHeaderPredator2">
+              <div class="table-header__text">
+                <div class="card-title" style="font-weight:800;">Predator 2025</div>
+                <div style="font-size:15px; color:var(--muted);">Майдан, Чарівні Озера (05.10.25)</div>
+                <div class="score-tag score-tag--team">Командний залік 🤜🤛</div>
+              </div>
+              <div class="chevron" id="chevronPredator2">
+                <svg class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M6 9l6 6 6-6"/>
+                </svg>
+              </div>
+            </div>
+            <div id="outPredator2" class="table-content table-collapsed"></div>
+          </article>
+
+          <!-- Donation info -->
+          <div style="margin-top:24px; margin-bottom:32px; font-size:16px; color:var(--muted); text-align:center;">
+            Передано на потреби збройних сил – <span style="white-space:nowrap;">29 500 грн 🇺🇦</span>
+          </div>
+
+          <!-- Badge -->
+          <div style="margin-top:16px; margin-bottom:48px; display:flex; justify-content:center; align-items:center; height:40px;">
+            <a href="https://t.me/andriiteslia" target="_blank" rel="noopener noreferrer" style="display:block; height:40px;">
+              <img id="badgeImg" src="assets/imgs/badge_light.png" alt="badge" style="height:40px; width:auto; display:block;">
+            </a>
+          </div>
         </div>
       </section>
 
@@ -305,6 +359,21 @@
       <path d="M10.293 5.293a1 1 0 011.414 1.414L7.414 11H19a1 1 0 110 2H7.414l4.293 4.293a1 1 0 01-1.414 1.414l-6-6a1 1 0 010-1.414l6-6z" fill="currentColor"/>
     </svg>
   </button>
+
+  <!-- Badge theme script -->
+  <script>
+    (function(){
+      function updateBadge(){
+        var img = document.getElementById('badgeImg');
+        if(!img) return;
+        var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        img.src = isDark ? 'assets/imgs/badge_dark.png' : 'assets/imgs/badge_light.png';
+      }
+      updateBadge();
+      var obs = new MutationObserver(updateBadge);
+      obs.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+    })();
+  </script>
 
   <!-- Main App Script -->
   <script type="module" src="js/app.js"></script>
