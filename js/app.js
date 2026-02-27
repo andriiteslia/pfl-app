@@ -5,6 +5,7 @@
 
 import CONFIG from './config.js';
 import { initTabs, onTabActivate, getActiveTab } from './tabs.js';
+import { initFests, loadFestsData, isFestsLoaded } from './fests.js';
 import { initLeaderboard, loadLeaderboard, isLeaderboardLoaded } from './leaderboard.js';
 import { fetchAppStyles } from './api.js';
 import { $ } from './utils.js';
@@ -186,6 +187,12 @@ function initPullToRefresh() {
 
 // ---- Tab Callbacks ----
 function setupTabCallbacks() {
+  onTabActivate('fests', () => {
+    if (!isFestsLoaded()) {
+      loadFestsData();
+    }
+  });
+
   onTabActivate('leaderboard', () => {
     if (!isLeaderboardLoaded()) {
       loadLeaderboard();
@@ -193,7 +200,6 @@ function setupTabCallbacks() {
   });
   
   // TODO: Add callbacks for other tabs
-  // onTabActivate('fests', () => { ... });
   // onTabActivate('arena', () => { ... });
   // onTabActivate('partners', () => { ... });
 }
@@ -213,6 +219,7 @@ async function init() {
   
   // 4. Initialize modules
   initTabs();
+  initFests();
   initLeaderboard();
   
   // 5. Setup tab activation callbacks
@@ -223,7 +230,9 @@ async function init() {
   
   // 7. Load initial data for visible tab
   const activeTab = getActiveTab();
-  if (activeTab === 'leaderboard') {
+  if (activeTab === 'fests') {
+    loadFestsData();
+  } else if (activeTab === 'leaderboard') {
     loadLeaderboard();
   }
   
