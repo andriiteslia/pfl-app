@@ -155,7 +155,7 @@ tbody tr:nth-child(even) {
 }
 
 tbody tr.zebra {
-  background: var(--brand-bg);
+  background: #F5F5F5;
 }
 
 tr:last-child td {
