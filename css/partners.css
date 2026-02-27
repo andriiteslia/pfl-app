@@ -37,7 +37,7 @@
 /* ---- Logo Section ---- */
 .partner-tile__logo {
   position: relative;
-  aspect-ratio: 1 / 1;
+  height: 120px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -48,7 +48,7 @@
 
 /* Individual partner logo backgrounds */
 .partner-tile[data-partner="upstream"] .partner-tile__logo {
-  background: #ffffff;
+  background: #f0f4f8;
 }
 
 .partner-tile[data-partner="m5craft"] .partner-tile__logo {
@@ -56,7 +56,7 @@
 }
 
 .partner-tile[data-partner="crazyfish"] .partner-tile__logo {
-  background: #ffffff;
+  background: #E91E8C;
 }
 
 .partner-tile[data-partner="themain"] .partner-tile__logo {
@@ -68,7 +68,7 @@
 }
 
 :root[data-theme="dark"] .partner-tile[data-partner="upstream"] .partner-tile__logo {
-  background: #ffffff;
+  background: #f0f4f8;
 }
 
 :root[data-theme="dark"] .partner-tile[data-partner="m5craft"] .partner-tile__logo {
@@ -76,7 +76,7 @@
 }
 
 :root[data-theme="dark"] .partner-tile[data-partner="crazyfish"] .partner-tile__logo {
-  background: #ffffff;
+  background: #E91E8C;
 }
 
 :root[data-theme="dark"] .partner-tile[data-partner="themain"] .partner-tile__logo {
@@ -85,7 +85,7 @@
 
 .partner-tile__logo img {
   max-width: 80%;
-  max-height: 60%;
+  max-height: 70%;
   object-fit: contain;
 }
 
