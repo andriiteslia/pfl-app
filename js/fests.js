@@ -91,27 +91,39 @@ async function reloadFests() {
 
   try {
     if (activeYear === '2025') {
-      // Reset loaded states
+      // Reset ALL loaded states
       cardStates.perch.resultsLoaded = false;
       cardStates.perch.toursLoaded = false;
       cardStates.predator.personalLoaded = false;
       cardStates.predator.teamLoaded = false;
       cardStates.predator2.loaded = false;
 
-      // Reload open cards
+      // Reload data for open cards (force refresh)
       const jobs = [];
+      
       if (cardStates.perch.isOpen) {
-        if (cardStates.perch.view === 'results') jobs.push(loadPerchResults(true));
-        else jobs.push(loadPerchTours(true));
+        if (cardStates.perch.view === 'results') {
+          jobs.push(loadPerchResults(true));
+        } else {
+          jobs.push(loadPerchTours(true));
+        }
       }
+      
       if (cardStates.predator.isOpen) {
-        if (cardStates.predator.view === 'personal') jobs.push(loadPredatorPersonal(true));
-        else jobs.push(loadPredatorTeam(true));
+        if (cardStates.predator.view === 'personal') {
+          jobs.push(loadPredatorPersonal(true));
+        } else {
+          jobs.push(loadPredatorTeam(true));
+        }
       }
+      
       if (cardStates.predator2.isOpen) {
         jobs.push(loadPredator2(true));
       }
-      await Promise.all(jobs);
+      
+      if (jobs.length > 0) {
+        await Promise.all(jobs);
+      }
       
       if (subtitle) subtitle.textContent = 'Актуальні результати';
     } else {
