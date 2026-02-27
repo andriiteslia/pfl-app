@@ -130,18 +130,91 @@ function initTelegram() {
     const tg = window.Telegram?.WebApp;
     if (!tg) return;
     
-    // Expand to full height
-    tg.expand();
+    const FULLSCREEN_PAD = 120;
+    const FULLSIZE_PAD = 20;
+    
+    function setPad(px) {
+      document.documentElement.style.setProperty('--app-top-pad', px + 'px');
+    }
+    
+    function isMobileClient() {
+      const p = tg && typeof tg.platform === 'string' ? tg.platform.toLowerCase() : '';
+      if (p.includes('android') || p.includes('ios')) return true;
+      
+      const ua = (navigator.userAgent || '').toLowerCase();
+      return /iphone|ipad|ipod|android/.test(ua);
+    }
+    
+    function isFullsizeNow() {
+      if (!isMobileClient()) return true;
+      const ih = window.innerHeight || 0;
+      const sh = window.screen?.availHeight || window.screen?.height || 0;
+      if (!ih || !sh) return false;
+      
+      const delta = sh - ih;
+      return delta >= 80;
+    }
+    
+    function applyByState() {
+      if (!isMobileClient()) {
+        setPad(FULLSIZE_PAD);
+        return;
+      }
+      
+      if (tg && typeof tg.isFullscreen === 'boolean') {
+        setPad(tg.isFullscreen ? FULLSCREEN_PAD : FULLSIZE_PAD);
+        return;
+      }
+      
+      setPad(isFullsizeNow() ? FULLSIZE_PAD : FULLSCREEN_PAD);
+    }
+    
+    function tryFullscreen() {
+      if (!tg || !isMobileClient()) return;
+      if (!isFullsizeNow()) return;
+      try {
+        if (typeof tg.requestFullscreen === 'function') {
+          tg.requestFullscreen();
+        } else if (typeof tg.expand === 'function') {
+          tg.expand();
+        }
+      } catch(e) {}
+    }
+    
+    // Apply padding immediately
+    applyByState();
+    
+    // Try fullscreen on mobile
+    if (isMobileClient()) {
+      tryFullscreen();
+    }
+    
+    // Try on first interaction
+    let triedOnInteraction = false;
+    function tryOnce() {
+      if (triedOnInteraction) return;
+      triedOnInteraction = true;
+      tryFullscreen();
+    }
+    
+    ['touchstart', 'click'].forEach(evt => {
+      document.addEventListener(evt, tryOnce, { once: true, passive: true });
+    });
     
     // Update viewport height CSS variable
     const updateViewport = () => {
       const vh = tg.viewportStableHeight || window.innerHeight;
       document.documentElement.style.setProperty('--tg-viewport-height', `${vh}px`);
       document.documentElement.style.setProperty('--tg-viewport-stable-height', `${vh}px`);
+      applyByState();
     };
     
     updateViewport();
     tg.onEvent('viewportChanged', updateViewport);
+    
+    // Expand on init
+    try { tg.expand(); } catch(e) {}
+    setTimeout(() => { try { tg.expand(); } catch(e) {} }, 120);
     
     console.log('[Telegram] WebApp initialized');
   } catch (e) {
