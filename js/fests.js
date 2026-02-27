@@ -7,19 +7,17 @@ import CONFIG from './config.js';
 import { fetchWithCache, fetchSheetData } from './api.js';
 import { 
   $, $$, escapeHtml, setButtonLoading, haptic,
-  normBool, normStr, parseDividers
+  parseDividers
 } from './utils.js';
 
 // ---- State ----
-let activeYear = '2026';
-let festsLoadedOnce = false;
-let perchToursLoadedOnce = false;
+let activeYear = '2025';
 
-// Card collapse states
+// Card states
 const cardStates = {
-  perchCup: { isOpen: false, view: 'results' },
-  perchCupR1: { isOpen: false, view: 'results' },
-  predatorCup: { isOpen: false, view: 'personal' },
+  perch: { isOpen: false, view: 'results', resultsLoaded: false, toursLoaded: false },
+  predator: { isOpen: false, view: 'personal', personalLoaded: false, teamLoaded: false },
+  predator2: { isOpen: false, loaded: false },
 };
 
 // ---- Initialize ----
@@ -39,13 +37,14 @@ export function initFests() {
   if (reloadBtn) {
     reloadBtn.addEventListener('click', () => {
       haptic('light');
-      loadFestsData({ force: true });
+      reloadFests();
     });
   }
 
-  // Setup 2025 card interactions
-  setupPerchCupCard();
-  setupPredatorCupCard();
+  // Setup card interactions
+  setupPerchCard();
+  setupPredatorCard();
+  setupPredator2Card();
 
   console.log('[Fests] Initialized');
 }
@@ -67,59 +66,86 @@ function switchYear(year) {
   if (panel2026) panel2026.style.display = year === '2026' ? 'block' : 'none';
   if (panel2025) panel2025.style.display = year === '2025' ? 'block' : 'none';
 
-  // Load data if needed
-  if (year === '2025' && !perchToursLoadedOnce) {
-    // Data loads on card expand
+  // Update subtitle
+  const subtitle = $('#subtitle-fests');
+  if (subtitle) {
+    subtitle.textContent = year === '2026' 
+      ? 'Фести 2026 року' 
+      : 'Актуальні результати';
+  }
+
+  // Load 2026 data if needed
+  if (year === '2026') {
+    loadFests2026();
   }
 }
 
-// ---- Load Fests Data ----
-export async function loadFestsData({ force = false } = {}) {
-  const subtitle = $('#subtitle-fests');
+// ---- Reload Fests ----
+async function reloadFests() {
   const reloadBtn = $('#reload');
-  const loader = $('#yearLoader2026Text');
-
+  const subtitle = $('#subtitle-fests');
+  
   setButtonLoading(reloadBtn, true);
-
   if (subtitle) subtitle.textContent = 'Оновлюю дані…';
 
   try {
-    // For now, just show that it's loaded
-    // TODO: Implement 2026 fests loading from config
-    
-    if (loader) {
-      loader.textContent = 'Фести 2026 року з\'являться тут найближчим часом!';
+    if (activeYear === '2025') {
+      // Reset loaded states
+      cardStates.perch.resultsLoaded = false;
+      cardStates.perch.toursLoaded = false;
+      cardStates.predator.personalLoaded = false;
+      cardStates.predator.teamLoaded = false;
+      cardStates.predator2.loaded = false;
+
+      // Reload open cards
+      const jobs = [];
+      if (cardStates.perch.isOpen) {
+        if (cardStates.perch.view === 'results') jobs.push(loadPerchResults(true));
+        else jobs.push(loadPerchTours(true));
+      }
+      if (cardStates.predator.isOpen) {
+        if (cardStates.predator.view === 'personal') jobs.push(loadPredatorPersonal(true));
+        else jobs.push(loadPredatorTeam(true));
+      }
+      if (cardStates.predator2.isOpen) {
+        jobs.push(loadPredator2(true));
+      }
+      await Promise.all(jobs);
+    } else {
+      await loadFests2026(true);
     }
 
     if (subtitle) subtitle.textContent = 'Актуальні результати';
-    festsLoadedOnce = true;
-
-  } catch (error) {
-    console.error('[Fests] Load error:', error);
+  } catch (e) {
     if (subtitle) subtitle.textContent = 'Помилка завантаження';
   } finally {
     setButtonLoading(reloadBtn, false);
   }
 }
 
-// ---- Setup Perch Cup Card (2025) ----
-function setupPerchCupCard() {
-  const header = $('#tableHeader');
-  const chevron = $('#tableChevron');
-  const segment = $('#perchSegment');
-  const outResults = $('#out');
-  const outTours = $('#outTours');
+// ---- Load Fests Data (called on init) ----
+export async function loadFestsData({ force = false } = {}) {
+  // Nothing to load on init - data loads when cards are opened
+  console.log('[Fests] Ready');
+}
+
+// ---- Perch Card ----
+function setupPerchCard() {
+  const header = $('#tableHeaderPerch');
+  const chevron = $('#chevronPerch');
+  const segment = $('#segmentPerch');
+  const outResults = $('#outPerchResults');
+  const outTours = $('#outPerchTours');
 
   if (!header) return;
 
   header.addEventListener('click', () => {
-    cardStates.perchCup.isOpen = !cardStates.perchCup.isOpen;
+    cardStates.perch.isOpen = !cardStates.perch.isOpen;
     haptic('light');
-    updatePerchCupView();
+    updatePerchView();
 
-    // Load data on first open
-    if (cardStates.perchCup.isOpen && !festsLoadedOnce) {
-      loadPerchCupResults();
+    if (cardStates.perch.isOpen && !cardStates.perch.resultsLoaded) {
+      loadPerchResults();
     }
   });
 
@@ -129,28 +155,27 @@ function setupPerchCupCard() {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
         const view = btn.dataset.view;
-        if (view === cardStates.perchCup.view) return;
+        if (view === cardStates.perch.view) return;
 
-        cardStates.perchCup.view = view;
+        cardStates.perch.view = view;
         haptic('light');
 
         segment.querySelectorAll('.segment').forEach(s => {
           s.classList.toggle('active', s.dataset.view === view);
         });
 
-        updatePerchCupView();
+        updatePerchView();
 
-        // Load tours if needed
-        if (view === 'tours' && !perchToursLoadedOnce) {
-          loadPerchCupTours();
+        if (view === 'tours' && !cardStates.perch.toursLoaded) {
+          loadPerchTours();
         }
       });
     });
   }
 
-  function updatePerchCupView() {
-    const isOpen = cardStates.perchCup.isOpen;
-    const view = cardStates.perchCup.view;
+  function updatePerchView() {
+    const isOpen = cardStates.perch.isOpen;
+    const view = cardStates.perch.view;
 
     chevron?.classList.toggle('open', isOpen);
     if (segment) segment.style.display = isOpen ? 'flex' : 'none';
@@ -171,61 +196,225 @@ function setupPerchCupCard() {
   }
 }
 
-// ---- Load Perch Cup Results ----
-async function loadPerchCupResults() {
-  const out = $('#out');
+async function loadPerchResults(force = false) {
+  const out = $('#outPerchResults');
   if (!out) return;
 
   out.innerHTML = '<div class="loading-text">Завантажую дані…</div>';
 
   try {
-    const data = await fetchWithCache(CONFIG.API_URL);
+    const data = await fetchWithCache(CONFIG.API_URL, { force });
 
     if (!data?.ok || !Array.isArray(data.values)) {
-      out.textContent = 'Не вдалося завантажити дані.';
+      out.innerHTML = '<div class="loading-text">Не вдалося завантажити дані.</div>';
       return;
     }
 
     renderTableInto(data.values, out);
-    festsLoadedOnce = true;
+    cardStates.perch.resultsLoaded = true;
   } catch (e) {
-    out.textContent = 'Помилка завантаження.';
+    out.innerHTML = '<div class="loading-text">Помилка завантаження.</div>';
   }
 }
 
-// ---- Load Perch Cup Tours ----
-async function loadPerchCupTours() {
-  const out = $('#outTours');
+async function loadPerchTours(force = false) {
+  const out = $('#outPerchTours');
   if (!out) return;
 
   out.innerHTML = '<div class="loading-text">Завантажую дані…</div>';
 
   try {
-    const params = { range: 'A1:I18' };
-    const url = `${CONFIG.API_URL}?range=${params.range}`;
-    const data = await fetchWithCache(url);
+    const url = `${CONFIG.API_URL}?range=A1:I18`;
+    const data = await fetchWithCache(url, { force });
 
     if (!data?.ok || !Array.isArray(data.values)) {
-      out.textContent = 'Не вдалося завантажити дані.';
+      out.innerHTML = '<div class="loading-text">Не вдалося завантажити дані.</div>';
       return;
     }
 
     renderTableInto(data.values, out);
-    perchToursLoadedOnce = true;
+    cardStates.perch.toursLoaded = true;
   } catch (e) {
-    out.textContent = 'Помилка завантаження.';
+    out.innerHTML = '<div class="loading-text">Помилка завантаження.</div>';
   }
 }
 
-// ---- Setup Predator Cup Card (2025) ----
-function setupPredatorCupCard() {
-  // TODO: Implement Predator Cup card if needed
+// ---- Predator Card ----
+function setupPredatorCard() {
+  const header = $('#tableHeaderPredator');
+  const chevron = $('#chevronPredator');
+  const segment = $('#segmentPredator');
+  const outPersonal = $('#outPredatorPersonal');
+  const outTeam = $('#outPredatorTeam');
+
+  if (!header) return;
+
+  header.addEventListener('click', () => {
+    cardStates.predator.isOpen = !cardStates.predator.isOpen;
+    haptic('light');
+    updatePredatorView();
+
+    if (cardStates.predator.isOpen && !cardStates.predator.personalLoaded) {
+      loadPredatorPersonal();
+    }
+  });
+
+  // Segment buttons
+  if (segment) {
+    segment.querySelectorAll('.segment').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const view = btn.dataset.view;
+        if (view === cardStates.predator.view) return;
+
+        cardStates.predator.view = view;
+        haptic('light');
+
+        segment.querySelectorAll('.segment').forEach(s => {
+          s.classList.toggle('active', s.dataset.view === view);
+        });
+
+        updatePredatorView();
+
+        if (view === 'team' && !cardStates.predator.teamLoaded) {
+          loadPredatorTeam();
+        }
+      });
+    });
+  }
+
+  function updatePredatorView() {
+    const isOpen = cardStates.predator.isOpen;
+    const view = cardStates.predator.view;
+
+    chevron?.classList.toggle('open', isOpen);
+    if (segment) segment.style.display = isOpen ? 'flex' : 'none';
+
+    if (!isOpen) {
+      outPersonal?.classList.add('table-collapsed');
+      outTeam?.classList.add('table-collapsed');
+      return;
+    }
+
+    if (view === 'team') {
+      outPersonal?.classList.add('table-collapsed');
+      outTeam?.classList.remove('table-collapsed');
+    } else {
+      outTeam?.classList.add('table-collapsed');
+      outPersonal?.classList.remove('table-collapsed');
+    }
+  }
+}
+
+async function loadPredatorPersonal(force = false) {
+  const out = $('#outPredatorPersonal');
+  if (!out) return;
+
+  out.innerHTML = '<div class="loading-text">Завантажую дані…</div>';
+
+  try {
+    const data = await fetchSheetData({
+      sheetId: CONFIG.FESTS_2025.PREDATOR_CUP.PERSONAL.SHEET_ID,
+      sheetName: CONFIG.FESTS_2025.PREDATOR_CUP.PERSONAL.SHEET_NAME,
+      range: CONFIG.FESTS_2025.PREDATOR_CUP.PERSONAL.RANGE,
+    }, { force });
+
+    if (!data?.ok || !Array.isArray(data.values)) {
+      out.innerHTML = '<div class="loading-text">Не вдалося завантажити дані.</div>';
+      return;
+    }
+
+    renderTableInto(data.values, out);
+    cardStates.predator.personalLoaded = true;
+  } catch (e) {
+    out.innerHTML = '<div class="loading-text">Помилка завантаження.</div>';
+  }
+}
+
+async function loadPredatorTeam(force = false) {
+  const out = $('#outPredatorTeam');
+  if (!out) return;
+
+  out.innerHTML = '<div class="loading-text">Завантажую дані…</div>';
+
+  try {
+    const data = await fetchSheetData({
+      sheetId: CONFIG.FESTS_2025.PREDATOR_CUP.TEAM.SHEET_ID,
+      sheetName: CONFIG.FESTS_2025.PREDATOR_CUP.TEAM.SHEET_NAME,
+      range: CONFIG.FESTS_2025.PREDATOR_CUP.TEAM.RANGE,
+    }, { force });
+
+    if (!data?.ok || !Array.isArray(data.values)) {
+      out.innerHTML = '<div class="loading-text">Не вдалося завантажити дані.</div>';
+      return;
+    }
+
+    renderTableInto(data.values, out);
+    cardStates.predator.teamLoaded = true;
+  } catch (e) {
+    out.innerHTML = '<div class="loading-text">Помилка завантаження.</div>';
+  }
+}
+
+// ---- Predator 2 Card ----
+function setupPredator2Card() {
+  const header = $('#tableHeaderPredator2');
+  const chevron = $('#chevronPredator2');
+  const out = $('#outPredator2');
+
+  if (!header) return;
+
+  header.addEventListener('click', () => {
+    cardStates.predator2.isOpen = !cardStates.predator2.isOpen;
+    haptic('light');
+    
+    chevron?.classList.toggle('open', cardStates.predator2.isOpen);
+    out?.classList.toggle('table-collapsed', !cardStates.predator2.isOpen);
+
+    if (cardStates.predator2.isOpen && !cardStates.predator2.loaded) {
+      loadPredator2();
+    }
+  });
+}
+
+async function loadPredator2(force = false) {
+  const out = $('#outPredator2');
+  if (!out) return;
+
+  out.innerHTML = '<div class="loading-text">Завантажую дані…</div>';
+
+  try {
+    const data = await fetchSheetData({
+      sheetId: CONFIG.FESTS_2025.PREDATOR_CUP.PERSONAL.SHEET_ID,
+      sheetName: CONFIG.FESTS_2025.PREDATOR_CUP.PERSONAL.SHEET_NAME,
+      range: 'O1:R18',
+    }, { force });
+
+    if (!data?.ok || !Array.isArray(data.values)) {
+      out.innerHTML = '<div class="loading-text">Не вдалося завантажити дані.</div>';
+      return;
+    }
+
+    renderTableInto(data.values, out);
+    cardStates.predator2.loaded = true;
+  } catch (e) {
+    out.innerHTML = '<div class="loading-text">Помилка завантаження.</div>';
+  }
+}
+
+// ---- Load Fests 2026 ----
+async function loadFests2026(force = false) {
+  const loader = $('#yearLoader2026Text');
+  if (loader) {
+    loader.textContent = 'Фести 2026 року з\'являться тут найближчим часом!';
+  }
+  // TODO: Implement CONFIG_2026 loading
 }
 
 // ---- Render Table ----
 function renderTableInto(values, targetEl, options = {}) {
   if (!Array.isArray(values) || values.length === 0) {
-    targetEl.textContent = 'Немає даних';
+    targetEl.innerHTML = '<div class="loading-text">Немає даних</div>';
     return;
   }
 
@@ -266,5 +455,5 @@ function renderTableInto(values, targetEl, options = {}) {
 
 // ---- Export ----
 export function isFestsLoaded() {
-  return festsLoadedOnce;
+  return true; // Fests loads on demand
 }
