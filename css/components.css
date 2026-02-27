@@ -175,7 +175,7 @@ tr:last-child td {
 /* ---- Table Header (collapsible) ---- */
 .table-header {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: var(--spacing-md);
   padding: var(--spacing-xs) 0;
@@ -199,6 +199,10 @@ tr:last-child td {
 /* Table content spacing */
 .table-content {
   margin-top: 12px;
+}
+
+.table-content .loading-text {
+  padding: 6px 0;
 }
 
 .table-content .table-wrap {
@@ -333,27 +337,65 @@ tr:last-child td {
 
 .fests-year-tag {
   appearance: none;
-  padding: var(--spacing-sm) var(--spacing-md);
-  border: none;
+  padding: 8px 16px;
+  border: 1px solid transparent;
   border-radius: var(--radius-full);
-  background: var(--brand-bg);
+  background: rgba(255, 255, 255, 0.70);
   color: var(--muted);
   font-family: var(--font-ui);
-  font-size: 14px;
-  font-weight: 600;
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.5;
   cursor: pointer;
   white-space: nowrap;
-  transition: background var(--transition-fast), color var(--transition-fast);
+  position: relative;
+  backdrop-filter: blur(12px) saturate(1.6);
+  -webkit-backdrop-filter: blur(12px) saturate(1.6);
+  box-shadow: 
+    inset 0 1px 0 rgba(255, 255, 255, 0.80),
+    0 2px 8px rgba(0, 99, 178, 0.06);
+  transition: background 0.15s ease, box-shadow 0.15s ease, transform 0.05s ease;
+}
+
+.fests-year-tag:hover {
+  background: rgba(18, 122, 201, 0.12);
+}
+
+.fests-year-tag:active {
+  background: rgba(18, 122, 201, 0.18);
+  transform: translateY(1px);
 }
 
 .fests-year-tag.active {
-  background: rgba(217, 242, 255, 0.80);
-  color: #0F130E;
+  background: rgba(217, 242, 255, 0.85);
+  color: var(--text);
+  border-color: rgba(35, 139, 218, 0.28);
+  box-shadow: 
+    inset 0 1px 0 rgba(255, 255, 255, 0.90),
+    0 4px 12px rgba(18, 122, 201, 0.12);
+}
+
+/* Dark theme year tags */
+:root[data-theme="dark"] .fests-year-tag {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text);
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow: 
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+:root[data-theme="dark"] .fests-year-tag:not(.active):hover {
+  background: rgba(78, 163, 255, 0.12);
 }
 
 :root[data-theme="dark"] .fests-year-tag.active {
-  background: rgba(78, 163, 255, 0.18);
+  background: rgba(78, 163, 255, 0.22);
   color: var(--text);
+  border-color: rgba(78, 163, 255, 0.28);
+  box-shadow: 
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 4px 12px rgba(78, 163, 255, 0.15);
 }
 
 /* ---- Header Layout ---- */
@@ -380,28 +422,44 @@ tr:last-child td {
 }
 
 /* ---- Theme Toggle ---- */
-.theme-toggle {
-  appearance: none;
-  width: 40px;
-  height: 40px;
-  display: flex;
+.btn.btn-theme {
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border-radius: 50%;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0;
-  border: none;
-  border-radius: 50%;
-  background: var(--brand-bg);
   font-size: 18px;
-  cursor: pointer;
-  transition: transform var(--transition-fast), background var(--transition-fast);
+  line-height: 1;
+  
+  /* Glass light */
+  background: rgba(255, 255, 255, 0.60);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.80),
+    0 8px 16px rgba(0, 99, 178, 0.06);
+  backdrop-filter: blur(12px) saturate(1.6);
+  -webkit-backdrop-filter: blur(12px) saturate(1.6);
 }
 
-.theme-toggle:hover {
-  background: var(--border);
+.btn.btn-theme:hover {
+  filter: none;
 }
 
-.theme-toggle:active {
-  transform: scale(0.92);
+.btn.btn-theme:active {
+  transform: none;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.60),
+    0 4px 8px rgba(0, 99, 178, 0.06);
+}
+
+:root[data-theme="dark"] .btn.btn-theme {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 4px 12px rgba(0, 0, 0, 0.04);
 }
 
 /* ---- Register Button (2026 fest cards) ---- */
