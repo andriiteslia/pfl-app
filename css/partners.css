@@ -19,6 +19,8 @@
 
 /* ---- Partner Tile ---- */
 .partner-tile {
+  display: flex;
+  flex-direction: column;
   background: var(--card);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow);
@@ -37,56 +39,37 @@
 /* ---- Logo Section ---- */
 .partner-tile__logo {
   position: relative;
-  height: 120px;
+  height: 80px;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: var(--spacing-lg);
-  background: #f8fafc;
+  padding: 0 var(--spacing-md);
+  background: #000000;
   overflow: hidden;
 }
 
 /* Individual partner logo backgrounds */
 .partner-tile[data-partner="upstream"] .partner-tile__logo {
-  background: #f0f4f8;
+  background: #000000;
 }
 
 .partner-tile[data-partner="m5craft"] .partner-tile__logo {
-  background: #1a1a1a;
+  background: #020102;
 }
 
 .partner-tile[data-partner="crazyfish"] .partner-tile__logo {
-  background: #E91E8C;
+  background: #DF127B;
 }
 
 .partner-tile[data-partner="themain"] .partner-tile__logo {
   background: #000000;
 }
 
-:root[data-theme="dark"] .partner-tile__logo {
-  background: #2a3441;
-}
-
-:root[data-theme="dark"] .partner-tile[data-partner="upstream"] .partner-tile__logo {
-  background: #f0f4f8;
-}
-
-:root[data-theme="dark"] .partner-tile[data-partner="m5craft"] .partner-tile__logo {
-  background: #1a1a1a;
-}
-
-:root[data-theme="dark"] .partner-tile[data-partner="crazyfish"] .partner-tile__logo {
-  background: #E91E8C;
-}
-
-:root[data-theme="dark"] .partner-tile[data-partner="themain"] .partner-tile__logo {
-  background: #000000;
-}
-
 .partner-tile__logo img {
-  max-width: 80%;
-  max-height: 70%;
+  max-width: 85%;
+  height: 100%;
   object-fit: contain;
+  padding: 12px 0;
 }
 
 .logo-fallback {
@@ -114,6 +97,9 @@
 
 /* ---- Body Section ---- */
 .partner-tile__body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
   padding: var(--spacing-md);
 }
 
@@ -126,10 +112,15 @@
 }
 
 .partner-subtitle {
-  margin: var(--spacing-xs) 0 var(--spacing-md);
+  margin: var(--spacing-xs) 0 0;
   font-size: 13px;
   color: var(--muted);
   line-height: 1.4;
+  flex: 1;
+}
+
+.partner-tile__body .link-btn {
+  margin-top: var(--spacing-md);
 }
 
 /* ---- Partner Details View ---- */
