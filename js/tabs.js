@@ -9,7 +9,7 @@ import CONFIG from './config.js';
 // ---- State ----
 let activeTab = CONFIG.UI.DEFAULT_TAB;
 let previousTab = null;
-const tabOrder = ['fests', 'leaderboard', 'arena', 'partners'];
+const tabOrder = ['fests', 'leaderboard', 'partners', 'arena'];
 
 // Callbacks for tab activation
 const tabCallbacks = new Map();
