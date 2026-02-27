@@ -9,6 +9,7 @@ import {
   $, $$, escapeHtml, setButtonLoading, haptic,
   parseDividers
 } from './utils.js';
+import { mountFests2026, resetFests2026 } from './fests2026.js';
 
 // ---- State ----
 let activeYear = '2025';
@@ -76,7 +77,7 @@ function switchYear(year) {
 
   // Load 2026 data if needed
   if (year === '2026') {
-    loadFests2026();
+    mountFests2026();
   }
 }
 
@@ -111,11 +112,15 @@ async function reloadFests() {
         jobs.push(loadPredator2(true));
       }
       await Promise.all(jobs);
+      
+      if (subtitle) subtitle.textContent = 'Актуальні результати';
     } else {
-      await loadFests2026(true);
+      // Reload 2026
+      resetFests2026();
+      await mountFests2026({ force: true });
+      
+      if (subtitle) subtitle.textContent = 'Фести 2026 року';
     }
-
-    if (subtitle) subtitle.textContent = 'Актуальні результати';
   } catch (e) {
     if (subtitle) subtitle.textContent = 'Помилка завантаження';
   } finally {
