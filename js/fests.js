@@ -37,6 +37,7 @@ export function initFests() {
   const reloadBtn = $('#reload');
   if (reloadBtn) {
     reloadBtn.addEventListener('click', () => {
+      console.log('[Fests] Reload button clicked, activeYear:', activeYear);
       haptic('light');
       reloadFests();
     });
@@ -83,6 +84,7 @@ function switchYear(year) {
 
 // ---- Reload Fests ----
 async function reloadFests() {
+  console.log('[Fests] reloadFests called, activeYear:', activeYear);
   const reloadBtn = $('#reload');
   const subtitle = $('#subtitle-fests');
   
