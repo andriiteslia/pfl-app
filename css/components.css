@@ -165,7 +165,7 @@ tbody tr:nth-child(even) {
 }
 
 :root[data-theme="dark"] tbody tr:nth-child(even) {
-  background: #273038;
+  background: var(--brand-bg);
 }
 
 tr:last-child td {
@@ -394,4 +394,23 @@ tr:last-child td {
   align-items: center;
   width: 100%;
   margin-top: var(--spacing-md);
+}
+
+/* ---- Table Content ---- */
+.table-content {
+  margin-top: 12px;
+}
+
+.table-content .loading-text {
+  padding: 12px 0;
+}
+
+.table-content .table-wrap {
+  margin-top: 0;
+  border-top: 1px solid #E6EAF4;
+  border-bottom: 1px solid #E6EAF4;
+}
+
+:root[data-theme="dark"] .table-content .table-wrap {
+  border-color: var(--border);
 }
