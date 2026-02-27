@@ -1,0 +1,383 @@
+/* ============================================
+   PFL App — Leaderboard Styles
+   Top 3 podium, avatars, aquarium effects
+   ============================================ */
+
+/* ---- Leaderboard Card ---- */
+#tab-leaderboard .card {
+  padding-top: 0;
+  overflow: hidden;
+}
+
+#tab-leaderboard .table-wrap {
+  margin-top: 0;
+}
+
+/* Center rank column */
+#tab-leaderboard table th:first-child,
+#tab-leaderboard table td:first-child {
+  text-align: center;
+}
+
+/* ---- Status Badge ---- */
+.lb-status-badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: var(--card);
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.14);
+  line-height: 1;
+  z-index: 2;
+}
+
+/* ---- Top 3 Podium ---- */
+.top3-podium {
+  position: relative;
+  margin: 0 calc(var(--spacing-md) * -1);
+  padding: 24px 12px 0;
+  background: linear-gradient(180deg, #1E8FE1 0%, #0F6FC0 100%);
+  border-radius: 0;
+  overflow: hidden;
+  animation: podium-fade-in 420ms ease-out both;
+}
+
+@keyframes podium-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.top3-podium__inner {
+  position: relative;
+  z-index: 1;
+}
+
+/* ---- Top 3 People Row ---- */
+.top3-people {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 8px;
+  padding-bottom: 8px;
+}
+
+.top3-person {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  max-width: 120px;
+  animation: person-fade-in 520ms cubic-bezier(0.2, 0.9, 0.2, 1) both;
+}
+
+.top3-person.place2 {
+  transform: translateY(24px);
+  animation-delay: 70ms;
+}
+
+.top3-person.place1 {
+  animation-delay: 140ms;
+}
+
+.top3-person.place3 {
+  transform: translateY(40px);
+  animation-delay: 0ms;
+}
+
+@keyframes person-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(var(--person-offset-y, 0)) scale(1);
+  }
+}
+
+.top3-person.place1 { --person-offset-y: 0; }
+.top3-person.place2 { --person-offset-y: 24px; }
+.top3-person.place3 { --person-offset-y: 40px; }
+
+/* ---- Crown ---- */
+.top3-crown {
+  font-size: 28px;
+  line-height: 1;
+  margin-bottom: -4px;
+  animation: crown-float 2s ease-in-out infinite;
+  cursor: pointer;
+}
+
+@keyframes crown-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+/* ---- Avatar ---- */
+.top3-avatar {
+  position: relative;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #fff 0%, #e8f4ff 100%);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+}
+
+.top3-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.top3-person.place1 .top3-avatar {
+  width: 80px;
+  height: 80px;
+  box-shadow: 
+    0 4px 20px rgba(0, 0, 0, 0.2),
+    0 0 0 3px rgba(255, 215, 0, 0.4);
+}
+
+/* Gold pulse for 1st place */
+.top3-person.place1 .top3-avatar::after {
+  content: "";
+  position: absolute;
+  inset: -12px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 50% 50%,
+    rgba(255, 215, 0, 0.25) 0%,
+    rgba(255, 215, 0, 0.18) 35%,
+    transparent 70%
+  );
+  opacity: 0;
+  pointer-events: none;
+  z-index: 4;
+  animation: gold-pulse 3s ease-out infinite;
+}
+
+@keyframes gold-pulse {
+  0% { opacity: 0; transform: scale(1); }
+  50% { opacity: 0.35; transform: scale(1.05); }
+  100% { opacity: 0; transform: scale(1.1); }
+}
+
+/* ---- Name & Points ---- */
+.top3-name {
+  margin-top: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #fff;
+  text-align: center;
+  line-height: 1.2;
+}
+
+.top3-points {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  margin-top: 4px;
+  padding: 6px 12px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: var(--radius-full);
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+}
+
+/* ---- Stands ---- */
+.top3-stands {
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+  margin-top: 12px;
+}
+
+.top3-stand {
+  flex: 1;
+  max-width: 100px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 12px;
+  border-radius: 8px 8px 0 0;
+  background: linear-gradient(
+    180deg,
+    #FFD93D 0px,
+    #FFD93D 12px,
+    #FFC107 12px,
+    #FFB800 100%
+  );
+}
+
+.top3-stand.s1 {
+  flex: 1.2;
+  height: 104px;
+}
+
+.top3-stand.s2 {
+  height: 80px;
+}
+
+.top3-stand.s3 {
+  height: 64px;
+}
+
+.top3-stand .num {
+  font-size: 40px;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  background: linear-gradient(180deg, #13485B 20%, #22242A 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.top3-stand.s1 .num {
+  font-size: 48px;
+  transform: translateY(6px);
+}
+
+.top3-stand.s2 .num {
+  font-size: 36px;
+  transform: translateY(4px);
+}
+
+.top3-stand.s3 .num {
+  font-size: 36px;
+  transform: translateY(3px);
+}
+
+/* Dark theme stands */
+:root[data-theme="dark"] .top3-stand {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 184, 5, 0.96) 0px,
+    rgba(255, 184, 5, 0.96) 12px,
+    rgba(255, 213, 59, 0.95) 12px,
+    rgba(255, 184, 4, 0.92) 100%
+  );
+}
+
+/* ---- Aquarium Effects ---- */
+.top3-aqua {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+/* Fish */
+.aqua-fish {
+  position: absolute;
+  top: var(--y, 50%);
+  font-size: calc(24px * var(--s, 1));
+  opacity: 0.8;
+  animation: fish-swim var(--d, 10s) linear infinite;
+  animation-delay: var(--del, 0s);
+  transform: scaleX(calc(var(--flip, 0) * -2 + 1));
+}
+
+@keyframes fish-swim {
+  0% {
+    left: -40px;
+    opacity: 0;
+  }
+  5% {
+    opacity: 0.8;
+  }
+  95% {
+    opacity: 0.8;
+  }
+  100% {
+    left: calc(100% + 40px);
+    opacity: 0;
+  }
+}
+
+/* Bubbles */
+.aqua-bubble {
+  position: absolute;
+  bottom: -20px;
+  left: var(--x, 50%);
+  width: var(--sz, 8px);
+  height: var(--sz, 8px);
+  background: rgba(255, 255, 255, 0.4);
+  border-radius: 50%;
+  animation: bubble-rise var(--d, 5s) ease-in infinite;
+  animation-delay: var(--del, 0s);
+}
+
+@keyframes bubble-rise {
+  0% {
+    transform: translateY(0) scale(1);
+    opacity: 0.6;
+  }
+  100% {
+    transform: translateY(-200px) scale(0.5);
+    opacity: 0;
+  }
+}
+
+/* Crab */
+.aqua-crab {
+  position: absolute;
+  bottom: 12px;
+  font-size: 24px;
+  display: none;
+}
+
+@keyframes crab-walk-right {
+  from { left: -32px; }
+  to { left: calc(100% + 32px); }
+}
+
+@keyframes crab-walk-left {
+  from { right: -32px; }
+  to { right: calc(100% + 32px); }
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 360px) {
+  .top3-avatar {
+    width: 58px;
+    height: 58px;
+  }
+  
+  .top3-person.place1 .top3-avatar {
+    width: 66px;
+    height: 66px;
+  }
+  
+  .top3-name {
+    font-size: 14px;
+  }
+  
+  .top3-points {
+    font-size: 13px;
+    padding: 6px 10px;
+  }
+}
+
+/* ---- Reduced Motion ---- */
+@media (prefers-reduced-motion: reduce) {
+  .top3-podium,
+  .top3-person,
+  .top3-crown,
+  .top3-person.place1 .top3-avatar::after,
+  .aqua-fish,
+  .aqua-bubble {
+    animation: none !important;
+  }
+}
