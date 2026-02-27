@@ -179,6 +179,11 @@ export async function loadArena({ force = false } = {}) {
 
   if (loaded && !force) return;
 
+  // Reset active tag on force reload
+  if (force) {
+    activeTagId = null;
+  }
+
   setButtonLoading(reloadBtn, true);
   setArenaState('loading');
 
