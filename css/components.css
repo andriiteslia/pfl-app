@@ -165,7 +165,7 @@ tbody tr:nth-child(even) {
 }
 
 :root[data-theme="dark"] tbody tr:nth-child(even) {
-  background: var(--brand-bg);
+  background: #273038;
 }
 
 tr:last-child td {
