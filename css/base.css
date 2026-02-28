@@ -39,6 +39,20 @@ body {
   overscroll-behavior: auto;
 }
 
+/* ---- Hide / soften scroll indicators ---- */
+#app-wrap {
+  /* Firefox */
+  scrollbar-width: none;
+  /* iOS/Android: avoids “scrollbar flashing” in some webviews */
+  -ms-overflow-style: none;
+}
+
+/* WebKit (Chrome/Safari/Telegram WebView) */
+#app-wrap::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
 #app-content {
   min-height: calc(100% - var(--app-top-pad, 20px) - 80px + 1px);
   padding: var(--app-top-pad, 20px) 18px 96px;
