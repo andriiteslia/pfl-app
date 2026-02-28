@@ -44,7 +44,6 @@
   );
 }
 
-/* Dark theme backdrop */
 :root[data-theme="dark"] .tabs-backdrop {
   background: linear-gradient(
     to bottom,
