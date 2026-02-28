@@ -120,7 +120,8 @@
 
 .lb-skel-podium-wrap {
   border-radius: 12px;
-  margin: 10px 0 12px;
+  /* No top gap — should start flush with the card (like the real podium) */
+  margin: 0 0 12px;
   padding: 14px 14px 12px;
   overflow: hidden;
   background: linear-gradient(180deg, #127AC9 0%, #0066B5 100%);
