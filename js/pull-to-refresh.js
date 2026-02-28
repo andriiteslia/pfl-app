@@ -7,9 +7,9 @@ import { $ } from './utils.js';
 import { getActiveTab } from './tabs.js';
 
 // ---- Config ----
-const THRESHOLD = 200;
+const THRESHOLD = 160;
 const RESIST = 0.35;
-const MAX_PULL = 120; // Maximum visual displacement
+const MAX_PULL = 100; // Maximum visual displacement
 
 // ---- State ----
 let startY = 0;
