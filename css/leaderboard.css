@@ -4,7 +4,7 @@
    ============================================ */
 
 /* ============================================
-   Leaderboard Skeleton (from index_old.html)
+   Skeleton Loader Styles (for loading state)
    ============================================ */
 @keyframes skeletonShimmer {
   0%   { background-position: -400px 0; }
@@ -27,7 +27,6 @@
   background-size: 800px 100%;
 }
 
-/* White skeleton for podium area */
 .skel-w {
   background: linear-gradient(90deg,
     rgba(255,255,255,.18) 25%, rgba(255,255,255,.33) 50%, rgba(255,255,255,.18) 75%
@@ -38,11 +37,10 @@
 }
 
 .lb-skel-podium-wrap {
-  border-radius: 0;
   margin: -12px -12px 0 -12px;
   padding: 14px 14px 12px;
-  overflow: hidden;
   background: linear-gradient(180deg, #127AC9 0%, #0066B5 100%);
+  overflow: hidden;
 }
 
 .lb-skel-people {
@@ -60,39 +58,16 @@
 }
 
 .lb-skel-person.p1 { flex: 1.2; }
-
 .lb-skel-person.p2,
 .lb-skel-person.p3 { flex: 1; }
-
 .lb-skel-person.p2 { padding-top: 24px; }
 .lb-skel-person.p3 { padding-top: 40px; }
 
-.lb-skel-avatar { 
-  border-radius: 50%; 
-  flex-shrink: 0; 
-}
-
-.lb-skel-crown { 
-  width: 26px; 
-  height: 20px; 
-  margin-bottom: 4px; 
-}
-
-.lb-skel-name1 { 
-  margin-top: 8px; 
-  height: 11px; 
-}
-
-.lb-skel-name2 { 
-  margin-top: 4px; 
-  height: 11px; 
-}
-
-.lb-skel-pts { 
-  margin-top: 6px; 
-  height: 28px; 
-  border-radius: 999px !important; 
-}
+.lb-skel-avatar { border-radius: 50%; flex-shrink: 0; }
+.lb-skel-crown { width: 26px; height: 20px; margin-bottom: 4px; }
+.lb-skel-name1 { margin-top: 8px; height: 11px; }
+.lb-skel-name2 { margin-top: 4px; height: 11px; }
+.lb-skel-pts { margin-top: 6px; height: 28px; border-radius: 999px !important; }
 
 .lb-skel-stands { 
   display: flex; 
@@ -102,22 +77,12 @@
   padding: 0 2px 2px; 
 }
 
-.lb-skel-stand { 
-  flex: 1; 
-  border-radius: 4px 4px 0 0; 
-}
-
-.lb-skel-stand.s1 { 
-  flex: 1.2; 
-  height: 104px; 
-}
-
+.lb-skel-stand { flex: 1; border-radius: 4px 4px 0 0; }
+.lb-skel-stand.s1 { flex: 1.2; height: 104px; }
 .lb-skel-stand.s2 { height: 80px; }
 .lb-skel-stand.s3 { height: 64px; }
 
-.lb-skel-table { 
-  padding: 4px 12px 8px; 
-}
+.lb-skel-table { padding: 4px 12px 8px; }
 
 .lb-skel-row { 
   display: flex; 
@@ -127,13 +92,8 @@
   border-bottom: 1px solid var(--border); 
 }
 
-.lb-skel-row:last-child { 
-  border-bottom: none; 
-}
-
-.lb-skel-cell { 
-  flex-shrink: 0; 
-}
+.lb-skel-row:last-child { border-bottom: none; }
+.lb-skel-cell { flex-shrink: 0; }
 
 /* ---- Leaderboard Card ---- */
 #tab-leaderboard .card {
