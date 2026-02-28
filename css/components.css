@@ -330,7 +330,7 @@ tr:last-child td {
 .fests-year-tags {
   display: flex;
   gap: var(--spacing-sm);
-  margin-bottom: var(--spacing-lg);
+  margin-bottom: var(--spacing-md);
   margin-left: -18px;
   margin-right: -18px;
   padding-left: 18px;
@@ -392,8 +392,7 @@ tr:last-child td {
   color: var(--text);
   border-color: rgba(255, 255, 255, 0.08);
   box-shadow: 
-    inset 0 1px 0 rgba(255, 255, 255, 0.08),
-    0 2px 8px rgba(0, 0, 0, 0.12);
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
 :root[data-theme="dark"] .fests-year-tag:not(.active):hover {
@@ -405,7 +404,8 @@ tr:last-child td {
   color: var(--text);
   border-color: rgba(78, 163, 255, 0.28);
   box-shadow: 
-    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 4px 12px rgba(78, 163, 255, 0.15);
 }
 
 /* ---- Header Layout ---- */
