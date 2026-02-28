@@ -7,7 +7,7 @@ import { $ } from './utils.js';
 import { getActiveTab } from './tabs.js';
 
 // ---- Config ----
-const THRESHOLD = 160;
+const THRESHOLD = 120;
 const RESIST = 0.4;
 
 // ---- State ----
