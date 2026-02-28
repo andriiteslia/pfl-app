@@ -180,15 +180,25 @@
   display: flex;
   align-items: center;
   gap: var(--spacing-sm);
-  margin: var(--spacing-lg) 0;
+  margin-bottom: var(--spacing-lg);
   padding: var(--spacing-md);
   background: var(--brand-bg);
   border-radius: var(--radius-md);
+  transition: background var(--transition-fast);
+}
+
+.partner-promo-block.is-copied {
+  background: rgba(16, 185, 129, 0.15);
 }
 
 .partner-promo-block__label {
   font-size: 14px;
   color: var(--muted);
+  transition: color var(--transition-fast);
+}
+
+.partner-promo-block.is-copied .partner-promo-block__label {
+  color: #10B981;
 }
 
 .partner-promo-block__code {
@@ -201,22 +211,37 @@
 
 .partner-promo-block__copy {
   appearance: none;
-  padding: var(--spacing-sm);
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   border: none;
   border-radius: var(--radius-sm);
   background: var(--card);
   color: var(--brand);
   cursor: pointer;
-  transition: background var(--transition-fast);
+  transition: background var(--transition-fast), color var(--transition-fast);
 }
 
 .partner-promo-block__copy:hover {
   background: var(--border);
 }
 
+.partner-promo-block__copy:active {
+  transform: scale(0.95);
+}
+
+.partner-promo-block.is-copied .partner-promo-block__copy {
+  background: #10B981;
+  color: #fff;
+}
+
 .partner-promo-block__copy svg {
   width: 18px;
   height: 18px;
+  display: block;
 }
 
 /* ---- Info Block ---- */
