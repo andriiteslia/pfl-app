@@ -15,6 +15,7 @@ const MAX_PULL = 240;
 let startY = 0;
 let pulling = false;
 let indicator = null;
+let currentDy = 0;
 
 // ---- Create Indicator ----
 function createIndicator() {
@@ -73,6 +74,7 @@ export function initPullToRefresh() {
     
     startY = e.touches[0].clientY;
     pulling = true;
+    currentDy = 0;
     
     if (!indicator) {
       indicator = createIndicator();
@@ -82,19 +84,22 @@ export function initPullToRefresh() {
   scroller.addEventListener('touchmove', (e) => {
     if (!pulling) return;
     
-    const dy = (e.touches[0].clientY - startY) * RESIST;
+    const dy = e.touches[0].clientY - startY;
     
     // If pulling up, cancel
     if (dy <= 0) {
       pulling = false;
+      currentDy = 0;
       return;
     }
+
+    currentDy = dy;
 
     // Check if this tab can refresh
     const canRefresh = canRefreshCurrentTab();
     
-    // Calculate indicator height
-    const h = Math.min(dy, MAX_PULL);
+    // Calculate indicator height with resistance
+    const h = Math.min(dy * RESIST, MAX_PULL * RESIST);
     
     if (indicator) {
       indicator.style.height = h + 'px';
@@ -120,7 +125,7 @@ export function initPullToRefresh() {
     // Apply bounce effect to content
     const content = $('#app-content');
     if (content) {
-      content.style.transform = `translateY(${h * 0.3}px)`;
+      content.style.transform = `translateY(${h * 0.5}px)`;
       content.style.transition = 'none';
     }
   }, { passive: true });
@@ -129,7 +134,8 @@ export function initPullToRefresh() {
     if (!pulling) return;
     pulling = false;
 
-    const h = indicator ? parseInt(indicator.style.height) || 0 : 0;
+    const dy = currentDy;
+    currentDy = 0;
     
     // Reset indicator
     if (indicator) {
@@ -148,8 +154,8 @@ export function initPullToRefresh() {
       content.style.transform = 'translateY(0)';
     }
 
-    // Trigger refresh if threshold reached and tab supports it
-    if (h >= THRESHOLD * RESIST && canRefreshCurrentTab()) {
+    // Trigger refresh if dy >= THRESHOLD and tab supports it
+    if (dy >= THRESHOLD && canRefreshCurrentTab()) {
       try {
         window.Telegram?.WebApp?.HapticFeedback?.impactOccurred('light');
       } catch(e) {}
