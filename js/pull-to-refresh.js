@@ -9,7 +9,7 @@ import { getActiveTab } from './tabs.js';
 // ---- Config ----
 const THRESHOLD = 200;
 const RESIST = 0.4;
-const MAX_PULL = 100; // Maximum visual displacement
+const MAX_PULL = 160; // Maximum visual displacement
 
 // ---- State ----
 let startY = 0;
