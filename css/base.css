@@ -36,26 +36,15 @@ body {
   overflow-y: auto;
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
-  overscroll-behavior: auto;
-}
-
-/* ---- Hide / soften scroll indicators ---- */
-#app-wrap {
-  /* Firefox */
-  scrollbar-width: none;
-  /* iOS/Android: avoids “scrollbar flashing” in some webviews */
-  -ms-overflow-style: none;
-}
-
-/* WebKit (Chrome/Safari/Telegram WebView) */
-#app-wrap::-webkit-scrollbar {
-  width: 0;
-  height: 0;
+  overscroll-behavior-y: none;
 }
 
 #app-content {
   min-height: calc(100% - var(--app-top-pad, 20px) - 80px + 1px);
   padding: var(--app-top-pad, 20px) 18px 96px;
+  overscroll-behavior: none;
+  /* Ensure content always fills viewport for consistent pull-to-refresh */
+  min-height: 100%;
 }
 
 /* ---- Typography ---- */
@@ -96,7 +85,7 @@ img {
   color: var(--muted);
   font-family: var(--font-ui);
   font-size: 15px;
-  padding: 0px 0;
+  padding: 6px 0;
   text-align: center;
 }
 
