@@ -10,6 +10,7 @@ import { initLeaderboard, loadLeaderboard, isLeaderboardLoaded } from './leaderb
 import { initArena, loadArena, isArenaLoaded } from './arena.js';
 import { fetchAppStyles } from './api.js';
 import { $ } from './utils.js';
+import { initPullToRefresh } from './pull-to-refresh.js';
 
 // ---- Theme Management ----
 function initTheme() {
@@ -181,6 +182,13 @@ function initTelegram() {
       } catch(e) {}
     }
     
+    // Disable vertical swipes to prevent closing app
+    try {
+      if (typeof tg.disableVerticalSwipes === 'function') {
+        tg.disableVerticalSwipes();
+      }
+    } catch(e) {}
+    
     // Apply padding immediately
     applyByState();
     
@@ -216,81 +224,10 @@ function initTelegram() {
     try { tg.expand(); } catch(e) {}
     setTimeout(() => { try { tg.expand(); } catch(e) {} }, 120);
     
-    console.log('[Telegram] WebApp initialized');
+    console.log('[Telegram] WebApp initialized, vertical swipes disabled');
   } catch (e) {
     console.warn('[Telegram] Not available:', e);
   }
-}
-
-// ---- Pull to Refresh ----
-function initPullToRefresh() {
-  const scroller = $('#app-wrap');
-  if (!scroller) return;
-  
-  const THRESHOLD = 120;
-  const RESIST = 0.4;
-  
-  let startY = 0;
-  let pulling = false;
-  let indicator = null;
-  
-  function createIndicator() {
-    const el = document.createElement('div');
-    el.className = 'ptr-indicator';
-    el.innerHTML = `<div class="ptr-indicator__icon">↓</div>`;
-    document.body.appendChild(el);
-    return el;
-  }
-  
-  function getActiveReloadBtn() {
-    const tab = getActiveTab();
-    if (tab === 'fests') return $('#reload');
-    if (tab === 'leaderboard') return $('#reloadLeaderboard');
-    if (tab === 'arena') return $('#reloadArena');
-    return null;
-  }
-  
-  scroller.addEventListener('touchstart', (e) => {
-    if (scroller.scrollTop > 0) return;
-    startY = e.touches[0].clientY;
-    pulling = true;
-    if (!indicator) indicator = createIndicator();
-  }, { passive: true });
-  
-  scroller.addEventListener('touchmove', (e) => {
-    if (!pulling) return;
-    const dy = (e.touches[0].clientY - startY) * RESIST;
-    if (dy <= 0) {
-      pulling = false;
-      return;
-    }
-    
-    const h = Math.min(dy, THRESHOLD + 16);
-    indicator.style.height = h + 'px';
-    
-    const icon = indicator.querySelector('.ptr-indicator__icon');
-    const rotate = Math.min((dy / THRESHOLD) * 180, 180);
-    icon.style.transform = `rotate(${rotate}deg)`;
-  }, { passive: true });
-  
-  scroller.addEventListener('touchend', () => {
-    if (!pulling || !indicator) return;
-    pulling = false;
-    
-    const h = parseInt(indicator.style.height) || 0;
-    indicator.style.height = '0';
-    
-    if (h >= THRESHOLD * RESIST) {
-      try {
-        window.Telegram?.WebApp?.HapticFeedback?.impactOccurred('light');
-      } catch (e) {}
-      
-      const btn = getActiveReloadBtn();
-      if (btn) btn.click();
-    }
-  });
-  
-  console.log('[PTR] Pull-to-refresh initialized');
 }
 
 // ---- Tab Callbacks ----
