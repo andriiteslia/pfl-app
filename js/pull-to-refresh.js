@@ -7,9 +7,8 @@ import { $ } from './utils.js';
 import { getActiveTab } from './tabs.js';
 
 // ---- Config ----
-const THRESHOLD = 200;
-const RESIST = 0.22;
-const MAX_PULL = 240;
+const THRESHOLD = 160;
+const RESIST = 0.4;
 
 // ---- State ----
 let startY = 0;
@@ -85,7 +84,7 @@ export function initPullToRefresh() {
     currentDy = dy;
     
     // Calculate bounce height with resistance
-    const h = Math.min(dy * RESIST, MAX_PULL * RESIST);
+    const h = dy * RESIST;
     
     // Apply bounce effect to content
     const content = $('#app-content');
