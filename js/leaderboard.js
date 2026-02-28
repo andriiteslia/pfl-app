@@ -118,6 +118,108 @@ function renderStatusBadge() {
   badge.textContent = text;
 }
 
+// ---- Column Detection Helpers ----
+function findIdxByKeywords(headersLower, keywords) {
+  if (!Array.isArray(headersLower)) return -1;
+  for (let i = 0; i < headersLower.length; i++) {
+    const h = String(headersLower[i] ?? '');
+    if (!h) continue;
+    for (const k of keywords) {
+      if (h.includes(k)) return i;
+    }
+  }
+  return -1;
+}
+
+function calcColStats(rows, colCount, sampleSize = 20) {
+  const stats = Array.from({ length: colCount }, () => ({
+    total: 0,
+    numeric: 0,
+    lenSum: 0,
+  }));
+
+  const sample = (Array.isArray(rows) ? rows : []).slice(0, sampleSize);
+
+  for (const r of sample) {
+    if (!Array.isArray(r)) continue;
+    for (let i = 0; i < colCount; i++) {
+      const raw = r?.[i];
+      const s = String(raw ?? '').trim();
+      if (!s) continue;
+
+      const st = stats[i];
+      st.total += 1;
+      st.lenSum += s.length;
+
+      // Accept commas as decimals (e.g., "14,5")
+      const n = s.replace(/\s+/g, '').replace(',', '.');
+      if (/^-?\d+(?:\.\d+)?$/.test(n)) {
+        st.numeric += 1;
+      }
+    }
+  }
+
+  return stats.map(st => ({
+    numRatio: st.total ? st.numeric / st.total : 0,
+    avgLen: st.total ? st.lenSum / st.total : 0,
+  }));
+}
+
+function isRankLikeHeader(h) {
+  const s = String(h ?? '').toLowerCase();
+  return (
+    s === '№' ||
+    s.includes('rank') ||
+    s.includes('place') ||
+    s.includes('пози') ||
+    s.includes('місц')
+  );
+}
+
+function guessPointsIdx(headersLower, colStats) {
+  // Prefer numeric-heavy columns (but avoid the rank column)
+  let best = -1;
+  let bestScore = -1;
+
+  for (let i = 0; i < colStats.length; i++) {
+    const h = headersLower?.[i] ?? '';
+    if (isRankLikeHeader(h)) continue;
+
+    const { numRatio, avgLen } = colStats[i];
+    // Points column usually: mostly numeric + short strings
+    const score = numRatio * 10 - Math.min(avgLen, 12) * 0.2;
+    if (score > bestScore) {
+      bestScore = score;
+      best = i;
+    }
+  }
+
+  return best;
+}
+
+function guessNameIdx(headersLower, colStats, pointsIdx) {
+  // Prefer text-heavy columns with longer strings (avoid rank + points)
+  let best = -1;
+  let bestScore = -1;
+
+  for (let i = 0; i < colStats.length; i++) {
+    if (i === pointsIdx) continue;
+
+    const h = headersLower?.[i] ?? '';
+    if (isRankLikeHeader(h)) continue;
+
+    const { numRatio, avgLen } = colStats[i];
+    // Name column usually: not numeric + longer strings
+    const score = (1 - numRatio) * 10 + Math.min(avgLen, 30) * 0.25;
+    if (score > bestScore) {
+      bestScore = score;
+      best = i;
+    }
+  }
+
+  return best;
+}
+
 // ---- Render Leaderboard ----
 function renderLeaderboard(values) {
   const { container } = getElements();
@@ -128,10 +230,26 @@ function renderLeaderboard(values) {
     Array.isArray(r) && r.some(c => String(c ?? '').trim() !== '')
   );
   
-  // Find column indices
+  // Find column indices (robust: handles unknown header labels)
   const hLower = header.map(h => String(h ?? '').toLowerCase());
-  const nameIdx = hLower.findIndex(x => x.includes('ім') || x.includes('name')) ?? 1;
-  const pointsIdx = hLower.findIndex(x => x.includes('бал') || x.includes('point')) ?? 2;
+  const colStats = calcColStats(rows, header.length);
+
+  let nameIdx = findIdxByKeywords(hLower, ['ім', 'name', 'учас', 'participant', 'angler', 'команд', 'team']);
+  let pointsIdx = findIdxByKeywords(hLower, ['бал', 'point', 'points', 'score', 'pts']);
+
+  if (pointsIdx < 0) pointsIdx = guessPointsIdx(hLower, colStats);
+  if (nameIdx < 0) nameIdx = guessNameIdx(hLower, colStats, pointsIdx);
+
+  // Final fallbacks
+  if (pointsIdx < 0 || pointsIdx >= header.length) {
+    pointsIdx = Math.min(2, Math.max(0, header.length - 1));
+  }
+  if (nameIdx < 0 || nameIdx >= header.length) {
+    nameIdx = header.length > 1 ? 1 : 0;
+  }
+  if (nameIdx === pointsIdx && header.length > 1) {
+    nameIdx = pointsIdx === 0 ? 1 : 0;
+  }
   
   // Build Top 3 podium
   const top3Html = buildTop3Podium(rows, nameIdx, pointsIdx);
