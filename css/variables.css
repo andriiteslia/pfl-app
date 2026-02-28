@@ -19,6 +19,7 @@
 
   /* ---- Light Theme (default) ---- */
   --bg: #f0f2f8;
+  --bg-rgb: 240, 242, 248;
   --text: #0F130E;
   --muted: rgba(71, 85, 105, 0.78);
   --card: #fff;
@@ -46,6 +47,12 @@
   --transition-fast: 0.12s ease;
   --transition-normal: 0.2s ease;
   --transition-slow: 0.3s ease;
+
+  /* ---- Tab Bar Fade ---- */
+  --tabs-height: 64px;
+  --tabs-offset: 20px;
+  --tabs-fade-extra: 56px;
+  --tabs-fade-height: calc(var(--tabs-height) + var(--tabs-offset) + env(safe-area-inset-bottom, 0px) + var(--tabs-fade-extra));
 }
 
 /* ============================================
@@ -54,6 +61,7 @@
 
 :root[data-theme="dark"] {
   --bg: #1A2026;
+  --bg-rgb: 26, 32, 38;
   --text: #F8FAFC;
   --muted: rgba(148, 163, 184, 0.85);
   --card: #202932;
