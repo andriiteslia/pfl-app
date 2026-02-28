@@ -330,7 +330,7 @@ tr:last-child td {
 .fests-year-tags {
   display: flex;
   gap: var(--spacing-sm);
-  margin-bottom: var(--spacing-lg);
+  margin-bottom: var(--spacing-md);
   margin-left: -18px;
   margin-right: -18px;
   padding-left: 18px;
@@ -382,8 +382,7 @@ tr:last-child td {
   background: rgba(217, 242, 255, 0.85);
   color: var(--text);
   border-color: rgba(35, 139, 218, 0.28);
-  box-shadow: 
-    inset 0 1px 0 rgba(255, 255, 255, 0.90);
+  box-shadow: 0 4px 12px rgba(18, 122, 201, 0.12);
 }
 
 /* Dark theme year tags */
@@ -404,8 +403,7 @@ tr:last-child td {
   background: rgba(78, 163, 255, 0.22);
   color: var(--text);
   border-color: rgba(78, 163, 255, 0.28);
-  box-shadow: 
-    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  box-shadow: 0 4px 12px rgba(78, 163, 255, 0.15);
 }
 
 /* ---- Header Layout ---- */
