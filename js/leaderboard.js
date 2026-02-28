@@ -130,8 +130,12 @@ function renderLeaderboard(values) {
   
   // Find column indices
   const hLower = header.map(h => String(h ?? '').toLowerCase());
-  const nameIdx = hLower.findIndex(x => x.includes('ім') || x.includes('name')) ?? 1;
-  const pointsIdx = hLower.findIndex(x => x.includes('бал') || x.includes('point')) ?? 2;
+  let nameIdx = hLower.findIndex(x => x.includes('ім') || x.includes('name'));
+  let pointsIdx = hLower.findIndex(x => x.includes('бал') || x.includes('point'));
+  
+  // Fallback to default indices if not found
+  if (nameIdx === -1) nameIdx = 1;
+  if (pointsIdx === -1) pointsIdx = 2;
   
   // Build Top 3 podium
   const top3Html = buildTop3Podium(rows, nameIdx, pointsIdx);
@@ -217,7 +221,6 @@ function buildAquarium() {
       <span class="aqua-fish" style="--d:10s; --y:78%; --del:7s; --s:1.30; --flip:1">🐠</span>
       <span class="aqua-fish" style="--d:9s; --y:42%; --del:9s; --s:1.00; --flip:0">🐟</span>
       <span class="aqua-fish" style="--d:11s; --y:38%; --del:9.5s; --s:.88; --flip:0">🐠</span>
-      <span class="aqua-fish" style="--d:7s; --y:920%; --del:3s; --s:.70; --flip:1">🐡</span>
       
       <span class="aqua-bubble" style="--d:4s; --x:8%; --sz:5px; --del:0s;"></span>
       <span class="aqua-bubble" style="--d:6s; --x:22%; --sz:8px; --del:1.5s;"></span>
