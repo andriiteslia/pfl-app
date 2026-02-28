@@ -33,14 +33,14 @@
   <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <!-- Styles -->
-  <link rel="stylesheet" href="css/variables.css">
-  <link rel="stylesheet" href="css/base.css">
-  <link rel="stylesheet" href="css/components.css">
-  <link rel="stylesheet" href="css/tabs.css">
-  <link rel="stylesheet" href="css/leaderboard.css">
-  <link rel="stylesheet" href="css/partners.css">
-  <link rel="stylesheet" href="css/skeleton.css">
-  <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="variables.css">
+  <link rel="stylesheet" href="base.css">
+  <link rel="stylesheet" href="components.css">
+  <link rel="stylesheet" href="tabs.css">
+  <link rel="stylesheet" href="leaderboard.css">
+  <link rel="stylesheet" href="partners.css">
+  <link rel="stylesheet" href="skeleton.css">
+  <link rel="stylesheet" href="animations.css">
 </head>
 <body>
 
@@ -167,80 +167,99 @@
           </div>
         </header>
 
-        <article class="card leaderboard-card">
-          <div id="outLeaderboard">
-            <!-- Skeleton loader -->
+        <article class="card leaderboard-card" style="margin-top:0;">
+          <div class="leaderboard-spacer"></div>
+          <div id="outLeaderboard" style="font-size:16px;">
+            <!-- Skeleton loader (exact from index_old.html) -->
             <div class="lb-skeleton">
-              <div class="lb-skeleton-podium">
-                <div class="lb-skeleton-person">
-                  <div class="lb-skeleton-avatar skeleton"></div>
-                  <div class="lb-skeleton-name skeleton"></div>
-                  <div class="lb-skeleton-points skeleton"></div>
+              <!-- Podium skeleton -->
+              <div class="lb-skel-podium-wrap">
+                <div class="lb-skel-people">
+                  <!-- place 2 -->
+                  <div class="lb-skel-person p2">
+                    <div class="skel-w lb-skel-avatar" style="width:68px;height:68px;"></div>
+                    <div class="skel-w lb-skel-name1" style="width:58px;"></div>
+                    <div class="skel-w lb-skel-name2" style="width:44px;"></div>
+                    <div class="skel-w lb-skel-pts" style="width:52px;"></div>
+                  </div>
+
+                  <!-- place 1 -->
+                  <div class="lb-skel-person p1">
+                    <div class="skel-w lb-skel-crown" style="width:26px;height:20px;"></div>
+                    <div class="skel-w lb-skel-avatar" style="width:80px;height:80px;"></div>
+                    <div class="skel-w lb-skel-name1" style="width:68px;"></div>
+                    <div class="skel-w lb-skel-name2" style="width:52px;"></div>
+                    <div class="skel-w lb-skel-pts" style="width:56px;"></div>
+                  </div>
+
+                  <!-- place 3 -->
+                  <div class="lb-skel-person p3">
+                    <div class="skel-w lb-skel-avatar" style="width:56px;height:56px;"></div>
+                    <div class="skel-w lb-skel-name1" style="width:52px;"></div>
+                    <div class="skel-w lb-skel-name2" style="width:40px;"></div>
+                    <div class="skel-w lb-skel-pts" style="width:48px;"></div>
+                  </div>
                 </div>
-                <div class="lb-skeleton-person first">
-                  <div class="lb-skeleton-avatar skeleton"></div>
-                  <div class="lb-skeleton-name skeleton"></div>
-                  <div class="lb-skeleton-points skeleton"></div>
-                </div>
-                <div class="lb-skeleton-person">
-                  <div class="lb-skeleton-avatar skeleton"></div>
-                  <div class="lb-skeleton-name skeleton"></div>
-                  <div class="lb-skeleton-points skeleton"></div>
+                <div class="lb-skel-stands">
+                  <div class="skel-w lb-skel-stand s2"></div>
+                  <div class="skel-w lb-skel-stand s1"></div>
+                  <div class="skel-w lb-skel-stand s3"></div>
                 </div>
               </div>
-              <div class="lb-skeleton-table">
-                <div class="lb-skeleton-row">
-                  <div class="lb-skeleton-rank skeleton"></div>
-                  <div class="lb-skeleton-cell lb-skeleton-cell-name skeleton"></div>
-                  <div class="lb-skeleton-cell lb-skeleton-cell-points skeleton"></div>
-                  <div class="lb-skeleton-cell lb-skeleton-cell-weight skeleton"></div>
+
+              <!-- Table rows skeleton -->
+              <div class="lb-skel-table">
+                <div class="lb-skel-row">
+                  <div class="skel lb-skel-cell" style="width:22px;height:22px;border-radius:50%;"></div>
+                  <div class="skel lb-skel-cell" style="width:140px;height:14px;"></div>
+                  <div class="skel lb-skel-cell" style="width:32px;height:14px;margin-left:auto;"></div>
+                  <div class="skel lb-skel-cell" style="width:42px;height:14px;"></div>
                 </div>
-                <div class="lb-skeleton-row">
-                  <div class="lb-skeleton-rank skeleton"></div>
-                  <div class="lb-skeleton-cell lb-skeleton-cell-name skeleton"></div>
-                  <div class="lb-skeleton-cell lb-skeleton-cell-points skeleton"></div>
-                  <div class="lb-skeleton-cell lb-skeleton-cell-weight skeleton"></div>
+                <div class="lb-skel-row">
+                  <div class="skel lb-skel-cell" style="width:22px;height:22px;border-radius:50%;"></div>
+                  <div class="skel lb-skel-cell" style="width:120px;height:14px;"></div>
+                  <div class="skel lb-skel-cell" style="width:32px;height:14px;margin-left:auto;"></div>
+                  <div class="skel lb-skel-cell" style="width:42px;height:14px;"></div>
                 </div>
-                <div class="lb-skeleton-row">
-                  <div class="lb-skeleton-rank skeleton"></div>
-                  <div class="lb-skeleton-cell lb-skeleton-cell-name skeleton"></div>
-                  <div class="lb-skeleton-cell lb-skeleton-cell-points skeleton"></div>
-                  <div class="lb-skeleton-cell lb-skeleton-cell-weight skeleton"></div>
+                <div class="lb-skel-row">
+                  <div class="skel lb-skel-cell" style="width:22px;height:22px;border-radius:50%;"></div>
+                  <div class="skel lb-skel-cell" style="width:150px;height:14px;"></div>
+                  <div class="skel lb-skel-cell" style="width:32px;height:14px;margin-left:auto;"></div>
+                  <div class="skel lb-skel-cell" style="width:42px;height:14px;"></div>
+                </div>
+                <div class="lb-skel-row">
+                  <div class="skel lb-skel-cell" style="width:22px;height:22px;border-radius:50%;"></div>
+                  <div class="skel lb-skel-cell" style="width:130px;height:14px;"></div>
+                  <div class="skel lb-skel-cell" style="width:32px;height:14px;margin-left:auto;"></div>
+                  <div class="skel lb-skel-cell" style="width:42px;height:14px;"></div>
+                </div>
+                <div class="lb-skel-row">
+                  <div class="skel lb-skel-cell" style="width:22px;height:22px;border-radius:50%;"></div>
+                  <div class="skel lb-skel-cell" style="width:115px;height:14px;"></div>
+                  <div class="skel lb-skel-cell" style="width:32px;height:14px;margin-left:auto;"></div>
+                  <div class="skel lb-skel-cell" style="width:42px;height:14px;"></div>
+                </div>
+                <div class="lb-skel-row">
+                  <div class="skel lb-skel-cell" style="width:22px;height:22px;border-radius:50%;"></div>
+                  <div class="skel lb-skel-cell" style="width:138px;height:14px;"></div>
+                  <div class="skel lb-skel-cell" style="width:32px;height:14px;margin-left:auto;"></div>
+                  <div class="skel lb-skel-cell" style="width:42px;height:14px;"></div>
+                </div>
+                <div class="lb-skel-row">
+                  <div class="skel lb-skel-cell" style="width:22px;height:22px;border-radius:50%;"></div>
+                  <div class="skel lb-skel-cell" style="width:125px;height:14px;"></div>
+                  <div class="skel lb-skel-cell" style="width:32px;height:14px;margin-left:auto;"></div>
+                  <div class="skel lb-skel-cell" style="width:42px;height:14px;"></div>
                 </div>
               </div>
             </div>
           </div>
         </article>
 
-        <div class="leaderboard-pdf-cta" style="margin-top: 12px;">
+        <div class="leaderboard-pdf-cta" style="margin-top:12px;">
           <a class="link-btn" id="pflPdfLink" href="assets/docs/predatorfest2026.pdf" rel="noopener">
             Переглянути умови PFL 2026 📝
           </a>
-        </div>
-      </section>
-
-      <!-- ========== ARENA TAB ========== -->
-      <section id="tab-arena" class="tab-content arena-empty" aria-label="Arena tab">
-        <header class="fests-header">
-          <div class="fests-header__text">
-            <h1 class="page-title">Arena ⭐️</h1>
-            <p class="page-subtitle" id="subtitle-arena">
-              Рейтинг і результати змагань різних форматів та дисциплін.
-            </p>
-          </div>
-          <div class="fests-header__actions">
-            <button class="btn" id="reloadArena" type="button">Оновити</button>
-          </div>
-        </header>
-
-        <div class="fests-year-tags" id="arenaTags" style="display: none;"></div>
-        <div id="arenaCards" style="display: none;"></div>
-
-        <div class="empty-state" id="arenaEmptyState">
-          <img src="./assets/imgs/pike.png" alt="Pike" width="160" height="160">
-          <p class="empty-state__text" id="arenaEmptyText">
-            Зачекайте будь ласка...<br>Ех, зараз би якийсь фюжин 2.5' 🤤
-          </p>
         </div>
       </section>
 
@@ -248,18 +267,16 @@
       <section id="tab-partners" class="tab-content" aria-label="Partners tab">
         <div id="partnersListView">
           <h1 class="page-title">Partners 🤝</h1>
-          <p class="page-subtitle">
-            Партнери та спонсори, які підтримують Predator Fest League призами та допомогою в організації.
-          </p>
+          <p class="page-subtitle">Партнери та спонсори, які підтримують Predator Fest League призами та допомогою в організації.</p>
 
           <div class="partners-grid">
             <!-- Upstream -->
-            <article class="partner-tile" 
+            <article class="partner-tile"
                      data-partner="upstream"
                      data-instagram="https://www.instagram.com/upstreambaits/"
-                     data-details-subtitle="📦 Онлайн-замовлення цілодобово.<br>🕘 Пн – Пт з 10:00 до 18:00<br>📱 Телефон: +38 (067) 13 13 110">
+                     data-details-subtitle="Силіконові приманки Upstream — ручна робота, унікальні моделі для ультралайту.">
               <div class="partner-tile__logo">
-                <img src="./assets/logos/upstream.svg" alt="Upstream" 
+                <img src="./assets/logos/upstream.svg" alt="Upstream"
                      onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                 <div class="logo-fallback">Upstream</div>
               </div>
@@ -383,8 +400,32 @@
         </div>
       </section>
 
+      <!-- ========== ARENA TAB ========== -->
+      <section id="tab-arena" class="tab-content arena-empty" aria-label="Arena tab">
+        <header class="fests-header">
+          <div class="fests-header__text">
+            <h1 class="page-title">Arena ⭐️</h1>
+            <p class="page-subtitle" id="subtitle-arena">Рейтинг і результати змагань різних форматів та дисциплін.</p>
+          </div>
+          <div class="fests-header__actions">
+            <button class="btn" id="reloadArena" type="button">Оновити</button>
+          </div>
+        </header>
+
+        <div class="fests-year-tags" id="arenaTags" aria-label="Arena tags" style="display:none;"></div>
+        <div id="arenaCards" aria-label="Arena cards" style="display:none;"></div>
+
+        <div class="empty-state" id="arenaEmptyState" aria-label="Arena empty state">
+          <img src="./assets/imgs/pike.png" alt="Pike" width="160" height="160">
+          <p class="empty-state__text" id="arenaEmptyText">Зачекайте будь ласка...<br>Ех, зараз би якийсь фюжин 2.5' 🤤</p>
+        </div>
+      </section>
+
     </main>
   </div>
+
+  <!-- Tabbar Gradient Backdrop (fades content under tab bar) -->
+  <div class="tabs-backdrop" aria-hidden="true"></div>
 
   <!-- Bottom Tab Bar -->
   <nav class="tabs" role="tablist" aria-label="Main navigation">
@@ -429,7 +470,7 @@
   </script>
 
   <!-- Main App Script -->
-  <script type="module" src="js/app.js"></script>
+  <script type="module" src="app.js"></script>
 
 </body>
 </html>
