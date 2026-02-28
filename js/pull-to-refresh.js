@@ -1,19 +1,25 @@
 /* ============================================
    PFL App — Pull to Refresh
-   iOS-style bounce effect
+   iOS-style bounce effect (tighter / more controlled)
    ============================================ */
 
 import { $ } from './utils.js';
 import { getActiveTab } from './tabs.js';
 
 // ---- Config ----
-const THRESHOLD = 160;
-const RESIST = 0.4;
+// NOTE:
+// - THRESHOLD is compared against the *effective* pull distance (after resistance)
+// - RESIST is the base resistance factor; additional non-linear resistance is applied as you pull further
+const THRESHOLD = 160;     // px of effective pull to trigger refresh
+const RESIST = 0.18;       // base resistance (smaller => “tighter”)
+const MAX_PULL = 240;      // max effective pull (cap)
+const CURVE = 220;         // non-linear resistance curve (smaller => gets “heavy” sooner)
+const BOUNCE_FACTOR = 0.16; // how much content visually moves vs pull
 
 // ---- State ----
 let startY = 0;
 let pulling = false;
-let currentDy = 0;
+let pull = 0; // effective pull distance (after resistance)
 
 // ---- Get Reload Button for Current Tab ----
 function getActiveReloadBtn() {
@@ -36,9 +42,17 @@ function canRefreshCurrentTab() {
 function resetContentPosition() {
   const content = $('#app-content');
   if (content) {
-    content.style.transition = 'transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+    content.style.transition = 'transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
     content.style.transform = 'translateY(0)';
   }
+}
+
+// ---- Compute effective pull with non-linear resistance ----
+function computePull(rawDy) {
+  // rawDy is physical finger distance in px (positive only)
+  // Non-linear resistance: grows “heavier” as rawDy increases.
+  const effective = (rawDy * RESIST) / (1 + rawDy / CURVE);
+  return Math.min(effective, MAX_PULL);
 }
 
 // ---- Initialize Pull to Refresh ----
@@ -52,102 +66,104 @@ export function initPullToRefresh() {
       pulling = false;
       return;
     }
-    
+
     startY = e.touches[0].clientY;
     pulling = true;
-    currentDy = 0;
+    pull = 0;
   }, { passive: true });
 
+  // NOTE: non-passive so we can preventDefault() while pulling to avoid native overscroll fighting our bounce
   scroller.addEventListener('touchmove', (e) => {
     // If scrolled down, reset and exit
     if (scroller.scrollTop > 0) {
       if (pulling) {
         pulling = false;
-        currentDy = 0;
+        pull = 0;
         resetContentPosition();
       }
       return;
     }
-    
+
     if (!pulling) return;
-    
-    const dy = e.touches[0].clientY - startY;
-    
+
+    const rawDy = e.touches[0].clientY - startY;
+
     // If pulling up, cancel and reset
-    if (dy <= 0) {
+    if (rawDy <= 0) {
       pulling = false;
-      currentDy = 0;
+      pull = 0;
       resetContentPosition();
       return;
     }
 
-    currentDy = dy;
-    
-    // Calculate bounce height with resistance
-    const h = dy * RESIST;
-    
-    // Apply bounce effect to content
+    // While pulling at top, stop native scroll/overscroll (makes it feel “tighter”)
+    e.preventDefault();
+
+    pull = computePull(rawDy);
+
+    // Apply bounce effect to content (reduced for a “tighter” feel)
     const content = $('#app-content');
     if (content) {
-      content.style.transform = `translateY(${h}px)`;
+      content.style.transform = `translateY(${pull * BOUNCE_FACTOR}px)`;
       content.style.transition = 'none';
     }
-  }, { passive: true });
+  }, { passive: false });
 
   scroller.addEventListener('touchend', () => {
-    const dy = currentDy;
-    
-    // Always reset state
+    const reached = pull >= THRESHOLD;
+
+    // Always reset state first (prevents double-trigger via document capture listener)
     pulling = false;
-    currentDy = 0;
-    
+
     // Always reset content position
     resetContentPosition();
 
-    // Trigger refresh if dy >= THRESHOLD and tab supports it
-    if (dy >= THRESHOLD && canRefreshCurrentTab()) {
+    // Trigger refresh if threshold reached and tab supports it
+    if (reached && canRefreshCurrentTab()) {
       try {
         window.Telegram?.WebApp?.HapticFeedback?.impactOccurred('light');
-      } catch(e) {}
-      
+      } catch (e) {}
+
       const btn = getActiveReloadBtn();
-      if (btn) {
-        btn.click();
-      }
+      if (btn) btn.click();
     }
+
+    pull = 0;
   }, { passive: true });
 
   // Also reset on touchcancel
   scroller.addEventListener('touchcancel', () => {
     pulling = false;
-    currentDy = 0;
+    pull = 0;
     resetContentPosition();
   }, { passive: true });
 
   // Global safety: reset if touch ends anywhere
   document.addEventListener('touchend', () => {
-    if (pulling) {
-      const dy = currentDy;
-      pulling = false;
-      currentDy = 0;
-      resetContentPosition();
-      
-      // Trigger refresh if threshold reached
-      if (dy >= THRESHOLD && canRefreshCurrentTab()) {
-        try {
-          window.Telegram?.WebApp?.HapticFeedback?.impactOccurred('light');
-        } catch(e) {}
-        const btn = getActiveReloadBtn();
-        if (btn) btn.click();
-      }
+    if (!pulling) return;
+
+    const reached = pull >= THRESHOLD;
+
+    pulling = false;
+    resetContentPosition();
+
+    if (reached && canRefreshCurrentTab()) {
+      try {
+        window.Telegram?.WebApp?.HapticFeedback?.impactOccurred('light');
+      } catch (e) {}
+
+      const btn = getActiveReloadBtn();
+      if (btn) btn.click();
     }
+
+    pull = 0;
   }, { passive: true, capture: true });
 
   // Reset on visibility change (app goes to background)
   document.addEventListener('visibilitychange', () => {
     if (pulling) {
       pulling = false;
-      currentDy = 0;
+      pull = 0;
       resetContentPosition();
     }
   });
@@ -156,7 +172,7 @@ export function initPullToRefresh() {
   window.addEventListener('blur', () => {
     if (pulling) {
       pulling = false;
-      currentDy = 0;
+      pull = 0;
       resetContentPosition();
     }
   });
