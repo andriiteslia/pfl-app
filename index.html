@@ -169,43 +169,83 @@
 
         <article class="card leaderboard-card">
           <div id="outLeaderboard">
-            <!-- Skeleton loader -->
+            <!-- Skeleton loader (from index_old.html) -->
             <div class="lb-skeleton">
-              <div class="lb-skeleton-podium">
-                <div class="lb-skeleton-person">
-                  <div class="lb-skeleton-avatar skeleton"></div>
-                  <div class="lb-skeleton-name skeleton"></div>
-                  <div class="lb-skeleton-points skeleton"></div>
+              <!-- Podium skeleton -->
+              <div class="lb-skel-podium-wrap">
+                <div class="lb-skel-people">
+                  <!-- place 2 -->
+                  <div class="lb-skel-person p2">
+                    <div class="skel-w lb-skel-avatar" style="width:68px;height:68px;"></div>
+                    <div class="skel-w lb-skel-name1" style="width:58px;"></div>
+                    <div class="skel-w lb-skel-name2" style="width:44px;"></div>
+                    <div class="skel-w lb-skel-pts" style="width:52px;"></div>
+                  </div>
+                  <!-- place 1 -->
+                  <div class="lb-skel-person p1">
+                    <div class="skel-w lb-skel-crown"></div>
+                    <div class="skel-w lb-skel-avatar" style="width:80px;height:80px;"></div>
+                    <div class="skel-w lb-skel-name1" style="width:68px;"></div>
+                    <div class="skel-w lb-skel-name2" style="width:52px;"></div>
+                    <div class="skel-w lb-skel-pts" style="width:56px;"></div>
+                  </div>
+                  <!-- place 3 -->
+                  <div class="lb-skel-person p3">
+                    <div class="skel-w lb-skel-avatar" style="width:56px;height:56px;"></div>
+                    <div class="skel-w lb-skel-name1" style="width:52px;"></div>
+                    <div class="skel-w lb-skel-name2" style="width:40px;"></div>
+                    <div class="skel-w lb-skel-pts" style="width:48px;"></div>
+                  </div>
                 </div>
-                <div class="lb-skeleton-person first">
-                  <div class="lb-skeleton-avatar skeleton"></div>
-                  <div class="lb-skeleton-name skeleton"></div>
-                  <div class="lb-skeleton-points skeleton"></div>
-                </div>
-                <div class="lb-skeleton-person">
-                  <div class="lb-skeleton-avatar skeleton"></div>
-                  <div class="lb-skeleton-name skeleton"></div>
-                  <div class="lb-skeleton-points skeleton"></div>
+                <div class="lb-skel-stands">
+                  <div class="skel-w lb-skel-stand s2"></div>
+                  <div class="skel-w lb-skel-stand s1"></div>
+                  <div class="skel-w lb-skel-stand s3"></div>
                 </div>
               </div>
-              <div class="lb-skeleton-table">
-                <div class="lb-skeleton-row">
-                  <div class="lb-skeleton-rank skeleton"></div>
-                  <div class="lb-skeleton-cell lb-skeleton-cell-name skeleton"></div>
-                  <div class="lb-skeleton-cell lb-skeleton-cell-points skeleton"></div>
-                  <div class="lb-skeleton-cell lb-skeleton-cell-weight skeleton"></div>
+              <!-- Table rows skeleton -->
+              <div class="lb-skel-table">
+                <div class="lb-skel-row">
+                  <div class="skel lb-skel-cell" style="width:22px;height:22px;border-radius:50%;"></div>
+                  <div class="skel lb-skel-cell" style="width:140px;height:14px;"></div>
+                  <div class="skel lb-skel-cell" style="width:32px;height:14px;margin-left:auto;"></div>
+                  <div class="skel lb-skel-cell" style="width:42px;height:14px;"></div>
                 </div>
-                <div class="lb-skeleton-row">
-                  <div class="lb-skeleton-rank skeleton"></div>
-                  <div class="lb-skeleton-cell lb-skeleton-cell-name skeleton"></div>
-                  <div class="lb-skeleton-cell lb-skeleton-cell-points skeleton"></div>
-                  <div class="lb-skeleton-cell lb-skeleton-cell-weight skeleton"></div>
+                <div class="lb-skel-row">
+                  <div class="skel lb-skel-cell" style="width:22px;height:22px;border-radius:50%;"></div>
+                  <div class="skel lb-skel-cell" style="width:120px;height:14px;"></div>
+                  <div class="skel lb-skel-cell" style="width:32px;height:14px;margin-left:auto;"></div>
+                  <div class="skel lb-skel-cell" style="width:42px;height:14px;"></div>
                 </div>
-                <div class="lb-skeleton-row">
-                  <div class="lb-skeleton-rank skeleton"></div>
-                  <div class="lb-skeleton-cell lb-skeleton-cell-name skeleton"></div>
-                  <div class="lb-skeleton-cell lb-skeleton-cell-points skeleton"></div>
-                  <div class="lb-skeleton-cell lb-skeleton-cell-weight skeleton"></div>
+                <div class="lb-skel-row">
+                  <div class="skel lb-skel-cell" style="width:22px;height:22px;border-radius:50%;"></div>
+                  <div class="skel lb-skel-cell" style="width:150px;height:14px;"></div>
+                  <div class="skel lb-skel-cell" style="width:32px;height:14px;margin-left:auto;"></div>
+                  <div class="skel lb-skel-cell" style="width:42px;height:14px;"></div>
+                </div>
+                <div class="lb-skel-row">
+                  <div class="skel lb-skel-cell" style="width:22px;height:22px;border-radius:50%;"></div>
+                  <div class="skel lb-skel-cell" style="width:130px;height:14px;"></div>
+                  <div class="skel lb-skel-cell" style="width:32px;height:14px;margin-left:auto;"></div>
+                  <div class="skel lb-skel-cell" style="width:42px;height:14px;"></div>
+                </div>
+                <div class="lb-skel-row">
+                  <div class="skel lb-skel-cell" style="width:22px;height:22px;border-radius:50%;"></div>
+                  <div class="skel lb-skel-cell" style="width:115px;height:14px;"></div>
+                  <div class="skel lb-skel-cell" style="width:32px;height:14px;margin-left:auto;"></div>
+                  <div class="skel lb-skel-cell" style="width:42px;height:14px;"></div>
+                </div>
+                <div class="lb-skel-row">
+                  <div class="skel lb-skel-cell" style="width:22px;height:22px;border-radius:50%;"></div>
+                  <div class="skel lb-skel-cell" style="width:138px;height:14px;"></div>
+                  <div class="skel lb-skel-cell" style="width:32px;height:14px;margin-left:auto;"></div>
+                  <div class="skel lb-skel-cell" style="width:42px;height:14px;"></div>
+                </div>
+                <div class="lb-skel-row">
+                  <div class="skel lb-skel-cell" style="width:22px;height:22px;border-radius:50%;"></div>
+                  <div class="skel lb-skel-cell" style="width:125px;height:14px;"></div>
+                  <div class="skel lb-skel-cell" style="width:32px;height:14px;margin-left:auto;"></div>
+                  <div class="skel lb-skel-cell" style="width:42px;height:14px;"></div>
                 </div>
               </div>
             </div>
