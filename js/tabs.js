@@ -1,101 +1,179 @@
 /* ============================================
-   PFL App — Tabs Module
-   Tab switching logic, animations
+   PFL App — Tabs
+   Bottom navigation bar, tab content
    ============================================ */
 
-import { $, $$, haptic } from './utils.js';
-import CONFIG from './config.js';
-
-// ---- State ----
-let activeTab = CONFIG.UI.DEFAULT_TAB;
-let previousTab = null;
-const tabOrder = ['fests', 'leaderboard', 'partners', 'arena'];
-
-// Callbacks for tab activation
-const tabCallbacks = new Map();
-
-// ---- Initialize ----
-export function initTabs() {
-  const tabButtons = $$('.tab-btn');
-  
-  tabButtons.forEach(btn => {
-    btn.addEventListener('click', () => {
-      const tabKey = btn.dataset.tab;
-      if (tabKey && tabKey !== activeTab) {
-        switchTab(tabKey);
-      }
-    });
-  });
-  
-  // Set initial active tab
-  updateTabUI(activeTab);
-  
-  console.log('[Tabs] Initialized');
+/* ---- Bottom Tab Bar ---- */
+.tabs {
+  position: fixed;
+  left: 20px;
+  right: 20px;
+  bottom: 20px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  gap: 0;
+  padding: 4px;
+  padding-bottom: calc(4px + env(safe-area-inset-bottom, 0px));
+  border-radius: var(--radius-full);
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(20px) saturate(1.8);
+  -webkit-backdrop-filter: blur(20px) saturate(1.8);
+  box-shadow: 
+    0 4px 24px rgba(18, 122, 201, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.90);
+  border: 1px solid rgba(255, 255, 255, 0.60);
+  overflow: hidden;
+  z-index: 100;
 }
 
-// ---- Switch Tab ----
-export function switchTab(tabKey) {
-  if (tabKey === activeTab) return;
-  
-  previousTab = activeTab;
-  activeTab = tabKey;
-  
-  // Haptic feedback
-  haptic('light');
-  
-  // Update UI
-  updateTabUI(tabKey);
-  
-  // Call registered callback
-  const callback = tabCallbacks.get(tabKey);
-  if (callback) {
-    callback();
+/* Tabbar gradient backdrop (from index_old.html) */
+.tabs-backdrop {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: calc(100px + env(safe-area-inset-bottom, 0px));
+  pointer-events: none;
+  z-index: 99;
+  background: linear-gradient(
+    to bottom,
+    rgba(240, 242, 248, 0) 0%,
+    rgba(240, 242, 248, 0.6) 55%,
+    rgba(240, 242, 248, 1) 100%
+  );
+}
+
+/* Dark theme backdrop */
+:root[data-theme="dark"] .tabs-backdrop {
+  background: linear-gradient(
+    to bottom,
+    rgba(21, 28, 36, 0) 0%,
+    rgba(21, 28, 36, 0.62) 55%,
+    rgba(21, 28, 36, 1) 100%
+  );
+}
+
+/* Dark theme tabs */
+:root[data-theme="dark"] .tabs {
+  background: rgba(32, 41, 50, 0.80);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 
+    0 4px 24px rgba(0, 0, 0, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+/* ---- Tab Button ---- */
+.tab-btn {
+  flex: 1;
+  height: 56px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--muted);
+  font-family: var(--font-ui);
+  cursor: pointer;
+  user-select: none;
+  position: relative;
+  z-index: 1;
+  transition: 
+    transform var(--transition-fast),
+    background var(--transition-fast),
+    color var(--transition-fast),
+    box-shadow var(--transition-fast);
+}
+
+.tab-btn:active {
+  transform: translateY(1px);
+}
+
+.tab-icon {
+  font-size: 18px;
+  line-height: 1;
+}
+
+.tab-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1;
+  margin-top: var(--spacing-xs);
+}
+
+/* ---- Active Tab ---- */
+.tab-btn.active {
+  background: rgba(217, 242, 255, 0.85);
+  color: #0F130E;
+  font-weight: 600;
+  box-shadow: 
+    inset 0 1px 0 rgba(255, 255, 255, 0.80),
+    0 2px 8px rgba(18, 122, 201, 0.12);
+}
+
+.tab-btn.active::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-full);
+  border: 1px solid rgba(35, 139, 218, 0.18);
+  pointer-events: none;
+}
+
+/* Dark theme active tab */
+:root[data-theme="dark"] .tab-btn.active {
+  background: rgba(78, 163, 255, 0.22);
+  color: var(--text);
+  box-shadow: 
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 2px 8px rgba(78, 163, 255, 0.15);
+}
+
+:root[data-theme="dark"] .tab-btn.active::before {
+  border-color: rgba(78, 163, 255, 0.25);
+}
+
+/* ---- Tab Content ---- */
+.tab-content {
+  display: none;
+}
+
+.tab-content.active {
+  display: block;
+  animation: tab-slide-in-right 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+}
+
+.tab-content.active.slide-left {
+  animation-name: tab-slide-in-left;
+}
+
+.tab-content.active.slide-right {
+  animation-name: tab-slide-in-right;
+}
+
+@keyframes tab-slide-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(40px);
   }
-  
-  // Store active tab globally for pull-to-refresh
-  window.__activeTabKey = tabKey;
-  
-  console.log('[Tabs] Switched to:', tabKey);
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
-// ---- Update UI ----
-function updateTabUI(tabKey) {
-  // Update buttons
-  $$('.tab-btn').forEach(btn => {
-    btn.classList.toggle('active', btn.dataset.tab === tabKey);
-  });
-  
-  // Update content panels
-  const prevIndex = tabOrder.indexOf(previousTab);
-  const currentIndex = tabOrder.indexOf(tabKey);
-  const direction = currentIndex > prevIndex ? 'right' : 'left';
-  
-  $$('.tab-content').forEach(panel => {
-    const isActive = panel.id === `tab-${tabKey}`;
-    
-    if (isActive) {
-      panel.classList.add('active');
-      panel.classList.remove('slide-left', 'slide-right');
-      panel.classList.add(`slide-${direction}`);
-    } else {
-      panel.classList.remove('active', 'slide-left', 'slide-right');
-    }
-  });
+@keyframes tab-slide-in-left {
+  from {
+    opacity: 0;
+    transform: translateX(-40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
-
-// ---- Register Callback ----
-export function onTabActivate(tabKey, callback) {
-  tabCallbacks.set(tabKey, callback);
-}
-
-// ---- Getters ----
-export function getActiveTab() {
-  return activeTab;
-}
-
-export function getPreviousTab() {
-  return previousTab;
-}
-
-// ---- Expose globally for pull-to-refresh ----
-window.__activeTabKey = activeTab;
