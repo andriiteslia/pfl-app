@@ -7,8 +7,8 @@ import { $ } from './utils.js';
 import { getActiveTab } from './tabs.js';
 
 // ---- Config ----
-const THRESHOLD = 160;
-const RESIST = 0.35;
+const THRESHOLD = 200;
+const RESIST = 0.4;
 const MAX_PULL = 100; // Maximum visual displacement
 
 // ---- State ----
@@ -89,6 +89,11 @@ export function initPullToRefresh() {
       return;
     }
 
+    // Prevent native overscroll when pulling down
+    if (dy > 0 && scroller.scrollTop === 0) {
+      e.preventDefault();
+    }
+
     currentDy = dy;
     
     // Calculate bounce with rubber band easing
@@ -100,7 +105,7 @@ export function initPullToRefresh() {
       content.style.transform = `translateY(${h}px)`;
       content.style.transition = 'none';
     }
-  }, { passive: true });
+  }, { passive: false });
 
   scroller.addEventListener('touchend', () => {
     const dy = currentDy;
