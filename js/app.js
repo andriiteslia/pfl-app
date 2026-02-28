@@ -8,7 +8,6 @@ import { initTabs, onTabActivate, getActiveTab } from './tabs.js';
 import { initFests, loadFestsData, isFestsLoaded } from './fests.js';
 import { initLeaderboard, loadLeaderboard, isLeaderboardLoaded } from './leaderboard.js';
 import { initArena, loadArena, isArenaLoaded } from './arena.js';
-import { initPartners } from './partners.js';
 import { fetchAppStyles } from './api.js';
 import { $ } from './utils.js';
 import { initPullToRefresh } from './pull-to-refresh.js';
@@ -271,7 +270,6 @@ async function init() {
   initFests();
   initLeaderboard();
   initArena();
-  initPartners();
   
   // 5. Setup tab activation callbacks
   setupTabCallbacks();

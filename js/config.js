@@ -5,7 +5,7 @@
 
 const CONFIG = {
   // ---- API ----
-  API_URL: 'https://script.google.com/macros/s/AKfycbyCPOHRIiJSqh-0xRVPWnJBPUuj0mtTcjUCRHa1ioT8aKuFO7TKB8Wd1cNr41RxL4gQDQ/exec',
+  API_URL: 'https://script.google.com/macros/s/AKfycbzWSMfLiiZLPMUBzOHLV-xCbkvQE4cUYWuYWCWYvXkRCXJFYg7WqefU8gkBG-JZZp0/exec',
 
   // ---- Cache Settings ----
   CACHE_TTL_MS: 3 * 60 * 1000, // 3 minutes
