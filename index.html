@@ -33,14 +33,14 @@
   <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <!-- Styles -->
-  <link rel="stylesheet" href="variables.css">
-  <link rel="stylesheet" href="base.css">
-  <link rel="stylesheet" href="components.css">
-  <link rel="stylesheet" href="tabs.css">
-  <link rel="stylesheet" href="leaderboard.css">
-  <link rel="stylesheet" href="partners.css">
-  <link rel="stylesheet" href="skeleton.css">
-  <link rel="stylesheet" href="animations.css">
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/tabs.css">
+  <link rel="stylesheet" href="css/leaderboard.css">
+  <link rel="stylesheet" href="css/partners.css">
+  <link rel="stylesheet" href="css/skeleton.css">
+  <link rel="stylesheet" href="css/animations.css">
 </head>
 <body>
 
@@ -167,10 +167,9 @@
           </div>
         </header>
 
-        <article class="card leaderboard-card" style="margin-top:0;">
-          <div class="leaderboard-spacer"></div>
-          <div id="outLeaderboard" style="font-size:16px;">
-            <!-- Skeleton loader (exact from index_old.html) -->
+        <article class="card leaderboard-card">
+          <div id="outLeaderboard">
+            <!-- Skeleton loader (from index_old.html) -->
             <div class="lb-skeleton">
               <!-- Podium skeleton -->
               <div class="lb-skel-podium-wrap">
@@ -182,16 +181,14 @@
                     <div class="skel-w lb-skel-name2" style="width:44px;"></div>
                     <div class="skel-w lb-skel-pts" style="width:52px;"></div>
                   </div>
-
                   <!-- place 1 -->
                   <div class="lb-skel-person p1">
-                    <div class="skel-w lb-skel-crown" style="width:26px;height:20px;"></div>
+                    <div class="skel-w lb-skel-crown"></div>
                     <div class="skel-w lb-skel-avatar" style="width:80px;height:80px;"></div>
                     <div class="skel-w lb-skel-name1" style="width:68px;"></div>
                     <div class="skel-w lb-skel-name2" style="width:52px;"></div>
                     <div class="skel-w lb-skel-pts" style="width:56px;"></div>
                   </div>
-
                   <!-- place 3 -->
                   <div class="lb-skel-person p3">
                     <div class="skel-w lb-skel-avatar" style="width:56px;height:56px;"></div>
@@ -206,7 +203,6 @@
                   <div class="skel-w lb-skel-stand s3"></div>
                 </div>
               </div>
-
               <!-- Table rows skeleton -->
               <div class="lb-skel-table">
                 <div class="lb-skel-row">
@@ -256,10 +252,35 @@
           </div>
         </article>
 
-        <div class="leaderboard-pdf-cta" style="margin-top:12px;">
+        <div class="leaderboard-pdf-cta" style="margin-top: 12px;">
           <a class="link-btn" id="pflPdfLink" href="assets/docs/predatorfest2026.pdf" rel="noopener">
             Переглянути умови PFL 2026 📝
           </a>
+        </div>
+      </section>
+
+      <!-- ========== ARENA TAB ========== -->
+      <section id="tab-arena" class="tab-content arena-empty" aria-label="Arena tab">
+        <header class="fests-header">
+          <div class="fests-header__text">
+            <h1 class="page-title">Arena ⭐️</h1>
+            <p class="page-subtitle" id="subtitle-arena">
+              Рейтинг і результати змагань різних форматів та дисциплін.
+            </p>
+          </div>
+          <div class="fests-header__actions">
+            <button class="btn" id="reloadArena" type="button">Оновити</button>
+          </div>
+        </header>
+
+        <div class="fests-year-tags" id="arenaTags" style="display: none;"></div>
+        <div id="arenaCards" style="display: none;"></div>
+
+        <div class="empty-state" id="arenaEmptyState">
+          <img src="./assets/imgs/pike.png" alt="Pike" width="160" height="160">
+          <p class="empty-state__text" id="arenaEmptyText">
+            Зачекайте будь ласка...<br>Ех, зараз би якийсь фюжин 2.5' 🤤
+          </p>
         </div>
       </section>
 
@@ -267,16 +288,18 @@
       <section id="tab-partners" class="tab-content" aria-label="Partners tab">
         <div id="partnersListView">
           <h1 class="page-title">Partners 🤝</h1>
-          <p class="page-subtitle">Партнери та спонсори, які підтримують Predator Fest League призами та допомогою в організації.</p>
+          <p class="page-subtitle">
+            Партнери та спонсори, які підтримують Predator Fest League призами та допомогою в організації.
+          </p>
 
           <div class="partners-grid">
             <!-- Upstream -->
-            <article class="partner-tile"
+            <article class="partner-tile" 
                      data-partner="upstream"
                      data-instagram="https://www.instagram.com/upstreambaits/"
-                     data-details-subtitle="Силіконові приманки Upstream — ручна робота, унікальні моделі для ультралайту.">
+                     data-details-subtitle="📦 Онлайн-замовлення цілодобово.<br>🕘 Пн – Пт з 10:00 до 18:00<br>📱 Телефон: +38 (067) 13 13 110">
               <div class="partner-tile__logo">
-                <img src="./assets/logos/upstream.svg" alt="Upstream"
+                <img src="./assets/logos/upstream.svg" alt="Upstream" 
                      onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                 <div class="logo-fallback">Upstream</div>
               </div>
@@ -350,82 +373,11 @@
         </div>
 
         <!-- Partner Details View (hidden by default) -->
-        <div id="partnerDetailsView" style="display:none;">
-          <div class="card" style="margin-top:0; padding:16px;">
-            <!-- Logo / Header -->
-            <div class="partner-details__logo" id="partnerDetailsLogo" style="width:100%; height:140px; border-radius:8px; overflow:hidden; display:flex; align-items:center; justify-content:center;">
-              <img id="partnerDetailsLogoImg" src="" alt="" style="max-width:100%; max-height:100%; padding:20px; display:block; object-fit:contain;">
-            </div>
-
-            <!-- Title + extended subtitle -->
-            <div style="padding-top:16px;">
-              <h2 class="partner-title" id="partnerDetailsTitle" style="font-size:20px; margin:0 0 8px 0; line-height:32px;">
-                Partner
-              </h2>
-              <p class="partner-subtitle" id="partnerDetailsSubtitle" style="font-size:16px; line-height:22px; margin:0;">
-                —
-              </p>
-            </div>
-
-            <div style="height:24px;"></div>
-
-            <!-- Promo code block (shown only for partners with promo) -->
-            <div id="partnerDetailsPromoWrap" style="display:none;">
-              <div class="partner-promo-block">
-                <span class="partner-promo-block__label">-10% за промокодом:</span>
-                <span class="partner-promo-block__code" id="partnerDetailsPromoCode">PFL2026_10</span>
-                <button class="partner-promo-block__copy" id="partnerDetailsPromoCopy" type="button" aria-label="Копіювати промокод">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
-                  </svg>
-                </button>
-              </div>
-            </div>
-
-            <!-- Primary CTA -->
-            <a class="btn" id="partnerDetailsCta" style="display:flex; align-items:center; justify-content:center; width:100%; box-sizing:border-box;" target="_blank" rel="noopener">
-              Перейти
-            </a>
-
-            <div id="partnerDetailsSecondaryWrap" style="display:none; justify-content:center; margin-top:16px;">
-              <a class="link-btn" id="partnerDetailsSecondaryCta" href="#" target="_blank" rel="noopener"></a>
-            </div>
-
-            <div style="height:24px;"></div>
-
-            <!-- Info block (free text with emoji) -->
-            <div id="partnerDetailsInfo" style="font-size:16px; line-height:1.6; color:var(--muted);">
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- ========== ARENA TAB ========== -->
-      <section id="tab-arena" class="tab-content arena-empty" aria-label="Arena tab">
-        <header class="fests-header">
-          <div class="fests-header__text">
-            <h1 class="page-title">Arena ⭐️</h1>
-            <p class="page-subtitle" id="subtitle-arena">Рейтинг і результати змагань різних форматів та дисциплін.</p>
-          </div>
-          <div class="fests-header__actions">
-            <button class="btn" id="reloadArena" type="button">Оновити</button>
-          </div>
-        </header>
-
-        <div class="fests-year-tags" id="arenaTags" aria-label="Arena tags" style="display:none;"></div>
-        <div id="arenaCards" aria-label="Arena cards" style="display:none;"></div>
-
-        <div class="empty-state" id="arenaEmptyState" aria-label="Arena empty state">
-          <img src="./assets/imgs/pike.png" alt="Pike" width="160" height="160">
-          <p class="empty-state__text" id="arenaEmptyText">Зачекайте будь ласка...<br>Ех, зараз би якийсь фюжин 2.5' 🤤</p>
-        </div>
+        <div id="partnerDetailsView" class="partner-details"></div>
       </section>
 
     </main>
   </div>
-
-  <!-- Tabbar Gradient Backdrop (fades content under tab bar) -->
-  <div class="tabs-backdrop" aria-hidden="true"></div>
 
   <!-- Bottom Tab Bar -->
   <nav class="tabs" role="tablist" aria-label="Main navigation">
@@ -470,7 +422,7 @@
   </script>
 
   <!-- Main App Script -->
-  <script type="module" src="app.js"></script>
+  <script type="module" src="js/app.js"></script>
 
 </body>
 </html>
