@@ -33,6 +33,15 @@ function canRefreshCurrentTab() {
   return true;
 }
 
+// ---- Reset content position ----
+function resetContentPosition() {
+  const content = $('#app-content');
+  if (content) {
+    content.style.transition = 'transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+    content.style.transform = 'translateY(0)';
+  }
+}
+
 // ---- Initialize Pull to Refresh ----
 export function initPullToRefresh() {
   const scroller = $('#app-wrap');
@@ -40,7 +49,10 @@ export function initPullToRefresh() {
 
   scroller.addEventListener('touchstart', (e) => {
     // Only start if at top of scroll
-    if (scroller.scrollTop > 0) return;
+    if (scroller.scrollTop > 0) {
+      pulling = false;
+      return;
+    }
     
     startY = e.touches[0].clientY;
     pulling = true;
@@ -48,14 +60,25 @@ export function initPullToRefresh() {
   }, { passive: true });
 
   scroller.addEventListener('touchmove', (e) => {
+    // If scrolled down, reset and exit
+    if (scroller.scrollTop > 0) {
+      if (pulling) {
+        pulling = false;
+        currentDy = 0;
+        resetContentPosition();
+      }
+      return;
+    }
+    
     if (!pulling) return;
     
     const dy = e.touches[0].clientY - startY;
     
-    // If pulling up, cancel
+    // If pulling up, cancel and reset
     if (dy <= 0) {
       pulling = false;
       currentDy = 0;
+      resetContentPosition();
       return;
     }
 
@@ -73,18 +96,14 @@ export function initPullToRefresh() {
   }, { passive: true });
 
   scroller.addEventListener('touchend', () => {
-    if (!pulling) return;
-    pulling = false;
-
     const dy = currentDy;
+    
+    // Always reset state
+    pulling = false;
     currentDy = 0;
     
-    // Reset content position with bounce
-    const content = $('#app-content');
-    if (content) {
-      content.style.transition = 'transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
-      content.style.transform = 'translateY(0)';
-    }
+    // Always reset content position
+    resetContentPosition();
 
     // Trigger refresh if dy >= THRESHOLD and tab supports it
     if (dy >= THRESHOLD && canRefreshCurrentTab()) {
@@ -98,6 +117,50 @@ export function initPullToRefresh() {
       }
     }
   }, { passive: true });
+
+  // Also reset on touchcancel
+  scroller.addEventListener('touchcancel', () => {
+    pulling = false;
+    currentDy = 0;
+    resetContentPosition();
+  }, { passive: true });
+
+  // Global safety: reset if touch ends anywhere
+  document.addEventListener('touchend', () => {
+    if (pulling) {
+      const dy = currentDy;
+      pulling = false;
+      currentDy = 0;
+      resetContentPosition();
+      
+      // Trigger refresh if threshold reached
+      if (dy >= THRESHOLD && canRefreshCurrentTab()) {
+        try {
+          window.Telegram?.WebApp?.HapticFeedback?.impactOccurred('light');
+        } catch(e) {}
+        const btn = getActiveReloadBtn();
+        if (btn) btn.click();
+      }
+    }
+  }, { passive: true, capture: true });
+
+  // Reset on visibility change (app goes to background)
+  document.addEventListener('visibilitychange', () => {
+    if (pulling) {
+      pulling = false;
+      currentDy = 0;
+      resetContentPosition();
+    }
+  });
+
+  // Reset on blur (window loses focus)
+  window.addEventListener('blur', () => {
+    if (pulling) {
+      pulling = false;
+      currentDy = 0;
+      resetContentPosition();
+    }
+  });
 
   console.log('[PullToRefresh] Initialized');
 }
