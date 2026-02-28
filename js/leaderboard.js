@@ -217,6 +217,7 @@ function buildAquarium() {
       <span class="aqua-fish" style="--d:10s; --y:78%; --del:7s; --s:1.30; --flip:1">🐠</span>
       <span class="aqua-fish" style="--d:9s; --y:42%; --del:9s; --s:1.00; --flip:0">🐟</span>
       <span class="aqua-fish" style="--d:11s; --y:38%; --del:9.5s; --s:.88; --flip:0">🐠</span>
+      <span class="aqua-fish" style="--d:7s; --y:920%; --del:3s; --s:.70; --flip:1">🐡</span>
       
       <span class="aqua-bubble" style="--d:4s; --x:8%; --sz:5px; --del:0s;"></span>
       <span class="aqua-bubble" style="--d:6s; --x:22%; --sz:8px; --del:1.5s;"></span>
