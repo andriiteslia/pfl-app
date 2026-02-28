@@ -83,7 +83,9 @@
   opacity: 0.75;
 }
 
-/* ====== Leaderboard Skeleton ====== */
+/* ============================================
+   Leaderboard Skeleton (from index_old.html)
+   ============================================ */
 @keyframes skeletonShimmer {
   0%   { background-position: -400px 0; }
   100% { background-position:  400px 0; }
@@ -122,9 +124,15 @@
   margin: 0 0 12px;
   padding: 14px 14px 12px;
   overflow: hidden;
+  /* Match loaded podium sizing (incl. border) to avoid layout jumps */
+  border: 1px solid rgba(13,59,117,.18);
   background: linear-gradient(180deg, #127AC9 0%, #0066B5 100%);
   margin-left: -12px;
   margin-right: -12px;
+}
+
+:root[data-theme="dark"] .lb-skel-podium-wrap {
+  border-color: rgba(255,255,255,.10);
 }
 
 .lb-skel-people {
@@ -146,8 +154,8 @@
 .lb-skel-person.p2,
 .lb-skel-person.p3 { flex: 1; }
 
-.lb-skel-person.p2 { padding-top: 24px; }
-.lb-skel-person.p3 { padding-top: 40px; }
+.lb-skel-person.p2 { transform: translateY(24px); }
+.lb-skel-person.p3 { transform: translateY(40px); }
 
 .lb-skel-avatar { 
   border-radius: 50%; 
@@ -156,23 +164,25 @@
 
 .lb-skel-crown { 
   width: 26px; 
-  height: 20px; 
+  height: 26px; 
   margin-bottom: 4px; 
 }
 
 .lb-skel-name1 { 
   margin-top: 8px; 
-  height: 11px; 
+  /* 14.8px x2 + 8px + 4px ~= 41.6px (matches loaded name block) */
+  height: 14.8px; 
 }
 
 .lb-skel-name2 { 
   margin-top: 4px; 
-  height: 11px; 
+  height: 14.8px; 
 }
 
 .lb-skel-pts { 
   margin-top: 6px; 
-  height: 28px; 
+  /* Loaded points pill is ~30px incl. borders */
+  height: 30px; 
   border-radius: 999px !important; 
 }
 
