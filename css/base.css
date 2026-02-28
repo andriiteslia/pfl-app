@@ -29,6 +29,27 @@ body {
   line-height: 1.5;
 }
 
+
+/* ---- Bottom Fade (prevents content behind tab bar from being readable) ---- */
+body::after {
+  content: "";
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: var(--tabs-fade-height, 140px);
+  pointer-events: none;
+  z-index: 99; /* below .tabs (100) */
+  background: linear-gradient(
+    to bottom,
+    rgba(var(--bg-rgb), 0) 0%,
+    rgba(var(--bg-rgb), 0.55) 55%,
+    rgba(var(--bg-rgb), 0.92) 78%,
+    var(--bg) 100%
+  );
+}
+
+
 /* ---- App Container (exactly like index_old.html) ---- */
 #app-wrap {
   position: fixed;
