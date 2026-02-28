@@ -1,0 +1,159 @@
+/* ============================================
+   PFL App — Base Styles
+   Reset, body, typography, utilities
+   ============================================ */
+
+/* ---- Reset ---- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* Prevent iOS/Telegram text autosizing */
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+html, body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  overflow: hidden;
+  font-family: var(--font-ui);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+}
+
+/* ---- App Container (exactly like index_old.html) ---- */
+#app-wrap {
+  position: fixed;
+  inset: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: auto;
+  overscroll-behavior-y: auto;
+}
+
+#app-content {
+  /* This ensures content is always scrollable for bounce to work */
+  min-height: calc(100% + 1px);
+  padding: var(--app-top-pad, 20px) 18px 96px;
+}
+
+/* ---- Global Scrollbar Hiding (except tables) ---- */
+*:not(.table-wrap)::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+*:not(.table-wrap) {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+/* ---- Table Scrollbar (visible, themed) ---- */
+.table-wrap::-webkit-scrollbar {
+  height: 6px;
+  width: 6px;
+}
+
+.table-wrap::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.table-wrap::-webkit-scrollbar-thumb {
+  background: var(--bg);
+  border-radius: 3px;
+}
+
+.table-wrap {
+  scrollbar-width: thin;
+  scrollbar-color: var(--bg) transparent;
+}
+
+/* ---- Typography ---- */
+.page-title {
+  margin: 0 0 var(--spacing-md);
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.01em;
+}
+
+.page-subtitle {
+  margin: 0 0 18px;
+  color: var(--muted);
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+/* ---- Links ---- */
+a {
+  color: var(--brand);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* ---- Images ---- */
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* ---- Loading Text ---- */
+.loading-text {
+  color: var(--muted);
+  font-family: var(--font-ui);
+  font-size: 15px;
+  padding: 6px 0;
+  text-align: center;
+}
+
+/* ---- Screen Reader Only ---- */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---- Empty State ---- */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: var(--spacing-2xl) var(--spacing-md);
+  min-height: calc(100vh - 280px);
+}
+
+.empty-state img {
+  width: 160px;
+  height: 160px;
+  object-fit: contain;
+  margin-bottom: var(--spacing-md);
+}
+
+.empty-state__text {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--muted);
+}
