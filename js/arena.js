@@ -221,8 +221,8 @@ export async function loadArena({ force = false } = {}) {
       return;
     }
 
-    // Set active tag
-    if (!activeTagId || !tags.some(t => t.id === activeTagId)) {
+    // Always ensure activeTagId is set to first valid tag
+    if (!activeTagId || !tags.find(t => t.id === activeTagId)) {
       activeTagId = tags[0].id;
     }
 
