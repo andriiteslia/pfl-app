@@ -3,7 +3,7 @@
    Year switching, fest cards, hardcoded 2025 data
    ============================================ */
 
-import { $, $$, escapeHtml, setButtonLoading, haptic, showToast, hintHorizontalScroll } from './utils.js';
+import { $, $$, escapeHtml, setButtonLoading, haptic, showToast } from './utils.js';
 import { mountFests2026, resetFests2026 } from './fests2026.js';
 
 // ---- Hardcoded Data 2025 ----
@@ -350,10 +350,10 @@ function renderPerchData() {
   
   if (view === 'results') {
     const out = $('#outPerchResults');
-    if (out) { renderTableInto(DATA_2025.perchResults, out); hintHorizontalScroll(out); }
+    if (out) renderTableInto(DATA_2025.perchResults, out);
   } else {
     const out = $('#outPerchTours');
-    if (out) { renderTableInto(DATA_2025.perchTours, out); hintHorizontalScroll(out); }
+    if (out) renderTableInto(DATA_2025.perchTours, out);
   }
 }
 
@@ -427,10 +427,10 @@ function renderPredatorData() {
   
   if (view === 'personal') {
     const out = $('#outPredatorPersonal');
-    if (out) { renderTableInto(DATA_2025.predatorPersonal, out); hintHorizontalScroll(out); }
+    if (out) renderTableInto(DATA_2025.predatorPersonal, out);
   } else {
     const out = $('#outPredatorTeam');
-    if (out) { renderTableInto(DATA_2025.predatorTeam, out); hintHorizontalScroll(out); }
+    if (out) renderTableInto(DATA_2025.predatorTeam, out);
   }
 }
 
@@ -458,7 +458,7 @@ function setupPredator2Card() {
 
 function renderPredator2Data() {
   const out = $('#outPredator2');
-  if (out) { renderTableInto(DATA_2025.predator2, out); hintHorizontalScroll(out); }
+  if (out) renderTableInto(DATA_2025.predator2, out);
 }
 
 // ---- Render Table ----
