@@ -371,18 +371,36 @@ function buildTop3Podium(rows, nameIdx, pointsIdx) {
 
 // ---- Build Aquarium (fish & bubbles) ----
 function buildAquarium() {
+  // 10 fish with varied movement: speed, depth, size, direction, delay
+  // Some swim in pairs (similar y + close delays)
+  const fish = [
+    // Deep pair — two friends near the bottom
+    { e:'🐟', d:'14s',  y:'78%', del:'0s',   s:'.80', flip:1 },
+    { e:'🐠', d:'15s',  y:'75%', del:'0.8s', s:'.75', flip:1 },
+    // Mid-water solo cruiser
+    { e:'🐡', d:'18s',  y:'50%', del:'3s',   s:'1.0', flip:0 },
+    // Upper pair — chasing each other
+    { e:'🐟', d:'11s',  y:'22%', del:'1.5s', s:'1.15', flip:0 },
+    { e:'🐠', d:'11.5s',y:'25%', del:'2.2s', s:'1.05', flip:0 },
+    // Fast surface fish
+    { e:'🐟', d:'9s',   y:'12%', del:'5s',   s:'1.25', flip:1 },
+    // Slow deep drifter
+    { e:'🐡', d:'22s',  y:'85%', del:'4s',   s:'.70', flip:0 },
+    // Mid solo
+    { e:'🐠', d:'13s',  y:'42%', del:'7s',   s:'.95', flip:1 },
+    // Another mid trio straggler
+    { e:'🐟', d:'16s',  y:'60%', del:'10s',  s:'.88', flip:1 },
+    // Top loner — big and slow
+    { e:'🐠', d:'20s',  y:'16%', del:'6s',   s:'1.30', flip:0 },
+  ];
+
+  const fishHTML = fish.map(f =>
+    `<span class="aqua-fish" style="--d:${f.d}; --y:${f.y}; --del:${f.del}; --s:${f.s}; --flip:${f.flip}">${f.e}</span>`
+  ).join('\n      ');
+
   return `
     <div class="top3-aqua" aria-hidden="true">
-      <span class="aqua-fish" style="--d:8s; --y:65%; --del:0s; --s:.95; --flip:1">🐟</span>
-      <span class="aqua-fish" style="--d:8s; --y:72%; --del:0.4s; --s:.85; --flip:1">🐠</span>
-      <span class="aqua-fish" style="--d:11s; --y:28%; --del:2.5s; --s:1.25; --flip:0">🐠</span>
-      <span class="aqua-fish" style="--d:9s; --y:50%; --del:5s; --s:.90; --flip:1">🐡</span>
-      <span class="aqua-fish" style="--d:13s; --y:18%; --del:1s; --s:1.15; --flip:0">🐟</span>
-      <span class="aqua-fish" style="--d:12s; --y:22%; --del:1.6s; --s:1.05; --flip:0">🐡</span>
-      <span class="aqua-fish" style="--d:10s; --y:78%; --del:7s; --s:1.30; --flip:1">🐠</span>
-      <span class="aqua-fish" style="--d:9s; --y:42%; --del:9s; --s:1.00; --flip:0">🐟</span>
-      <span class="aqua-fish" style="--d:11s; --y:38%; --del:9.5s; --s:.88; --flip:0">🐠</span>
-      <span class="aqua-fish" style="--d:7s; --y:920%; --del:3s; --s:.70; --flip:1">🐡</span>
+      ${fishHTML}
       
       <span class="aqua-bubble" style="--d:4s; --x:8%; --sz:5px; --del:0s;"></span>
       <span class="aqua-bubble" style="--d:6s; --x:22%; --sz:8px; --del:1.5s;"></span>
@@ -390,8 +408,9 @@ function buildAquarium() {
       <span class="aqua-bubble" style="--d:7s; --x:68%; --sz:9px; --del:2.8s;"></span>
       <span class="aqua-bubble" style="--d:4.5s; --x:85%; --sz:5px; --del:1s;"></span>
       <span class="aqua-bubble" style="--d:6.5s; --x:55%; --sz:7px; --del:3.5s;"></span>
+      <span class="aqua-bubble" style="--d:5.5s; --x:35%; --sz:4px; --del:5s;"></span>
       
-      <span class="aqua-crab" id="aquaCrab" style="display:none;">🦀</span>
+      <span class="aqua-crab" id="aquaCrab">🦀</span>
     </div>
   `;
 }
