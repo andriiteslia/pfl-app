@@ -6,7 +6,7 @@
 import { fetchLeaderboard, fetchLeaderboardConfig } from './api.js';
 import { 
   $, escapeHtml, setButtonLoading, formatNameTwoLines, 
-  formatPointsLabel, haptic 
+  formatPointsLabel, haptic, showToast 
 } from './utils.js';
 
 // ---- State ----
@@ -90,6 +90,7 @@ export async function loadLeaderboard({ force = false } = {}) {
   if (!isLoaded || force) {
     // Show skeleton
     container.innerHTML = SKELETON_HTML;
+    container.classList.remove('content-fade-in');
     if (card) card.classList.remove('is-loaded');
     if (subtitle) {
       subtitle.textContent = 'Оновлюю дані Predator Fest League. Головний приз - 23 Shimano Vanquish 2500S!';
@@ -120,8 +121,14 @@ export async function loadLeaderboard({ force = false } = {}) {
       subtitle.textContent = 'Рейтинг учасників Predator Fest League. Головний приз - 23 Shimano Vanquish 2500S!';
     }
     
+    // Fade-in content after skeleton
+    if (container) container.classList.add('content-fade-in');
+    
     if (card) card.classList.add('is-loaded');
     isLoaded = true;
+    
+    // Toast on force reload
+    if (force) showToast('Оновлено ✓');
     
   } catch (error) {
     console.error('[Leaderboard] Load error:', error);
