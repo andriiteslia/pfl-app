@@ -697,7 +697,3 @@ body.pdf-viewer-open .tabs,
 body.pdf-viewer-open::after {
   display: none !important;
 }
-
-body.pdf-viewer-open #tab-leaderboard > .fests-header {
-  display: none;
-}
