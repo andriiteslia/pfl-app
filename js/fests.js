@@ -3,7 +3,7 @@
    Year switching, fest cards, hardcoded 2025 data
    ============================================ */
 
-import { $, $$, escapeHtml, setButtonLoading, haptic } from './utils.js';
+import { $, $$, escapeHtml, setButtonLoading, haptic, showToast } from './utils.js';
 import { mountFests2026, resetFests2026 } from './fests2026.js';
 
 // ---- Hardcoded Data 2025 ----
@@ -227,7 +227,7 @@ function switchYear(year) {
 
   const subtitle = $('#subtitle-fests');
   if (subtitle) {
-    subtitle.textContent = year === '2026' ? 'Результати сезону 2026' : 'Результати сезону 2025';
+    subtitle.textContent = year === '2026' ? 'Фести 2026 року' : 'Результати сезону 2025';
   }
 
   if (year === '2026') {
@@ -260,10 +260,12 @@ async function reloadFests() {
       }
       
       if (subtitle) subtitle.textContent = 'Результати сезону 2025';
+      showToast('Оновлено ✓');
     } else {
       resetFests2026();
       await mountFests2026({ force: true });
-      if (subtitle) subtitle.textContent = 'Результати сезону 2026';
+      if (subtitle) subtitle.textContent = 'Фести 2026 року';
+      showToast('Оновлено ✓');
     }
   } catch (e) {
     console.error('[Fests] Reload error:', e);
