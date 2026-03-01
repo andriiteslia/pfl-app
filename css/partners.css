@@ -123,6 +123,21 @@
 
 .partner-tile__body .link-btn {
   margin-top: var(--spacing-md);
+  display: inline;
+  padding: 0;
+  border-radius: 0;
+  background: none;
+  color: var(--brand);
+  font-family: var(--font-ui);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  align-self: flex-start;
+}
+
+.partner-tile__body .link-btn:hover {
+  filter: none;
+  text-decoration: underline;
 }
 
 /* ---- Partner Details View ---- */
@@ -385,8 +400,8 @@ body.partners-details-open::after {
   position: fixed;
   bottom: 24px;
   left: 24px;
-  width: 56px;
-  height: 56px;
+  width: 48px;
+  height: 48px;
   display: none;
   align-items: center;
   justify-content: center;
