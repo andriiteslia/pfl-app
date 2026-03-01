@@ -5,7 +5,7 @@
 
 import CONFIG from './config.js';
 import { fetchSheetData } from './api.js';
-import { $, $$, escapeHtml, haptic, parseDividers, hintHorizontalScroll } from './utils.js';
+import { $, $$, escapeHtml, haptic, parseDividers } from './utils.js';
 
 // ---- Config ----
 const CONFIG_2026 = {
@@ -305,7 +305,6 @@ async function loadCardData(fest, viewKey, force = false) {
     }
 
     renderTableInto(data.values, outEl, { dividers: view.dividers });
-    hintHorizontalScroll(outEl);
     st.loaded[viewKey] = true;
   } catch (e) {
     outEl.innerHTML = '<div class="loading-text">Помилка завантаження.</div>';
