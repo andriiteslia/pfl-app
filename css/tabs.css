@@ -89,6 +89,16 @@
     0 2px 8px rgba(18, 122, 201, 0.12);
 }
 
+.tab-btn.active .tab-icon {
+  animation: tabIconPop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+@keyframes tabIconPop {
+  0%   { transform: scale(0.7); }
+  50%  { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
 .tab-btn.active::before {
   content: "";
   position: absolute;
@@ -149,4 +159,8 @@
     opacity: 1;
     transform: translateX(0);
   }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tab-btn.active .tab-icon { animation: none; }
 }
