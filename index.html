@@ -373,7 +373,41 @@
         </div>
 
         <!-- Partner Details View (hidden by default) -->
-        <div id="partnerDetailsView" class="partner-details"></div>
+        <div id="partnerDetailsView" class="partner-details" style="display:none;">
+          <!-- Logo Header -->
+          <div class="partner-details__header" id="partnerDetailsLogo">
+            <img id="partnerDetailsLogoImg" src="" alt="">
+          </div>
+
+          <!-- Body -->
+          <div class="partner-details__body">
+            <h2 class="partner-details__title" id="partnerDetailsTitle"></h2>
+            <p class="partner-details__subtitle" id="partnerDetailsSubtitle"></p>
+
+            <!-- Promo Block -->
+            <div class="partner-promo-block" id="partnerDetailsPromoWrap" style="display:none;">
+              <span class="partner-promo-block__label">Промокод:</span>
+              <span class="partner-promo-block__code" id="partnerDetailsPromoCode"></span>
+              <button class="partner-promo-block__copy" id="partnerDetailsPromoCopy" type="button">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+              </button>
+            </div>
+
+            <!-- Main CTA -->
+            <a class="btn partner-details__cta-main" id="partnerDetailsCta" href="#" target="_blank" rel="noopener"></a>
+
+            <!-- Secondary CTA (Instagram etc.) -->
+            <div id="partnerDetailsSecondaryWrap" style="display:none;">
+              <a class="btn partner-details__cta-secondary" id="partnerDetailsSecondaryCta" href="#" target="_blank" rel="noopener"></a>
+            </div>
+
+            <!-- Info Block -->
+            <div class="partner-info-block">
+              <div class="partner-info-block__title">Контакти</div>
+              <p class="partner-info-block__text" id="partnerDetailsInfo"></p>
+            </div>
+          </div>
+        </div>
       </section>
 
     </main>
