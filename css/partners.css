@@ -309,8 +309,8 @@ body.partners-details-open::after {
 /* ---- Back FAB ---- */
 .fab-back {
   position: fixed;
-  bottom: 20px;
-  left: 20px;
+  bottom: 24px;
+  left: 24px;
   width: 56px;
   height: 56px;
   display: none;
