@@ -43,6 +43,10 @@ export function switchTab(tabKey) {
   // Haptic feedback
   haptic('light');
   
+  // Reset scroll to top
+  const scroller = document.getElementById('app-wrap');
+  if (scroller) scroller.scrollTop = 0;
+  
   // Update UI
   updateTabUI(tabKey);
   
