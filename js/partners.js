@@ -189,7 +189,7 @@ function openPartnerDetails(tile) {
   // Set promo code
   if (els.detailsPromoWrap) {
     if (data.promo) {
-      els.detailsPromoWrap.style.display = 'block';
+      els.detailsPromoWrap.style.display = 'flex';
       if (els.detailsPromoCode) {
         els.detailsPromoCode.textContent = data.promo;
       }
@@ -272,23 +272,22 @@ async function handlePromoCopy(code) {
   await copyToClipboard(code);
   haptic('success');
 
-  // Visual feedback
-  const block = els.detailsPromoCopy?.closest('.partner-promo-block');
-  const label = block?.querySelector('.partner-promo-block__label');
+  // Visual feedback via CSS class (icons swap automatically)
+  const block = els.detailsPromoCopy?.closest('.partner-promo');
+  const label = block?.querySelector('.partner-promo__label');
+  const copyText = els.detailsPromoCopy?.querySelector('.partner-promo__copy-text');
   const prevLabel = label?.textContent || '';
-  const prevBtnHTML = els.detailsPromoCopy?.innerHTML || '';
+  const prevCopyText = copyText?.textContent || '';
 
   if (block) block.classList.add('is-copied');
-  if (label) label.textContent = '🦀 Скопійовано ✓';
-  if (els.detailsPromoCopy) {
-    els.detailsPromoCopy.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;display:block"><polyline points="20 6 9 17 4 12"/></svg>`;
-  }
+  if (label) label.textContent = 'Скопійовано ✓';
+  if (copyText) copyText.textContent = 'Готово';
 
   setTimeout(() => {
     if (block) block.classList.remove('is-copied');
     if (label) label.textContent = prevLabel;
-    if (els.detailsPromoCopy) els.detailsPromoCopy.innerHTML = prevBtnHTML;
-  }, 3000);
+    if (copyText) copyText.textContent = prevCopyText;
+  }, 2500);
 }
 
 // ---- Telegram BackButton ----
