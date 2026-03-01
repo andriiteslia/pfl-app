@@ -256,6 +256,8 @@
   color: var(--brand);
   cursor: pointer;
   transition: background var(--transition-fast);
+  margin-left: auto;
+  flex-shrink: 0;
 }
 
 .partner-promo-block__copy:hover {
@@ -296,6 +298,12 @@
   font-size: 15px;
   line-height: 1.6;
   color: var(--text);
+}
+
+/* ---- Hide Tab Bar when details open ---- */
+body.partners-details-open .tabs,
+body.partners-details-open::after {
+  display: none !important;
 }
 
 /* ---- Back FAB ---- */
