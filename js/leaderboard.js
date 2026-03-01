@@ -12,6 +12,7 @@ import {
 // ---- State ----
 let isLoaded = false;
 let lbConfig = {};
+let pdfViewerOpen = false;
 
 // ---- DOM References ----
 const getElements = () => ({
@@ -20,11 +21,16 @@ const getElements = () => ({
   subtitle: $('#subtitle-leaderboard'),
   reloadBtn: $('#reloadLeaderboard'),
   statusBadge: $('#lbStatusBadge'),
+  pdfLink: $('#pflPdfLink'),
+  pdfViewer: $('#pdfViewer'),
+  pdfFrame: $('#pdfViewerFrame'),
+  pdfCta: $('.leaderboard-pdf-cta'),
+  fabBack: $('#fabBack'),
 });
 
 // ---- Initialize ----
 export function initLeaderboard() {
-  const { reloadBtn } = getElements();
+  const { reloadBtn, pdfLink, fabBack } = getElements();
   
   if (reloadBtn) {
     reloadBtn.addEventListener('click', () => {
@@ -33,7 +39,70 @@ export function initLeaderboard() {
     });
   }
   
+  // PDF viewer
+  if (pdfLink) {
+    pdfLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      openPdfViewer(pdfLink.href);
+    });
+  }
+  
+  if (fabBack) {
+    fabBack.addEventListener('click', () => {
+      if (pdfViewerOpen) {
+        closePdfViewer();
+      }
+    });
+  }
+  
   console.log('[Leaderboard] Initialized');
+}
+
+// ---- PDF Viewer ----
+function openPdfViewer(url) {
+  const { card, pdfCta, pdfViewer, pdfFrame, fabBack } = getElements();
+  
+  if (!pdfViewer || !pdfFrame) return;
+  
+  // Hide leaderboard content
+  if (card) card.style.display = 'none';
+  if (pdfCta) pdfCta.style.display = 'none';
+  
+  // Show PDF
+  pdfFrame.src = url;
+  pdfViewer.style.display = 'block';
+  pdfViewerOpen = true;
+  
+  // Hide tabs, show FAB
+  document.body.classList.add('pdf-viewer-open');
+  if (fabBack) fabBack.classList.add('visible');
+  
+  // Scroll to top
+  const scroller = document.getElementById('app-wrap');
+  if (scroller) scroller.scrollTop = 0;
+  
+  haptic('light');
+}
+
+function closePdfViewer() {
+  const { card, pdfCta, pdfViewer, pdfFrame, fabBack } = getElements();
+  
+  if (!pdfViewer) return;
+  
+  // Hide PDF
+  pdfViewer.style.display = 'none';
+  pdfFrame.src = '';
+  pdfViewerOpen = false;
+  
+  // Show leaderboard content
+  if (card) card.style.display = '';
+  if (pdfCta) pdfCta.style.display = '';
+  
+  // Show tabs, hide FAB
+  document.body.classList.remove('pdf-viewer-open');
+  if (fabBack) fabBack.classList.remove('visible');
+  
+  haptic('light');
 }
 
 // ---- Load Data ----
