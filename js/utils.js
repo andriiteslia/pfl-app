@@ -168,39 +168,31 @@ export function formatDate(date) {
   }).format(new Date(date));
 }
 
-// ---- Horizontal Scroll Hint ----
-// Nudges a .table-wrap to the right and back to hint horizontal scroll.
-// Only fires once per element.
-const hintedElements = new WeakSet();
-
-export function hintHorizontalScroll(container, { distance = 32, delay = 400 } = {}) {
-  if (!container) return;
+// ---- Toast Notification ----
+let toastTimeout = null;
+export function showToast(message = 'Оновлено ✓', duration = 2000) {
+  let toast = document.getElementById('pflToast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'pflToast';
+    toast.className = 'pfl-toast';
+    document.body.appendChild(toast);
+  }
   
-  // Find the scrollable wrapper
-  const wrap = container.classList.contains('table-wrap') 
-    ? container 
-    : container.querySelector('.table-wrap');
-  if (!wrap) return;
+  clearTimeout(toastTimeout);
+  toast.textContent = message;
+  toast.classList.remove('pfl-toast--visible', 'pfl-toast--hiding');
   
-  // Skip if already hinted
-  if (hintedElements.has(wrap)) return;
+  // Force reflow for animation restart
+  void toast.offsetWidth;
+  toast.classList.add('pfl-toast--visible');
   
-  // Wait for layout, then check overflow
-  requestAnimationFrame(() => {
-    setTimeout(() => {
-      if (wrap.scrollWidth <= wrap.clientWidth + 2) return; // no overflow
-      
-      hintedElements.add(wrap);
-      
-      // Nudge right
-      wrap.scrollTo({ left: distance, behavior: 'smooth' });
-      
-      // Return back
-      setTimeout(() => {
-        wrap.scrollTo({ left: 0, behavior: 'smooth' });
-      }, 350);
-    }, delay);
-  });
+  toastTimeout = setTimeout(() => {
+    toast.classList.add('pfl-toast--hiding');
+    toast.addEventListener('animationend', () => {
+      toast.classList.remove('pfl-toast--visible', 'pfl-toast--hiding');
+    }, { once: true });
+  }, duration);
 }
 
 // ---- Clipboard ----
