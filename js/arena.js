@@ -5,7 +5,7 @@
 
 import CONFIG from './config.js';
 import { fetchSheetData } from './api.js';
-import { $, $$, escapeHtml, setButtonLoading, haptic, parseDividers } from './utils.js';
+import { $, $$, escapeHtml, setButtonLoading, haptic, parseDividers, showToast } from './utils.js';
 
 // ---- State ----
 let tags = [];
@@ -229,6 +229,7 @@ export async function loadArena({ force = false } = {}) {
     renderTags();
     renderCards();
     setArenaState('content');
+    if (force) showToast('Оновлено ✓');
     loaded = true;
 
   } catch (e) {
