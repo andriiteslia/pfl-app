@@ -57,7 +57,7 @@
 
 /* ---- PDF CTA Link ---- */
 #tab-leaderboard .leaderboard-pdf-cta {
-  margin-top: 32px;
+  margin-top: 20px;
   margin-bottom: 32px;
   text-align: center;
 }
@@ -286,7 +286,7 @@
   font-size: calc(18px * var(--s, 1));
   line-height: 1;
   opacity: 0;
-  animation: fishSwim var(--d, 9s) ease-in-out var(--del, 0s) infinite;
+  will-change: translate, opacity;
 }
 
 /* flip=1: left→right — mirror the emoji so head faces right */
@@ -302,29 +302,80 @@
   transform: scaleX(1);
 }
 
-@keyframes fishSwim {
+/* Wobble variants — fish assigned via nth-child for organic feel */
+.aqua-fish:nth-child(3n+1) { animation: fishSwimA var(--d, 9s) ease-in-out var(--del, 0s) infinite; }
+.aqua-fish:nth-child(3n+2) { animation: fishSwimA var(--d, 9s) ease-in-out var(--del, 0s) infinite; }
+.aqua-fish:nth-child(3n+3) { animation: fishSwimA var(--d, 9s) ease-in-out var(--del, 0s) infinite; }
+
+/* flip=0 fish swim opposite */
+.aqua-fish[style*="--flip:0"]:nth-child(3n+1) { animation-name: fishSwimLeftA; }
+.aqua-fish[style*="--flip:0"]:nth-child(3n+2) { animation-name: fishSwimLeftB; }
+.aqua-fish[style*="--flip:0"]:nth-child(3n+3) { animation-name: fishSwimLeftC; }
+
+.aqua-fish[style*="--flip:1"]:nth-child(3n+1) { animation-name: fishSwimA; }
+.aqua-fish[style*="--flip:1"]:nth-child(3n+2) { animation-name: fishSwimB; }
+.aqua-fish[style*="--flip:1"]:nth-child(3n+3) { animation-name: fishSwimC; }
+
+/* ---- Right-bound variants (flip:1) ---- */
+@keyframes fishSwimA {
   0%   { opacity: 0;   translate: 0 0; }
-  8%   { opacity: .55; }
-  25%  { translate: 30vw  -6px; }
-  50%  { translate: 60vw   6px; opacity: .45; }
-  75%  { translate: 90vw  -4px; }
-  92%  { opacity: .30; }
-  100% { translate: 115vw 0;   opacity: 0; }
+  8%   { opacity: .50; }
+  20%  { translate: 22vw  -8px; }
+  40%  { translate: 46vw   5px; opacity: .45; }
+  60%  { translate: 68vw  -3px; }
+  80%  { translate: 92vw   6px; opacity: .35; }
+  100% { translate: 115vw  0;   opacity: 0; }
 }
 
-/* flip=0 fish swim in opposite direction */
-.aqua-fish[style*="--flip:0"] {
-  animation-name: fishSwimLeft;
+@keyframes fishSwimB {
+  0%   { opacity: 0;   translate: 0 0; }
+  6%   { opacity: .55; }
+  18%  { translate: 18vw   6px; }
+  35%  { translate: 40vw  -10px; opacity: .50; }
+  55%  { translate: 62vw   8px; }
+  78%  { translate: 88vw  -5px; opacity: .30; }
+  100% { translate: 115vw  0;   opacity: 0; }
 }
 
-@keyframes fishSwimLeft {
+@keyframes fishSwimC {
   0%   { opacity: 0;   translate: 0 0; }
-  8%   { opacity: .55; }
-  25%  { translate: -30vw  -6px; }
-  50%  { translate: -60vw   6px; opacity: .45; }
-  75%  { translate: -90vw  -4px; }
-  92%  { opacity: .30; }
-  100% { translate: -115vw 0;   opacity: 0; }
+  10%  { opacity: .45; }
+  25%  { translate: 28vw  -4px; }
+  45%  { translate: 52vw   10px; opacity: .40; }
+  65%  { translate: 74vw  -7px; }
+  85%  { translate: 96vw   3px; opacity: .28; }
+  100% { translate: 115vw  0;   opacity: 0; }
+}
+
+/* ---- Left-bound variants (flip:0) ---- */
+@keyframes fishSwimLeftA {
+  0%   { opacity: 0;   translate: 0 0; }
+  8%   { opacity: .50; }
+  20%  { translate: -22vw  -8px; }
+  40%  { translate: -46vw   5px; opacity: .45; }
+  60%  { translate: -68vw  -3px; }
+  80%  { translate: -92vw   6px; opacity: .35; }
+  100% { translate: -115vw  0;   opacity: 0; }
+}
+
+@keyframes fishSwimLeftB {
+  0%   { opacity: 0;   translate: 0 0; }
+  6%   { opacity: .55; }
+  18%  { translate: -18vw   6px; }
+  35%  { translate: -40vw  -10px; opacity: .50; }
+  55%  { translate: -62vw   8px; }
+  78%  { translate: -88vw  -5px; opacity: .30; }
+  100% { translate: -115vw  0;   opacity: 0; }
+}
+
+@keyframes fishSwimLeftC {
+  0%   { opacity: 0;   translate: 0 0; }
+  10%  { opacity: .45; }
+  25%  { translate: -28vw  -4px; }
+  45%  { translate: -52vw   10px; opacity: .40; }
+  65%  { translate: -74vw  -7px; }
+  85%  { translate: -96vw   3px; opacity: .28; }
+  100% { translate: -115vw  0;   opacity: 0; }
 }
 
 /* Bubbles rise from bottom */
@@ -356,29 +407,31 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .aqua-fish, .aqua-bubble { animation: none !important; opacity: 0 !important; }
+  .aqua-fish, .aqua-bubble, .aqua-crab { animation: none !important; opacity: 0 !important; }
 }
 
 /* ============================================
-   🦀 Secret crab — walks along the bottom
+   🦀 Crab — walks along the bottom continuously
    ============================================ */
 .aqua-crab {
   position: absolute;
-  bottom: 0;
-  font-size: 16px;
+  bottom: 2px;
+  left: -32px;
+  font-size: 14px;
   line-height: 1;
   pointer-events: none;
-  z-index: 10;
+  z-index: 2;
+  opacity: .6;
+  animation: crabWalk 24s linear infinite;
 }
 
-@keyframes crabWalkRight {
-  from { left: -32px; }
-  to   { left: calc(100% + 8px); }
-}
-
-@keyframes crabWalkLeft {
-  from { right: -32px; }
-  to   { right: calc(100% + 8px); }
+@keyframes crabWalk {
+  0%   { left: -32px;            transform: scaleX(1); }
+  48%  { left: calc(100% + 8px); transform: scaleX(1); }
+  49%  { left: calc(100% + 8px); transform: scaleX(-1); }
+  97%  { left: -32px;            transform: scaleX(-1); }
+  98%  { left: -32px;            transform: scaleX(1); }
+  100% { left: -32px;            transform: scaleX(1); }
 }
 
 /* ============================================
