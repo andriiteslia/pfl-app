@@ -6,7 +6,7 @@
 import { fetchLeaderboard, fetchLeaderboardConfig } from './api.js';
 import { 
   $, escapeHtml, setButtonLoading, formatNameTwoLines, 
-  formatPointsLabel, haptic, showToast 
+  formatPointsLabel, haptic, showToast, hintHorizontalScroll 
 } from './utils.js';
 
 // ---- State ----
@@ -116,6 +116,7 @@ export async function loadLeaderboard({ force = false } = {}) {
     }
     
     renderLeaderboard(leaderboardData.values);
+    hintHorizontalScroll(container);
     
     if (subtitle) {
       subtitle.textContent = 'Рейтинг учасників Predator Fest League. Головний приз - 23 Shimano Vanquish 2500S!';
