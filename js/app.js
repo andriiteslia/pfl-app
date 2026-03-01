@@ -231,6 +231,31 @@ function initTelegram() {
   }
 }
 
+// ---- External Links (bypass Telegram confirmation modal) ----
+function initExternalLinks() {
+  const tg = window.Telegram?.WebApp;
+  if (!tg?.openLink) return;
+
+  document.addEventListener('click', (e) => {
+    const link = e.target.closest('a[href]');
+    if (!link) return;
+
+    const href = link.href;
+    if (!href || href.startsWith('#') || href.startsWith('javascript')) return;
+
+    // Only intercept external links
+    const isExternal = link.target === '_blank' || 
+                       (href.startsWith('http') && !href.includes(location.hostname));
+    if (!isExternal) return;
+
+    e.preventDefault();
+    e.stopPropagation();
+    tg.openLink(href);
+  });
+
+  console.log('[App] External links handler initialized');
+}
+
 // ---- Tab Callbacks ----
 function setupTabCallbacks() {
   onTabActivate('fests', () => {
@@ -278,6 +303,9 @@ async function init() {
   
   // 6. Pull to refresh
   initPullToRefresh();
+  
+  // 7. Bypass Telegram confirmation modal for external links
+  initExternalLinks();
   
   // 7. Load initial data for visible tab
   const activeTab = getActiveTab();
