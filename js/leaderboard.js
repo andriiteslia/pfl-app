@@ -36,6 +36,48 @@ export function initLeaderboard() {
   console.log('[Leaderboard] Initialized');
 }
 
+// ---- Skeleton HTML ----
+const SKELETON_HTML = `
+<div class="lb-skeleton">
+  <div class="lb-skel-podium-wrap">
+    <div class="lb-skel-people">
+      <div class="lb-skel-person p2">
+        <div class="skel-w lb-skel-avatar" style="width:68px;height:68px;"></div>
+        <div class="skel-w lb-skel-name1" style="width:58px;"></div>
+        <div class="skel-w lb-skel-name2" style="width:44px;"></div>
+        <div class="skel-w lb-skel-pts" style="width:52px;"></div>
+      </div>
+      <div class="lb-skel-person p1">
+        <div class="skel-w lb-skel-crown"></div>
+        <div class="skel-w lb-skel-avatar" style="width:80px;height:80px;"></div>
+        <div class="skel-w lb-skel-name1" style="width:68px;"></div>
+        <div class="skel-w lb-skel-name2" style="width:52px;"></div>
+        <div class="skel-w lb-skel-pts" style="width:56px;"></div>
+      </div>
+      <div class="lb-skel-person p3">
+        <div class="skel-w lb-skel-avatar" style="width:56px;height:56px;"></div>
+        <div class="skel-w lb-skel-name1" style="width:52px;"></div>
+        <div class="skel-w lb-skel-name2" style="width:40px;"></div>
+        <div class="skel-w lb-skel-pts" style="width:48px;"></div>
+      </div>
+    </div>
+    <div class="lb-skel-stands">
+      <div class="skel-w lb-skel-stand s2"></div>
+      <div class="skel-w lb-skel-stand s1"></div>
+      <div class="skel-w lb-skel-stand s3"></div>
+    </div>
+  </div>
+  <div class="lb-skel-table">
+    ${[140,120,150,130,115,138,125].map(w => `
+    <div class="lb-skel-row">
+      <div class="skel lb-skel-cell" style="width:22px;height:22px;border-radius:50%;"></div>
+      <div class="skel lb-skel-cell" style="width:${w}px;height:14px;"></div>
+      <div class="skel lb-skel-cell" style="width:32px;height:14px;margin-left:auto;"></div>
+      <div class="skel lb-skel-cell" style="width:42px;height:14px;"></div>
+    </div>`).join('')}
+  </div>
+</div>`;
+
 // ---- Load Data ----
 export async function loadLeaderboard({ force = false } = {}) {
   const { container, card, subtitle, reloadBtn } = getElements();
@@ -46,10 +88,12 @@ export async function loadLeaderboard({ force = false } = {}) {
   setButtonLoading(reloadBtn, true);
   
   if (!isLoaded || force) {
+    // Show skeleton
+    container.innerHTML = SKELETON_HTML;
+    if (card) card.classList.remove('is-loaded');
     if (subtitle) {
       subtitle.textContent = 'Оновлюю дані Predator Fest League. Головний приз - 23 Shimano Vanquish 2500S!';
     }
-    if (card) card.classList.remove('is-loaded');
   }
   
   try {
@@ -284,6 +328,9 @@ function buildTop3Podium(rows, nameIdx, pointsIdx) {
   const pts2 = getPoints(winners[1]);
   const pts3 = getPoints(winners[2]);
   
+  // Cache-bust images so updated photos always load
+  const cb = `?v=${Date.now()}`;
+  
   return `
     <div class="top3-podium" aria-label="Top 3 winners podium">
       <div class="top3-podium__inner">
@@ -293,20 +340,20 @@ function buildTop3Podium(rows, nameIdx, pointsIdx) {
         
         <div class="top3-people">
           <div class="top3-person place2">
-            <div class="top3-avatar"><img src="./assets/imgs/podium-2.png" alt="" /></div>
+            <div class="top3-avatar"><img src="./assets/imgs/podium-2.png${cb}" alt="" /></div>
             <div class="top3-name">${n2}</div>
             <div class="top3-points">${pts2}</div>
           </div>
           
           <div class="top3-person place1">
             <div class="top3-crown">👑</div>
-            <div class="top3-avatar"><img src="./assets/imgs/podium-1.png" alt="" /></div>
+            <div class="top3-avatar"><img src="./assets/imgs/podium-1.png${cb}" alt="" /></div>
             <div class="top3-name">${n1}</div>
             <div class="top3-points">${pts1}</div>
           </div>
           
           <div class="top3-person place3">
-            <div class="top3-avatar"><img src="./assets/imgs/podium-3.png" alt="" /></div>
+            <div class="top3-avatar"><img src="./assets/imgs/podium-3.png${cb}" alt="" /></div>
             <div class="top3-name">${n3}</div>
             <div class="top3-points">${pts3}</div>
           </div>
