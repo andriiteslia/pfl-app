@@ -168,6 +168,33 @@ export function formatDate(date) {
   }).format(new Date(date));
 }
 
+// ---- Toast Notification ----
+let toastTimeout = null;
+export function showToast(message = 'Оновлено ✓', duration = 2000) {
+  let toast = document.getElementById('pflToast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'pflToast';
+    toast.className = 'pfl-toast';
+    document.body.appendChild(toast);
+  }
+  
+  clearTimeout(toastTimeout);
+  toast.textContent = message;
+  toast.classList.remove('pfl-toast--visible', 'pfl-toast--hiding');
+  
+  // Force reflow for animation restart
+  void toast.offsetWidth;
+  toast.classList.add('pfl-toast--visible');
+  
+  toastTimeout = setTimeout(() => {
+    toast.classList.add('pfl-toast--hiding');
+    toast.addEventListener('animationend', () => {
+      toast.classList.remove('pfl-toast--visible', 'pfl-toast--hiding');
+    }, { once: true });
+  }, duration);
+}
+
 // ---- Clipboard ----
 export async function copyToClipboard(text) {
   try {
