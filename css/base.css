@@ -37,7 +37,7 @@ body::after {
   left: 0;
   right: 0;
   bottom: 0;
-  height: var(--tabs-fade-height, 88px);
+  height: var(--tabs-fade-height, 140px);
   pointer-events: none;
   z-index: 99; /* below .tabs (100) */
   background: linear-gradient(
@@ -50,7 +50,7 @@ body::after {
 }
 
 
-/* ---- App Container ---- */
+/* ---- App Container (exactly like index_old.html) ---- */
 #app-wrap {
   position: fixed;
   inset: 0;
@@ -177,4 +177,65 @@ img {
   font-size: 16px;
   line-height: 1.5;
   color: var(--muted);
+}
+
+/* ============================================
+   Toast Notification
+   ============================================ */
+.pfl-toast {
+  position: fixed;
+  bottom: 100px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  padding: 10px 20px;
+  border-radius: var(--radius-full);
+  background: rgba(15, 23, 42, 0.88);
+  color: #fff;
+  font-family: var(--font-ui);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  z-index: 200;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
+}
+
+:root[data-theme="dark"] .pfl-toast {
+  background: rgba(255, 255, 255, 0.92);
+  color: #0F130E;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.30);
+}
+
+.pfl-toast--visible {
+  animation: toastIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.pfl-toast--hiding {
+  animation: toastOut 0.25s ease-in forwards;
+}
+
+@keyframes toastIn {
+  from { opacity: 0; transform: translateX(-50%) translateY(20px) scale(0.92); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+}
+
+@keyframes toastOut {
+  from { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+  to   { opacity: 0; transform: translateX(-50%) translateY(-10px) scale(0.95); }
+}
+
+/* ============================================
+   Content Fade-In (after skeleton)
+   ============================================ */
+.content-fade-in {
+  animation: contentFadeIn 0.35s ease-out both;
+}
+
+@keyframes contentFadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
