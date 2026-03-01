@@ -309,10 +309,10 @@ body.partners-details-open::after {
 /* ---- Back FAB ---- */
 .fab-back {
   position: fixed;
-  bottom: 100px;
+  bottom: 20px;
   left: 20px;
-  width: 48px;
-  height: 48px;
+  width: 56px;
+  height: 56px;
   display: none;
   align-items: center;
   justify-content: center;
