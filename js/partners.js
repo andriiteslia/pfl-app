@@ -69,6 +69,50 @@ const PARTNER_DATA = {
   },
 };
 
+// ---- Edge Swipe Back Gesture ----
+const EDGE_ZONE = 28;         // px from left edge to start tracking
+const SWIPE_THRESHOLD = 80;   // px to trigger back
+const SWIPE_MAX_Y = 60;       // max vertical drift before cancelling
+
+let swipeStartX = 0;
+let swipeStartY = 0;
+let isSwiping = false;
+
+function initEdgeSwipe() {
+  const scroller = document.getElementById('app-wrap');
+  if (!scroller) return;
+
+  scroller.addEventListener('touchstart', (e) => {
+    if (currentView !== 'details') return;
+    const touch = e.touches[0];
+    if (touch.clientX <= EDGE_ZONE) {
+      swipeStartX = touch.clientX;
+      swipeStartY = touch.clientY;
+      isSwiping = true;
+    }
+  }, { passive: true });
+
+  scroller.addEventListener('touchmove', (e) => {
+    if (!isSwiping) return;
+    const touch = e.touches[0];
+    const dy = Math.abs(touch.clientY - swipeStartY);
+    if (dy > SWIPE_MAX_Y) {
+      isSwiping = false;
+    }
+  }, { passive: true });
+
+  scroller.addEventListener('touchend', (e) => {
+    if (!isSwiping) return;
+    isSwiping = false;
+    const touch = e.changedTouches[0];
+    const dx = touch.clientX - swipeStartX;
+    if (dx >= SWIPE_THRESHOLD) {
+      haptic('light');
+      closePartnerDetails();
+    }
+  }, { passive: true });
+}
+
 // ---- Initialize ----
 export function initPartners() {
   const tiles = $$('.partner-tile');
@@ -95,6 +139,9 @@ export function initPartners() {
 
   // Telegram BackButton
   bindTelegramBackButton();
+
+  // Edge swipe gesture
+  initEdgeSwipe();
 
   console.log('[Partners] Initialized');
 }
