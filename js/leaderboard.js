@@ -12,7 +12,7 @@ import {
 // ---- State ----
 let isLoaded = false;
 let lbConfig = {};
-let pdfViewerOpen = false;
+let pdfOpen = false;
 
 // ---- DOM References ----
 const getElements = () => ({
@@ -21,16 +21,11 @@ const getElements = () => ({
   subtitle: $('#subtitle-leaderboard'),
   reloadBtn: $('#reloadLeaderboard'),
   statusBadge: $('#lbStatusBadge'),
-  pdfLink: $('#pflPdfLink'),
-  pdfViewer: $('#pdfViewer'),
-  pdfFrame: $('#pdfViewerFrame'),
-  pdfCta: $('.leaderboard-pdf-cta'),
-  fabBack: $('#fabBack'),
 });
 
 // ---- Initialize ----
 export function initLeaderboard() {
-  const { reloadBtn, pdfLink, fabBack } = getElements();
+  const { reloadBtn } = getElements();
   
   if (reloadBtn) {
     reloadBtn.addEventListener('click', () => {
@@ -39,69 +34,56 @@ export function initLeaderboard() {
     });
   }
   
-  // PDF viewer
+  // PDF link → open in iframe with FAB back
+  const pdfLink = $('#pflPdfLink');
   if (pdfLink) {
     pdfLink.addEventListener('click', (e) => {
       e.preventDefault();
-      openPdfViewer(pdfLink.href);
+      openPdf(pdfLink.href);
     });
   }
   
-  if (fabBack) {
-    fabBack.addEventListener('click', () => {
-      if (pdfViewerOpen) {
-        closePdfViewer();
-      }
+  // FAB back closes PDF
+  const fab = $('#fabBack');
+  if (fab) {
+    fab.addEventListener('click', () => {
+      if (!pdfOpen) return;
+      closePdf();
     });
   }
   
   console.log('[Leaderboard] Initialized');
 }
 
-// ---- PDF Viewer ----
-function openPdfViewer(url) {
-  const { card, pdfCta, pdfViewer, pdfFrame, fabBack } = getElements();
-  
-  if (!pdfViewer || !pdfFrame) return;
-  
-  // Hide leaderboard content
-  if (card) card.style.display = 'none';
-  if (pdfCta) pdfCta.style.display = 'none';
-  
-  // Show PDF
-  pdfFrame.src = url;
-  pdfViewer.style.display = 'block';
-  pdfViewerOpen = true;
-  
-  // Hide tabs, show FAB
+// ---- PDF ----
+function openPdf(url) {
+  const viewer = $('#pdfViewer');
+  const frame = $('#pdfViewerFrame');
+  const fab = $('#fabBack');
+  if (!viewer || !frame) return;
+
+  frame.src = url;
+  viewer.style.display = 'block';
   document.body.classList.add('pdf-viewer-open');
-  if (fabBack) fabBack.classList.add('visible');
-  
-  // Scroll to top
+  if (fab) fab.classList.add('visible');
+  pdfOpen = true;
+
   const scroller = document.getElementById('app-wrap');
   if (scroller) scroller.scrollTop = 0;
-  
   haptic('light');
 }
 
-function closePdfViewer() {
-  const { card, pdfCta, pdfViewer, pdfFrame, fabBack } = getElements();
-  
-  if (!pdfViewer) return;
-  
-  // Hide PDF
-  pdfViewer.style.display = 'none';
-  pdfFrame.src = '';
-  pdfViewerOpen = false;
-  
-  // Show leaderboard content
-  if (card) card.style.display = '';
-  if (pdfCta) pdfCta.style.display = '';
-  
-  // Show tabs, hide FAB
+function closePdf() {
+  const viewer = $('#pdfViewer');
+  const frame = $('#pdfViewerFrame');
+  const fab = $('#fabBack');
+  if (!viewer) return;
+
+  viewer.style.display = 'none';
+  frame.src = '';
   document.body.classList.remove('pdf-viewer-open');
-  if (fabBack) fabBack.classList.remove('visible');
-  
+  if (fab) fab.classList.remove('visible');
+  pdfOpen = false;
   haptic('light');
 }
 
