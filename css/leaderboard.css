@@ -421,7 +421,7 @@
   line-height: 1;
   pointer-events: none;
   z-index: 2;
-  opacity: .6;
+  opacity: 1;
   animation: crabWalk 24s linear infinite;
 }
 
