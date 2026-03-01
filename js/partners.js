@@ -174,9 +174,10 @@ function openPartnerDetails(tile) {
     } catch (e) {}
   }
 
-  // Switch views
+  // Switch views with animation
   els.listView.style.display = 'none';
   els.detailsView.style.display = 'block';
+  els.detailsView.classList.add('slide-in');
   currentView = 'details';
 
   // Show FAB back
@@ -201,6 +202,7 @@ export function closePartnerDetails() {
   if (!els.listView || !els.detailsView) return;
 
   els.detailsView.style.display = 'none';
+  els.detailsView.classList.remove('slide-in');
   els.listView.style.display = 'block';
   currentView = 'list';
 
