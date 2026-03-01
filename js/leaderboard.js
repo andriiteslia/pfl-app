@@ -12,7 +12,6 @@ import {
 // ---- State ----
 let isLoaded = false;
 let lbConfig = {};
-let pdfOpen = false;
 
 // ---- DOM References ----
 const getElements = () => ({
@@ -34,57 +33,7 @@ export function initLeaderboard() {
     });
   }
   
-  // PDF link → open in iframe with FAB back
-  const pdfLink = $('#pflPdfLink');
-  if (pdfLink) {
-    pdfLink.addEventListener('click', (e) => {
-      e.preventDefault();
-      openPdf(pdfLink.href);
-    });
-  }
-  
-  // FAB back closes PDF
-  const fab = $('#fabBack');
-  if (fab) {
-    fab.addEventListener('click', () => {
-      if (!pdfOpen) return;
-      closePdf();
-    });
-  }
-  
   console.log('[Leaderboard] Initialized');
-}
-
-// ---- PDF ----
-function openPdf(url) {
-  const viewer = $('#pdfViewer');
-  const frame = $('#pdfViewerFrame');
-  const fab = $('#fabBack');
-  if (!viewer || !frame) return;
-
-  frame.src = url;
-  viewer.style.display = 'block';
-  document.body.classList.add('pdf-viewer-open');
-  if (fab) fab.classList.add('visible');
-  pdfOpen = true;
-
-  const scroller = document.getElementById('app-wrap');
-  if (scroller) scroller.scrollTop = 0;
-  haptic('light');
-}
-
-function closePdf() {
-  const viewer = $('#pdfViewer');
-  const frame = $('#pdfViewerFrame');
-  const fab = $('#fabBack');
-  if (!viewer) return;
-
-  viewer.style.display = 'none';
-  frame.src = '';
-  document.body.classList.remove('pdf-viewer-open');
-  if (fab) fab.classList.remove('visible');
-  pdfOpen = false;
-  haptic('light');
 }
 
 // ---- Load Data ----
