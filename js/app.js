@@ -250,7 +250,13 @@ function initExternalLinks() {
 
     e.preventDefault();
     e.stopPropagation();
-    tg.openLink(href);
+    
+    // Telegram links open natively inside Telegram
+    if (href.includes('t.me/') || href.includes('telegram.me/')) {
+      tg.openTelegramLink(href);
+    } else {
+      tg.openLink(href);
+    }
   });
 
   console.log('[App] External links handler initialized');
