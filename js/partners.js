@@ -132,6 +132,7 @@ export function initPartners() {
   // FAB back button
   if (fabBack) {
     fabBack.addEventListener('click', () => {
+      if (currentView !== 'details') return;
       haptic('light');
       closePartnerDetails();
     });
