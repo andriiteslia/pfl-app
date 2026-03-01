@@ -415,23 +415,24 @@
    ============================================ */
 .aqua-crab {
   position: absolute;
-  bottom: 2px;
+  bottom: 1px;
   left: -32px;
-  font-size: 14px;
+  font-size: 12px;
   line-height: 1;
   pointer-events: none;
   z-index: 2;
   opacity: 1;
-  animation: crabWalk 30s linear infinite;
+  animation: crabWalk 16s linear infinite;
 }
 
 @keyframes crabWalk {
-  0%   { left: -80px; transform: scaleX(1); }
-  10%  { left: -80px; transform: scaleX(1); }              /* пауза зліва */
-  55%  { left: calc(100% + 8px); transform: scaleX(1); }
-  60%  { left: calc(100% + 8px); transform: scaleX(-1); }  /* пауза справа */
-  95%  { left: -80px; transform: scaleX(-1); }
-  100% { left: -80px; transform: scaleX(1); }
+  0%   { left: -32px; transform: scaleX(1); }
+  48%  { left: calc(100% + 8px); transform: scaleX(1); }
+  49%  { left: calc(100% + 8px); transform: scaleX(-1); }
+  97%  { left: -32px; transform: scaleX(-1); }
+  98%  { left: -32px; transform: scaleX(1); }
+  100% { left: -32px; transform: scaleX(1); }
+}
 }
 
 /* ============================================
