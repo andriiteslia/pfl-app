@@ -44,7 +44,7 @@ body::after {
     to bottom,
     rgba(var(--bg-rgb), 0) 0%,
     rgba(var(--bg-rgb), 0.55) 55%,
-    rgba(var(--bg-rgb), 0.92) 78%,
+    rgba(var(--bg-rgb), 0.92) 92%,
     var(--bg) 100%
   );
 }
