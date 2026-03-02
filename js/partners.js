@@ -249,9 +249,16 @@ export function closePartnerDetails() {
   const els = getElements();
   if (!els.listView || !els.detailsView) return;
 
-  els.detailsView.style.display = 'none';
+  // Animate out, then hide
   els.detailsView.classList.remove('slide-in');
-  els.listView.style.display = 'block';
+  els.detailsView.classList.add('slide-out');
+
+  els.detailsView.addEventListener('animationend', () => {
+    els.detailsView.style.display = 'none';
+    els.detailsView.classList.remove('slide-out');
+    els.listView.style.display = 'block';
+  }, { once: true });
+
   currentView = 'list';
 
   // Hide FAB back
