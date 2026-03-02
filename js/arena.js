@@ -5,7 +5,7 @@
 
 import CONFIG from './config.js';
 import { fetchSheetData } from './api.js';
-import { $, $$, escapeHtml, setButtonLoading, haptic, parseDividers, showToast } from './utils.js';
+import { $, $$, escapeHtml, setButtonLoading, haptic, parseDividers } from './utils.js';
 
 // ---- State ----
 let tags = [];
@@ -14,6 +14,7 @@ let cardsByTag = new Map();
 let activeTagId = null;
 const cardState = new Map();
 let loaded = false;
+let isLoading = false;
 
 // ---- Helpers ----
 function normBool(v) {
@@ -178,6 +179,8 @@ export async function loadArena({ force = false } = {}) {
   const reloadBtn = $('#reloadArena');
 
   if (loaded && !force) return;
+  if (isLoading) return;
+  isLoading = true;
 
   // Reset active tag on force reload
   if (force) {
@@ -229,13 +232,13 @@ export async function loadArena({ force = false } = {}) {
     renderTags();
     renderCards();
     setArenaState('content');
-    if (force) showToast('Оновлено ✓');
     loaded = true;
 
   } catch (e) {
     console.error('[Arena] Load error:', e);
     setArenaState('error');
   } finally {
+    isLoading = false;
     setButtonLoading(reloadBtn, false);
   }
 }
@@ -249,7 +252,15 @@ function renderTags() {
     `<button class="fests-year-tag${t.id === activeTagId ? ' active' : ''}" type="button" data-tag="${escapeHtml(t.id)}">${escapeHtml(t.title)}</button>`
   ).join('');
 
-  tagsEl.querySelectorAll('button[data-tag]').forEach(btn => {
+  // Safety: ensure at least one tag is visually active
+  const buttons = tagsEl.querySelectorAll('button[data-tag]');
+  const hasActive = tagsEl.querySelector('.fests-year-tag.active');
+  if (!hasActive && buttons.length) {
+    buttons[0].classList.add('active');
+    activeTagId = buttons[0].dataset.tag;
+  }
+
+  buttons.forEach(btn => {
     btn.addEventListener('click', () => {
       const id = btn.dataset.tag;
       if (!id || id === activeTagId) return;
