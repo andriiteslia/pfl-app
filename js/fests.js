@@ -226,13 +226,27 @@ function switchYear(year) {
   if (panel2025) panel2025.style.display = year === '2025' ? 'block' : 'none';
 
   const subtitle = $('#subtitle-fests');
-  if (subtitle) {
-    subtitle.textContent = year === '2026' ? 'Фести 2026 року' : 'Результати сезону 2025';
-  }
+const reloadBtn = $('#reload');
 
-  if (year === '2026') {
-    mountFests2026();
-  }
+if (year === '2026') {
+  // Show loading state while fetching 2026 config
+  if (subtitle) subtitle.textContent = 'Оновлюю дані…';
+  setButtonLoading(reloadBtn, true);
+
+  mountFests2026().then(() => {
+    if (activeYear === '2026' && subtitle) {
+      subtitle.textContent = 'Фести 2026 року';
+    }
+  }).catch(() => {
+    if (activeYear === '2026' && subtitle) {
+      subtitle.textContent = 'Помилка завантаження';
+    }
+  }).finally(() => {
+    setButtonLoading(reloadBtn, false);
+  });
+} else {
+  if (subtitle) subtitle.textContent = 'Результати сезону 2025';
+}
 }
 
 // ---- Reload Fests ----
