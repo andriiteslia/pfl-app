@@ -11,7 +11,7 @@
   transform: translateX(-50%);
   bottom: 28px;
 
-  width: min(560px, calc(100% - 40px)); /* max 560px, але з відступами 20px з боків */
+  width: min(480px, calc(100% - 40px)); /* max 480px, але з відступами 20px з боків */
   display: flex;
   align-items: center;
   gap: 8px;
