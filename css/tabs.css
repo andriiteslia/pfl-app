@@ -6,12 +6,16 @@
 /* ---- Bottom Tab Bar Container ---- */
 .tabs-bar {
   position: fixed;
-  left: 20px;
-  right: 20px;
+
+  left: 50%;
+  transform: translateX(-50%);
   bottom: 28px;
+
+  width: min(560px, calc(100% - 40px)); /* max 560px, але з відступами 20px з боків */
   display: flex;
   align-items: center;
   gap: 8px;
+
   z-index: 100;
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
