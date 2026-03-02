@@ -381,7 +381,7 @@ tr:last-child td {
   background: rgba(217, 242, 255, 0.85);
   color: var(--text);
   border-color: rgba(35, 139, 218, 0.28);
-  box-shadow: 0 4px 12px rgba(18, 122, 201, 0.12);
+  box-shadow: 0 2px 8px rgba(0, 99, 178, 0.06);
 }
 
 /* Dark theme year tags */
@@ -402,7 +402,7 @@ tr:last-child td {
   background: rgba(78, 163, 255, 0.22);
   color: var(--text);
   border-color: rgba(78, 163, 255, 0.28);
-  box-shadow: 0 4px 12px rgba(78, 163, 255, 0.15);
+  box-shadow:  0 2px 8px rgba(0, 0, 0, 0.12);
 }
 
 /* ---- Header Layout ---- */
