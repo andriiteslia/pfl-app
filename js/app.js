@@ -48,6 +48,14 @@ function toggleTheme() {
   
   updateThemeToggleIcon();
   
+  // Update Telegram header color
+  try {
+    const tg = window.Telegram?.WebApp;
+    if (tg && typeof tg.setHeaderColor === 'function') {
+      tg.setHeaderColor(newTheme === 'dark' ? '#1a2128' : '#1a2128');
+    }
+  } catch (e) {}
+  
   // Haptic feedback
   try {
     window.Telegram?.WebApp?.HapticFeedback?.impactOccurred('light');
@@ -132,7 +140,7 @@ function initTelegram() {
     const tg = window.Telegram?.WebApp;
     if (!tg) return;
     
-    const FULLSCREEN_PAD = 108;
+    const FULLSCREEN_PAD = 120;
     const FULLSIZE_PAD = 20;
     
     function setPad(px) {
@@ -187,6 +195,14 @@ function initTelegram() {
     try {
       if (typeof tg.disableVerticalSwipes === 'function') {
         tg.disableVerticalSwipes();
+      }
+    } catch(e) {}
+    
+    // Set header/status bar color
+    try {
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      if (typeof tg.setHeaderColor === 'function') {
+        tg.setHeaderColor(isDark ? '#1a2128' : '#1a2128');
       }
     } catch(e) {}
     
