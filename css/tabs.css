@@ -3,18 +3,25 @@
    Bottom navigation bar, tab content
    ============================================ */
 
-/* ---- Bottom Tab Bar ---- */
-.tabs {
+/* ---- Bottom Tab Bar Container ---- */
+.tabs-bar {
   position: fixed;
   left: 20px;
   right: 20px;
-  bottom: 24px;
+  bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  z-index: 100;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* ---- Shared Glass Pill ---- */
+.tabs {
   height: 64px;
   display: flex;
   align-items: center;
-  gap: 0;
   padding: 4px;
-  padding-bottom: calc(4px + env(safe-area-inset-bottom, 0px));
   border-radius: var(--radius-full);
   background: rgba(255, 255, 255, 0.75);
   backdrop-filter: blur(20px) saturate(1.8);
@@ -24,7 +31,22 @@
     inset 0 1px 0 rgba(255, 255, 255, 0.90);
   border: 1px solid rgba(255, 255, 255, 0.60);
   overflow: hidden;
-  z-index: 100;
+}
+
+/* Main pill — takes remaining space */
+.tabs-main {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Solo pill — fits content */
+.tabs-solo {
+  flex-shrink: 0;
+}
+
+.tabs-solo .tab-btn {
+  flex: none;
+  padding: 0 14px;
 }
 
 /* Dark theme tabs */
@@ -89,16 +111,6 @@
     0 2px 8px rgba(18, 122, 201, 0.12);
 }
 
-.tab-btn.active .tab-icon {
-  animation: tabIconPop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
-}
-
-@keyframes tabIconPop {
-  0%   { transform: scale(0.7); }
-  50%  { transform: scale(1.2); }
-  100% { transform: scale(1); }
-}
-
 .tab-btn.active::before {
   content: "";
   position: absolute;
@@ -159,8 +171,4 @@
     opacity: 1;
     transform: translateX(0);
   }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .tab-btn.active .tab-icon { animation: none; }
 }
