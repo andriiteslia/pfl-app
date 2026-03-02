@@ -317,6 +317,74 @@ function renderLeaderboard(values) {
   
   // Re-render status badge (it's inside the podium)
   renderStatusBadge();
+  
+  // Connect Easter eggs (crown tap, long-press 2nd place)
+  initEasterEggs();
+}
+
+// ---- Easter Eggs ----
+function initEasterEggs() {
+  // 🎉 Crown tap — crown shakes
+  const crown = $('#tab-leaderboard .top3-crown');
+  if (crown) {
+    crown.addEventListener('click', () => {
+      if (crown.classList.contains('crab-mode')) return;
+      haptic('light');
+      crown.classList.add('crab-mode');
+      crown.addEventListener('animationend', () => {
+        crown.classList.remove('crab-mode');
+      }, { once: true });
+    });
+  }
+
+  // 🦀 Long-press on 2nd place — avatar shakes + crab popup
+  const place2 = $('#tab-leaderboard .top3-person.place2');
+  if (place2) {
+    let pressTimer = null;
+    const LONG_PRESS_MS = 600;
+
+    const triggerCrab = () => {
+      haptic('medium');
+
+      // Shake avatar
+      place2.classList.add('shaking');
+      place2.addEventListener('animationend', () => {
+        place2.classList.remove('shaking');
+      }, { once: true });
+
+      // Show crab popup
+      let crab = place2.querySelector('.crab-popup');
+      if (!crab) {
+        crab = document.createElement('span');
+        crab.className = 'crab-popup';
+        crab.textContent = '🦀';
+        place2.appendChild(crab);
+      }
+
+      // Reset & play pop-in
+      crab.style.animation = 'none';
+      void crab.offsetWidth;
+      crab.style.animation = 'crabPopIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards';
+
+      // Pop-out after delay
+      setTimeout(() => {
+        crab.style.animation = 'crabPopOut 0.3s ease-in forwards';
+      }, 1800);
+    };
+
+    const cancelPress = () => {
+      clearTimeout(pressTimer);
+      pressTimer = null;
+    };
+
+    place2.addEventListener('touchstart', (e) => {
+      pressTimer = setTimeout(triggerCrab, LONG_PRESS_MS);
+    }, { passive: true });
+
+    place2.addEventListener('touchend', cancelPress, { passive: true });
+    place2.addEventListener('touchmove', cancelPress, { passive: true });
+    place2.addEventListener('touchcancel', cancelPress, { passive: true });
+  }
 }
 
 // ---- Build Top 3 Podium ----
