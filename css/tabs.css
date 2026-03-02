@@ -44,6 +44,8 @@
   flex-shrink: 0;
   width: 64px;
   height: 64px;
+  padding: 0;
+  justify-content: center;
 }
 
 .tabs-solo .tab-btn {
