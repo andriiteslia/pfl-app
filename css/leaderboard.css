@@ -421,17 +421,21 @@
   line-height: 1;
   pointer-events: none;
   z-index: 2;
-  opacity: .75;
-  animation: crabWalk 24s linear infinite;
+  opacity: 0;
+  animation: crabWalk 60s linear infinite;
 }
 
+/* 60s total: run right (0-5s), wait (5-30s), run left (30-35s), wait (35-60s) */
 @keyframes crabWalk {
-  0%   { left: -32px;            transform: scaleX(1); }
-  48%  { left: calc(100% + 8px); transform: scaleX(1); }
-  49%  { left: calc(100% + 8px); transform: scaleX(-1); }
-  97%  { left: -32px;            transform: scaleX(-1); }
-  98%  { left: -32px;            transform: scaleX(1); }
-  100% { left: -32px;            transform: scaleX(1); }
+  0%    { left: -32px;            transform: scaleX(1);  opacity: 0; }
+  1%    { left: -32px;            transform: scaleX(1);  opacity: 1; }
+  8%    { left: calc(100% + 8px); transform: scaleX(1);  opacity: 1; }
+  8.5%  { left: calc(100% + 8px); transform: scaleX(1);  opacity: 0; }
+  49.5% { left: calc(100% + 8px); transform: scaleX(-1); opacity: 0; }
+  50%   { left: calc(100% + 8px); transform: scaleX(-1); opacity: 1; }
+  57%   { left: -32px;            transform: scaleX(-1); opacity: 1; }
+  57.5% { left: -32px;            transform: scaleX(-1); opacity: 0; }
+  100%  { left: -32px;            transform: scaleX(1);  opacity: 0; }
 }
 
 /* ============================================
