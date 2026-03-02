@@ -14,6 +14,16 @@ import { $ } from './utils.js';
 import { initPullToRefresh } from './pull-to-refresh.js';
 
 // ---- Theme Management ----
+function updateMetaThemeColor(color) {
+  let meta = document.querySelector('meta[name="theme-color"]');
+  if (!meta) {
+    meta = document.createElement('meta');
+    meta.name = 'theme-color';
+    document.head.appendChild(meta);
+  }
+  meta.content = color;
+}
+
 function initTheme() {
   try {
     // Check for theme override in localStorage
@@ -21,6 +31,7 @@ function initTheme() {
     if (override === 'dark' || override === 'light') {
       document.documentElement.setAttribute('data-theme', override === 'dark' ? 'dark' : '');
       updateThemeToggleIcon();
+      updateMetaThemeColor(override === 'dark' ? '#1A2026' : '#f0f2f8');
       return;
     }
     
@@ -34,6 +45,10 @@ function initTheme() {
   } catch (e) {
     console.warn('[Theme] Error:', e);
   }
+  
+  // Set initial meta theme-color
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  updateMetaThemeColor(isDark ? '#1A2026' : '#f0f2f8');
 }
 
 function toggleTheme() {
@@ -51,9 +66,11 @@ function toggleTheme() {
   // Update Telegram header color
   try {
     const tg = window.Telegram?.WebApp;
+    const headerColor = newTheme === 'dark' ? '#1A2026' : '#f0f2f8';
     if (tg && typeof tg.setHeaderColor === 'function') {
-      tg.setHeaderColor(newTheme === 'dark' ? '#1a2128' : '#1a2128');
+      tg.setHeaderColor(headerColor);
     }
+    updateMetaThemeColor(headerColor);
   } catch (e) {}
   
   // Haptic feedback
@@ -201,9 +218,12 @@ function initTelegram() {
     // Set header/status bar color
     try {
       const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      const headerColor = isDark ? '#1A2026' : '#f0f2f8';
       if (typeof tg.setHeaderColor === 'function') {
-        tg.setHeaderColor(isDark ? '#1a2128' : '#1a2128');
+        tg.setHeaderColor(headerColor);
       }
+      // Update meta theme-color for system status bar
+      updateMetaThemeColor(headerColor);
     } catch(e) {}
     
     // Apply padding immediately
