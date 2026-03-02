@@ -11,6 +11,7 @@ import {
 
 // ---- State ----
 let isLoaded = false;
+let isLoading = false;
 let lbConfig = {};
 
 // ---- DOM References ----
@@ -83,6 +84,8 @@ export async function loadLeaderboard({ force = false } = {}) {
   const { container, card, subtitle, reloadBtn } = getElements();
   
   if (!container) return;
+  if (isLoading) return;
+  isLoading = true;
   
   // Show loading state
   setButtonLoading(reloadBtn, true);
@@ -139,6 +142,7 @@ export async function loadLeaderboard({ force = false } = {}) {
     container.innerHTML = '<div class="loading-text">Не вдалося завантажити дані.</div>';
     
   } finally {
+    isLoading = false;
     setButtonLoading(reloadBtn, false);
   }
 }
