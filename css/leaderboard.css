@@ -57,7 +57,7 @@
 
 /* ---- PDF CTA Link ---- */
 #tab-leaderboard .leaderboard-pdf-cta {
-  margin-top: 32px;
+  margin-top: 20px;
   margin-bottom: 32px;
   text-align: center;
 }
@@ -688,7 +688,7 @@
 }
 
 #tab-leaderboard .top3-stand .num {
-  font-size: 40px;
+  font-size: 48px;
   font-weight: 900;
   line-height: 1;
   letter-spacing: -.02em;
@@ -698,8 +698,8 @@
   color: transparent;
 }
 
-#tab-leaderboard .top3-stand.s2 .num,
-#tab-leaderboard .top3-stand.s3 .num { font-size: 36px; }
+#tab-leaderboard .top3-stand.s2 .num { font-size: 40px; }
+#tab-leaderboard .top3-stand.s3 .num { font-size: 34px; }
 
 #tab-leaderboard .top3-stand::after {
   content: "";
