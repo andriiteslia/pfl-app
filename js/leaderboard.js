@@ -318,6 +318,14 @@ function renderLeaderboard(values) {
   // Re-render status badge (it's inside the podium)
   renderStatusBadge();
   
+  // Trigger podium entrance animation
+  const podium = container.querySelector('.top3-podium');
+  if (podium) {
+    podium.classList.add('podium-entrance');
+    // Remove class after animations complete so Easter eggs work cleanly
+    setTimeout(() => podium.classList.remove('podium-entrance'), 1200);
+  }
+  
   // Connect Easter eggs (crown tap, long-press 2nd place)
   initEasterEggs();
 }
