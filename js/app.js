@@ -157,7 +157,7 @@ function initTelegram() {
     const tg = window.Telegram?.WebApp;
     if (!tg) return;
     
-    const FULLSCREEN_PAD = 120;
+    const FULLSCREEN_PAD = 108;
     const FULLSIZE_PAD = 20;
     
     function setPad(px) {
