@@ -390,7 +390,7 @@
 }
 
 /* ---- Hide Tab Bar when details open ---- */
-body.partners-details-open .tabs,
+body.partners-details-open .tabs-bar,
 body.partners-details-open::after {
   display: none !important;
 }
@@ -398,7 +398,7 @@ body.partners-details-open::after {
 /* ---- Back FAB ---- */
 .fab-back {
   position: fixed;
-  bottom: 28px;
+  bottom: 24px;
   left: 24px;
   width: 56px;
   height: 56px;
