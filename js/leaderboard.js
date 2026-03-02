@@ -324,7 +324,7 @@ function renderLeaderboard(values) {
 
 // ---- Easter Eggs ----
 function initEasterEggs() {
-  // 🎉 Crown tap — crown shakes
+  // 🎉 Crown tap — shakes then turns into crab, then back
   const crown = $('#tab-leaderboard .top3-crown');
   if (crown) {
     crown.addEventListener('click', () => {
@@ -332,7 +332,14 @@ function initEasterEggs() {
       haptic('light');
       crown.classList.add('crab-mode');
       crown.addEventListener('animationend', () => {
-        crown.classList.remove('crab-mode');
+        // Swap to crab
+        crown.textContent = '🦀';
+        
+        // Swap back after delay
+        setTimeout(() => {
+          crown.textContent = '👑';
+          crown.classList.remove('crab-mode');
+        }, 2000);
       }, { once: true });
     });
   }
