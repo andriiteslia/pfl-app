@@ -50,6 +50,18 @@ export function switchTab(tabKey) {
   // Update UI
   updateTabUI(tabKey);
   
+  // Bounce the active tab icon
+  const activeBtn = $(`.tab-btn[data-tab="${tabKey}"]`);
+  const icon = activeBtn?.querySelector('.tab-icon');
+  if (icon) {
+    icon.classList.remove('bounce');
+    void icon.offsetWidth;
+    icon.classList.add('bounce');
+    icon.addEventListener('animationend', () => {
+      icon.classList.remove('bounce');
+    }, { once: true });
+  }
+  
   // Call registered callback
   const callback = tabCallbacks.get(tabKey);
   if (callback) {
