@@ -239,7 +239,7 @@ if (year === '2026') {
     }
   }).catch(() => {
     if (activeYear === '2026' && subtitle) {
-      subtitle.textContent = 'Помилка завантаження';
+      subtitle.textContent = 'Помилка завантаження, натисніть оновити ще раз';
     }
   }).finally(() => {
     setButtonLoading(reloadBtn, false);
@@ -283,7 +283,7 @@ async function reloadFests() {
     }
   } catch (e) {
     console.error('[Fests] Reload error:', e);
-    if (subtitle) subtitle.textContent = 'Помилка завантаження';
+    if (subtitle) subtitle.textContent = 'Помилка завантаження, натисніть оновити ще раз';
   } finally {
     setButtonLoading(reloadBtn, false);
   }
