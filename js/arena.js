@@ -423,7 +423,7 @@ async function loadCardData(card, viewKey, force = false) {
     renderTableInto(data.values, outEl, { dividers: view.dividers });
     st.loaded[viewKey] = true;
   } catch (e) {
-    outEl.innerHTML = '<div class="loading-text">Помилка завантаження.</div>';
+    outEl.innerHTML = '<div class="loading-text">Помилка завантаження, натисніть оновити ще раз</div>';
   }
 }
 
