@@ -137,7 +137,7 @@ export async function loadLeaderboard({ force = false } = {}) {
     console.error('[Leaderboard] Load error:', error);
     
     if (subtitle) {
-      subtitle.textContent = 'Помилка завантаження';
+      subtitle.textContent = 'Помилка завантаження, натисніть оновити ще раз';
     }
     container.innerHTML = '<div class="loading-text">Не вдалося завантажити дані.</div>';
     
