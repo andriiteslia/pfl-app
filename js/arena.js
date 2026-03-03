@@ -72,7 +72,7 @@ function setArenaState(state) {
     if (subtitle) subtitle.textContent = 'Оновлюю рейтинг і результати…';
     if (emptyText) emptyText.innerHTML = LOADING_HTML;
   } else if (state === 'error') {
-    if (subtitle) subtitle.textContent = 'Помилка завантаження.';
+    if (subtitle) subtitle.textContent = 'Помилка завантаження, натисніть оновити ще раз';
     if (emptyText) emptyText.innerHTML = EMPTY_HTML;
   } else {
     if (subtitle) subtitle.textContent = DEFAULT_SUB;
