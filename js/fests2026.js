@@ -155,6 +155,7 @@ async function loadConfig2026({ force = false } = {}) {
       registerBtnLabel: normStr(o.registerBtnLabel),
       registerBtnLink: normStr(o.registerBtnLink),
       cover: normStr(o.cover),
+      defaultState: normStr(o.defaultState).toLowerCase() === 'open' ? 'open' : 'closed',
       order: normNum(o.order, 999),
     }))
     .filter(o => o.id && o.sheetName);
@@ -177,16 +178,18 @@ function renderCard(fest) {
   };
   const tagClass = tagClassMap[fest.tagClass] || fest.tagClass || 'score-tag score-tag--personal';
 
+  const isOpen = st?.isOpen || false;
+
   // Segmented control
   const segHtml = views.length > 1
-    ? `<div class="segmented-control" id="seg2026_${fest.id}" style="display:none;">
+    ? `<div class="segmented-control" id="seg2026_${fest.id}" style="display:${isOpen ? 'flex' : 'none'};">
         ${views.map(v => `<button class="segment${v.key === activeKey ? ' active' : ''}" type="button" data-view="${v.key}">${escapeHtml(v.label)}</button>`).join('')}
        </div>`
     : '';
 
   // Output containers
   const outsHtml = views.map(v =>
-    `<div id="out2026_${v.key}_${fest.id}" class="table-content table-collapsed">
+    `<div id="out2026_${v.key}_${fest.id}" class="table-content${isOpen && v.key === activeKey ? '' : ' table-collapsed'}">
       <div class="loading-text">Завантажую дані…</div>
     </div>`
   ).join('');
@@ -216,7 +219,7 @@ function renderCard(fest) {
         </div>
         <div class="table-header__actions">
           <button class="share-btn" type="button" data-share="fests__${fest.id}" aria-label="Share">${SHARE_ICON_SVG}</button>
-          <div class="chevron" id="chevron2026_${fest.id}">
+          <div class="chevron${isOpen ? ' open' : ''}" id="chevron2026_${fest.id}">
             <svg class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
               <path d="M6 9l6 6 6-6"/>
             </svg>
@@ -419,7 +422,7 @@ export async function mountFests2026({ force = false } = {}) {
         const defView = pickDefaultView(f, views);
         const loaded = {};
         views.forEach(v => { loaded[v.key] = false; });
-        festState.set(f.id, { isOpen: false, view: defView, loaded, views });
+        festState.set(f.id, { isOpen: f.defaultState === 'open', view: defView, loaded, views });
       }
     });
 
@@ -428,6 +431,14 @@ export async function mountFests2026({ force = false } = {}) {
 
     // Init interactions
     fests2026.forEach(initCard);
+
+    // Auto-load data for cards starting open
+    fests2026.forEach(f => {
+      const st = festState.get(f.id);
+      if (st?.isOpen && !st.loaded[st.view]) {
+        loadCardData(f, st.view);
+      }
+    });
 
     mounted = true;
     hideLoader();
