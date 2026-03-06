@@ -528,10 +528,10 @@ tbody tr.row-highlight td {
   left: 50%;
   transform: translateX(-50%);
   white-space: nowrap;
-  font-size: 12px;
+  font-size: 13px;
   color: var(--muted);
-  line-height: 1;
-  margin-top: 4px;
+  line-height: 16px;
+  margin-top: 6px;
 }
 
 /* ---- Theme Toggle ---- */
