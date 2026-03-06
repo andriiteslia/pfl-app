@@ -190,13 +190,21 @@ export function markUpdated(btnId) {
   const now = Date.now();
   updatedTimestamps.set(btnId, now);
 
+  // Wrap button if not already wrapped
+  let wrap = btn.closest('.btn-updated-wrap');
+  if (!wrap) {
+    wrap = document.createElement('div');
+    wrap.className = 'btn-updated-wrap';
+    btn.parentNode.insertBefore(wrap, btn);
+    wrap.appendChild(btn);
+  }
+
   // Find or create timestamp label
-  const parent = btn.parentElement;
-  let label = parent?.querySelector('.last-updated');
+  let label = wrap.querySelector('.last-updated');
   if (!label) {
     label = document.createElement('span');
     label.className = 'last-updated';
-    parent?.appendChild(label);
+    wrap.appendChild(label);
   }
   label.textContent = timeAgo(now);
 }
@@ -205,7 +213,7 @@ export function markUpdated(btnId) {
 function refreshTimestamps() {
   updatedTimestamps.forEach((ts, btnId) => {
     const btn = document.getElementById(btnId);
-    const label = btn?.parentElement?.querySelector('.last-updated');
+    const label = btn?.closest('.btn-updated-wrap')?.querySelector('.last-updated');
     if (label) label.textContent = timeAgo(ts);
   });
 }
