@@ -5,7 +5,7 @@
 
 import CONFIG from './config.js';
 import { fetchSheetData } from './api.js';
-import { $, $$, escapeHtml, haptic, parseDividers, shareCard, buildShareLink, SHARE_ICON_SVG, showToast, markUpdated } from './utils.js';
+import { $, $$, escapeHtml, haptic, parseDividers, shareCard, buildShareLink, SHARE_ICON_SVG, showToast, markUpdated, yieldToMain } from './utils.js';
 
 // ---- Config ----
 const CONFIG_2026 = {
@@ -429,8 +429,12 @@ export async function mountFests2026({ force = false } = {}) {
     // Render cards
     containerEl.innerHTML = fests2026.map(renderCard).join('');
 
+    await yieldToMain();
+
     // Init interactions
     fests2026.forEach(initCard);
+
+    await yieldToMain();
 
     // Auto-load data for cards starting open
     fests2026.forEach(f => {

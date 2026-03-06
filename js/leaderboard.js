@@ -6,7 +6,7 @@
 import { fetchLeaderboard, fetchLeaderboardConfig } from './api.js';
 import { 
   $, escapeHtml, setButtonLoading, formatNameTwoLines, 
-  formatPointsLabel, haptic, showToast, shareCard, buildShareLink, SHARE_ICON_SVG, markUpdated
+  formatPointsLabel, haptic, showToast, shareCard, buildShareLink, SHARE_ICON_SVG, markUpdated, yieldToMain
 } from './utils.js';
 
 // ---- State ----
@@ -118,7 +118,7 @@ export async function loadLeaderboard({ force = false } = {}) {
       throw new Error('Invalid data');
     }
     
-    renderLeaderboard(leaderboardData.values);
+    await renderLeaderboard(leaderboardData.values);
     
     if (subtitle) {
       subtitle.textContent = 'Рейтинг учасників Predator Fest League. Головний приз - 23 Shimano Vanquish 2500S!';
@@ -277,7 +277,7 @@ function guessNameIdx(headersLower, colStats, pointsIdx) {
 }
 
 // ---- Render Leaderboard ----
-function renderLeaderboard(values) {
+async function renderLeaderboard(values) {
   const { container } = getElements();
   if (!container) return;
   
@@ -307,18 +307,21 @@ function renderLeaderboard(values) {
     nameIdx = pointsIdx === 0 ? 1 : 0;
   }
   
-  // Build Top 3 podium
+  // Build HTML (CPU work)
   const top3Html = buildTop3Podium(rows, nameIdx, pointsIdx);
-  
-  // Build table
   const tableHtml = buildTable(header, rows);
+
+  await yieldToMain();
   
+  // DOM write
   container.innerHTML = `
     ${top3Html}
     <div class="table-wrap" role="region" aria-label="2026 Leaderboard table">
       ${tableHtml}
     </div>
   `;
+
+  await yieldToMain();
   
   // Re-render status badge (it's inside the podium)
   renderStatusBadge();
@@ -327,7 +330,6 @@ function renderLeaderboard(values) {
   const podium = container.querySelector('.top3-podium');
   if (podium) {
     podium.classList.add('podium-entrance');
-    // Remove class after animations complete so Easter eggs work cleanly
     setTimeout(() => podium.classList.remove('podium-entrance'), 1200);
   }
   

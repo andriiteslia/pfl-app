@@ -159,6 +159,11 @@ export function throttle(fn, limit) {
   };
 }
 
+// ---- Yield to Main Thread ----
+export function yieldToMain() {
+  return new Promise(r => setTimeout(r, 0));
+}
+
 // ---- Date/Time ----
 export function formatDate(date) {
   return new Intl.DateTimeFormat('uk-UA', {

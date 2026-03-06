@@ -5,7 +5,7 @@
 
 import CONFIG from './config.js';
 import { fetchSheetData } from './api.js';
-import { $, $$, escapeHtml, setButtonLoading, haptic, parseDividers, shareCard, buildShareLink, SHARE_ICON_SVG, showToast, markUpdated } from './utils.js';
+import { $, $$, escapeHtml, setButtonLoading, haptic, parseDividers, shareCard, buildShareLink, SHARE_ICON_SVG, showToast, markUpdated, yieldToMain } from './utils.js';
 
 // ---- State ----
 let tags = [];
@@ -238,7 +238,7 @@ export async function loadArena({ force = false } = {}) {
       return;
     }
 
-    renderArenaContent();
+    await renderArenaContent();
 
   } catch (e) {
     console.error('[Arena] Load error:', e);
@@ -494,9 +494,11 @@ function renderTableInto(values, targetEl, options = {}) {
 }
 
 // ---- Render Content (called immediately or deferred) ----
-function renderArenaContent() {
+async function renderArenaContent() {
   renderTags();
+  await yieldToMain();
   renderCards();
+  await yieldToMain();
   setArenaState('content');
   loaded = true;
   dataReady = false;
@@ -505,9 +507,9 @@ function renderArenaContent() {
 }
 
 // ---- Render deferred content when tab becomes active ----
-export function renderArenaIfReady() {
+export async function renderArenaIfReady() {
   if (!dataReady || loaded) return;
-  renderArenaContent();
+  await renderArenaContent();
   console.log('[Arena] Deferred render complete');
 }
 

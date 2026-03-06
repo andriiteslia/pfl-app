@@ -4,7 +4,7 @@
    ============================================ */
 
 import { fetchSheetData } from './api.js';
-import { $, $$, escapeHtml, setButtonLoading, haptic, parseDividers, shareCard, buildShareLink, SHARE_ICON_SVG, showToast, markUpdated } from './utils.js';
+import { $, $$, escapeHtml, setButtonLoading, haptic, parseDividers, shareCard, buildShareLink, SHARE_ICON_SVG, showToast, markUpdated, yieldToMain } from './utils.js';
 
 // ---- State ----
 let tags = [];
@@ -352,7 +352,7 @@ export async function loadDidyliv({ force = false } = {}) {
       return;
     }
 
-    renderContent(aboutKv);
+    await renderContent(aboutKv);
 
   } catch (e) {
     console.error('[Didyliv] Load error:', e);
@@ -608,9 +608,11 @@ function renderTableInto(values, targetEl, options = {}) {
 }
 
 // ---- Render Content (called immediately or deferred) ----
-function renderContent(aboutKv) {
+async function renderContent(aboutKv) {
   renderTags();
+  await yieldToMain();
   renderCards();
+  await yieldToMain();
   applyAbout(aboutKv);
   setDidylivState('content');
   loaded = true;
@@ -621,9 +623,9 @@ function renderContent(aboutKv) {
 }
 
 // ---- Render deferred content when tab becomes active ----
-export function renderDidylivIfReady() {
+export async function renderDidylivIfReady() {
   if (!dataReady || loaded) return;
-  renderContent(pendingAbout);
+  await renderContent(pendingAbout);
   console.log('[Didyliv] Deferred render complete');
 }
 
