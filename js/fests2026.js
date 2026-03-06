@@ -5,7 +5,7 @@
 
 import CONFIG from './config.js';
 import { fetchSheetData } from './api.js';
-import { $, $$, escapeHtml, haptic, parseDividers, shareCard, buildShareLink, SHARE_ICON_SVG } from './utils.js';
+import { $, $$, escapeHtml, haptic, parseDividers, shareCard, buildShareLink, SHARE_ICON_SVG, showToast } from './utils.js';
 
 // ---- Config ----
 const CONFIG_2026 = {
@@ -416,6 +416,7 @@ export async function mountFests2026({ force = false } = {}) {
 
     mounted = true;
     hideLoader();
+    showToast('Оновлено ✓');
 
   } catch (e) {
     console.error('[Fests2026] Mount error:', e);
