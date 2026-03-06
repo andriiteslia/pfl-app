@@ -154,6 +154,7 @@ async function loadConfig2026({ force = false } = {}) {
       registerBtn: normBool(o.registerBtn) && !!normStr(o.registerBtnLink),
       registerBtnLabel: normStr(o.registerBtnLabel),
       registerBtnLink: normStr(o.registerBtnLink),
+      cover: normStr(o.cover),
       order: normNum(o.order, 999),
     }))
     .filter(o => o.id && o.sheetName);
@@ -197,8 +198,13 @@ function renderCard(fest) {
     ? `<a class="btn register-btn" href="${escapeHtml(regLink)}" target="_blank" rel="noopener">${escapeHtml(fest.registerBtnLabel || 'Зареєструватись')}</a>`
     : '';
 
+  const coverHtml = fest.cover
+    ? `<img class="card-cover" src="./assets/imgs/${escapeHtml(fest.cover)}" alt="" loading="lazy">`
+    : '';
+
   return `
     <article class="card" data-fest-id="${fest.id}">
+      ${coverHtml}
       <div class="table-header" id="header2026_${fest.id}">
         <div class="table-header__text">
           <div class="card-title" style="font-weight:800;">${escapeHtml(fest.title)}</div>
