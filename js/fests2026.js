@@ -348,20 +348,26 @@ function renderTableInto(values, targetEl, options = {}) {
     Array.isArray(r) && r.some(c => String(c ?? '').trim() !== '')
   );
 
-  const colCount = header.length;
+  // Filter empty columns (no header and no data)
+  const colHasData = header.map((h, i) =>
+    String(h ?? '').trim() !== '' || rows.some(r => String(r?.[i] ?? '').trim() !== '')
+  );
+  const activeCols = colHasData.reduce((acc, has, i) => { if (has) acc.push(i); return acc; }, []);
+
+  const colCount = activeCols.length;
   const dividerCols = parseDividers(options.dividers, colCount);
   const borderStyle = '1px solid #E6EAF4';
 
   const cellStyle = (colIdx) =>
     dividerCols.has(colIdx + 1) ? ` style="border-right:${borderStyle};"` : '';
 
-  const thead = '<tr>' + header.map((h, i) =>
-    `<th${cellStyle(i)}>${escapeHtml(h)}</th>`
+  const thead = '<tr>' + activeCols.map((ci, idx) =>
+    `<th${cellStyle(idx)}>${escapeHtml(header[ci])}</th>`
   ).join('') + '</tr>';
 
   const tbody = rows.map(r =>
-    '<tr>' + (Array.isArray(r) ? r : []).map((c, i) =>
-      `<td${cellStyle(i)}>${escapeHtml(c)}</td>`
+    '<tr>' + activeCols.map((ci, idx) =>
+      `<td${cellStyle(idx)}>${escapeHtml(Array.isArray(r) ? r[ci] : '')}</td>`
     ).join('') + '</tr>'
   ).join('');
 
