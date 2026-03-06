@@ -199,7 +199,8 @@ function renderCard(fest) {
     : '';
 
   const coverHtml = fest.cover
-    ? `<div class="card-cover" style="--cover-url: url('./assets/imgs/${escapeHtml(fest.cover)}')">
+    ? `<div class="card-cover">
+        <img class="card-cover__blur" src="./assets/imgs/${escapeHtml(fest.cover)}" alt="" loading="lazy">
         <img class="card-cover__img" src="./assets/imgs/${escapeHtml(fest.cover)}" alt="" loading="lazy">
        </div>`
     : '';
