@@ -119,9 +119,8 @@
 /* ---- Card Cover Image ---- */
 .card-cover {
   position: relative;
-  width: calc(100% + var(--spacing-md) * 2);
-  height: 100px;
   margin: calc(var(--spacing-sm) * -1) calc(var(--spacing-md) * -1) var(--spacing-sm);
+  height: 100px;
   overflow: hidden;
   background: var(--brand-bg);
 }
@@ -137,13 +136,9 @@
 @media (min-width: 600px) {
   .card-cover {
     height: 160px;
-    background-image: var(--cover-url);
-    background-size: cover;
-    background-position: center;
-    filter: none;
   }
 
-  /* Blurred background layer */
+  /* Blurred background layer — same image stretched & blurred */
   .card-cover::before {
     content: "";
     position: absolute;
@@ -155,6 +150,7 @@
     z-index: 0;
   }
 
+  /* Original image centered, natural aspect ratio */
   .card-cover__img {
     position: relative;
     z-index: 1;
