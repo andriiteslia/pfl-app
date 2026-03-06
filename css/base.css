@@ -37,16 +37,42 @@ body::after {
   left: 0;
   right: 0;
   bottom: 0;
-  height: var(--tabs-fade-height, 96px);
+  height: 80px;
   pointer-events: none;
   z-index: 99; /* below .tabs (100) */
   background: linear-gradient(
     to bottom,
     rgba(var(--bg-rgb), 0) 0%,
-    rgba(var(--bg-rgb), 0.72) 50%,
-    rgba(var(--bg-rgb), 0.92) 80%,
+    rgba(var(--bg-rgb), 0.55) 55%,
+    rgba(var(--bg-rgb), 0.92) 78%,
     var(--bg) 100%
   );
+}
+
+/* ---- Top Fade (fullscreen mobile only — native TG header area) ---- */
+body::before {
+  content: "";
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 40px;
+  pointer-events: none;
+  z-index: 99;
+  opacity: 0;
+  background: linear-gradient(
+    to top,
+    rgba(var(--bg-rgb), 0) 0%,
+    rgba(var(--bg-rgb), 0.55) 45%,
+    rgba(var(--bg-rgb), 0.92) 72%,
+    var(--bg) 100%
+  );
+  transition: opacity 0.3s ease;
+}
+
+.fullscreen-active body::before,
+body.fullscreen-active::before {
+  opacity: 1;
 }
 
 
@@ -65,6 +91,8 @@ body::after {
   /* This ensures content is always scrollable for bounce to work */
   min-height: calc(100% + 1px);
   padding: var(--app-top-pad, 20px) 18px 96px;
+  max-width: var(--app-max-width);
+  margin: 0 auto;
 }
 
 /* ---- Global Scrollbar Hiding (except tables) ---- */

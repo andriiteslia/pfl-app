@@ -319,62 +319,56 @@
 /* ---- Right-bound variants (flip:1) ---- */
 @keyframes fishSwimA {
   0%   { opacity: 0;   translate: 0 0; }
-  8%   { opacity: .75; }
-  20%  { translate: 22vw  -8px; }
-  40%  { translate: 46vw   5px; opacity: .70; }
-  60%  { translate: 68vw  -3px; }
-  80%  { translate: 92vw   6px; opacity: .55; }
+  6%   { opacity: .70; }
+  30%  { translate: 35vw  -6px; }
+  60%  { translate: 68vw  -10px; opacity: .60; }
+  85%  { translate: 98vw  -4px; opacity: .35; }
   100% { translate: 115vw  0;   opacity: 0; }
 }
 
 @keyframes fishSwimB {
   0%   { opacity: 0;   translate: 0 0; }
-  6%   { opacity: .80; }
-  18%  { translate: 18vw   6px; }
-  35%  { translate: 40vw  -10px; opacity: .72; }
-  55%  { translate: 62vw   8px; }
-  78%  { translate: 88vw  -5px; opacity: .50; }
+  8%   { opacity: .72; }
+  35%  { translate: 38vw  8px; }
+  65%  { translate: 72vw  5px; opacity: .55; }
+  88%  { translate: 100vw 10px; opacity: .30; }
   100% { translate: 115vw  0;   opacity: 0; }
 }
 
 @keyframes fishSwimC {
   0%   { opacity: 0;   translate: 0 0; }
-  10%  { opacity: .70; }
+  5%   { opacity: .65; }
   25%  { translate: 28vw  -4px; }
-  45%  { translate: 52vw   10px; opacity: .65; }
-  65%  { translate: 74vw  -7px; }
-  85%  { translate: 96vw   3px; opacity: .48; }
+  50%  { translate: 55vw  3px; opacity: .58; }
+  80%  { translate: 90vw  -2px; opacity: .35; }
   100% { translate: 115vw  0;   opacity: 0; }
 }
 
 /* ---- Left-bound variants (flip:0) ---- */
 @keyframes fishSwimLeftA {
   0%   { opacity: 0;   translate: 0 0; }
-  8%   { opacity: .75; }
-  20%  { translate: -22vw  -8px; }
-  40%  { translate: -46vw   5px; opacity: .70; }
-  60%  { translate: -68vw  -3px; }
-  80%  { translate: -92vw   6px; opacity: .55; }
+  6%   { opacity: .70; }
+  30%  { translate: -35vw  6px; }
+  60%  { translate: -68vw  10px; opacity: .60; }
+  85%  { translate: -98vw  4px; opacity: .35; }
   100% { translate: -115vw  0;   opacity: 0; }
 }
 
 @keyframes fishSwimLeftB {
   0%   { opacity: 0;   translate: 0 0; }
-  6%   { opacity: .80; }
-  18%  { translate: -18vw   6px; }
-  35%  { translate: -40vw  -10px; opacity: .72; }
-  55%  { translate: -62vw   8px; }
-  78%  { translate: -88vw  -5px; opacity: .50; }
+  8%   { opacity: .72; }
+  35%  { translate: -38vw  -8px; }
+  65%  { translate: -72vw  -5px; opacity: .55; }
+  88%  { translate: -100vw -10px; opacity: .30; }
   100% { translate: -115vw  0;   opacity: 0; }
 }
 
 @keyframes fishSwimLeftC {
   0%   { opacity: 0;   translate: 0 0; }
-  10%  { opacity: .70; }
-  25%  { translate: -28vw  -4px; }
-  45%  { translate: -52vw   10px; opacity: .65; }
-  65%  { translate: -74vw  -7px; }
-  85%  { translate: -96vw   3px; opacity: .48; }
+  5%   { opacity: .65; }
+  25%  { translate: -28vw  4px; }
+  50%  { translate: -55vw  -3px; opacity: .58; }
+  80%  { translate: -90vw  2px; opacity: .35; }
   100% { translate: -115vw  0;   opacity: 0; }
 }
 
@@ -393,10 +387,11 @@
 }
 
 @keyframes bubbleRise {
-  0%   { opacity: 0;   transform: translateY(0)     scale(1);    }
-  15%  { opacity: .80; }
-  70%  { opacity: .55; transform: translateY(-160px) scale(1.15); }
-  100% { opacity: 0;   transform: translateY(-220px) scale(1.3);  }
+  0%   { opacity: 0;   transform: translateY(0) translateX(0) scale(1); }
+  15%  { opacity: .75; transform: translateY(-40px) translateX(6px) scale(1.05); }
+  40%  { opacity: .60; transform: translateY(-90px) translateX(-4px) scale(1.1); }
+  70%  { opacity: .40; transform: translateY(-155px) translateX(8px) scale(1.18); }
+  100% { opacity: 0;   transform: translateY(-220px) translateX(-2px) scale(1.3); }
 }
 
 /* Make sure podium content sits above the aqua layer */
@@ -738,6 +733,39 @@
   z-index: 2;
 }
 
+.lb-share-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: var(--card);
+  color: #20283A;
+  box-shadow: 0 1px 4px rgba(0,0,0,.14);
+  cursor: pointer;
+  z-index: 2;
+  transition: transform var(--transition-fast);
+}
+
+:root[data-theme="dark"] .lb-share-btn {
+  color: #fff;
+}
+
+.lb-share-btn:active {
+  transform: scale(0.88);
+}
+
+.lb-share-btn svg {
+  width: 20px;
+  height: 20px;
+}
+
 /* ============================================
    Podium Entrance Animations
    ============================================ */
@@ -806,8 +834,9 @@
   to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-/* -- Status badge -- */
-.podium-entrance .lb-status-badge {
+/* -- Status badge & share btn -- */
+.podium-entrance .lb-status-badge,
+.podium-entrance .lb-share-btn {
   animation: nameEntrance 0.3s ease-out both;
   animation-delay: 0.5s;
 }
@@ -818,7 +847,8 @@
   .podium-entrance .top3-name,
   .podium-entrance .top3-points,
   .podium-entrance .top3-crown,
-  .podium-entrance .lb-status-badge {
+  .podium-entrance .lb-status-badge,
+  .podium-entrance .lb-share-btn {
     animation: none !important;
   }
 }

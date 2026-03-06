@@ -398,8 +398,8 @@ body.partners-details-open::after {
 /* ---- Back FAB ---- */
 .fab-back {
   position: fixed;
-  bottom: 32px;
-  left: 24px;
+  bottom: 28px;
+  left: max(28px, calc((100vw - var(--app-max-width)) / 2 + 28px));
   width: 56px;
   height: 56px;
   display: none;
