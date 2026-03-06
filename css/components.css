@@ -122,7 +122,7 @@
   width: calc(100% + var(--spacing-md) * 2);
   margin: calc(var(--spacing-sm) * -1) calc(var(--spacing-md) * -1) var(--spacing-sm);
   object-fit: cover;
-  max-height: 200px;
+  max-height: 100px;
 }
 
 /* ---- Table ---- */
