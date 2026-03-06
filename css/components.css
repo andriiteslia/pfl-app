@@ -127,11 +127,14 @@
 /* Blurred background — same image stretched & blurred */
 .card-cover__blur {
   position: absolute;
-  inset: -20px;
-  width: calc(100% + 40px);
-  height: calc(100% + 40px);
+  top: -30px;
+  left: -30px;
+  right: -30px;
+  bottom: -30px;
+  width: calc(100% + 60px);
+  height: calc(100% + 60px);
   object-fit: cover;
-  filter: blur(20px) saturate(1.4);
+  filter: blur(24px) saturate(1.4);
   z-index: 0;
 }
 
