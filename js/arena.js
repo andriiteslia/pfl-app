@@ -5,7 +5,7 @@
 
 import CONFIG from './config.js';
 import { fetchSheetData } from './api.js';
-import { $, $$, escapeHtml, setButtonLoading, haptic, parseDividers, shareCard, buildShareLink, SHARE_ICON_SVG, showToast } from './utils.js';
+import { $, $$, escapeHtml, setButtonLoading, haptic, parseDividers, shareCard, buildShareLink, SHARE_ICON_SVG, showToast, markUpdated } from './utils.js';
 
 // ---- State ----
 let tags = [];
@@ -501,6 +501,7 @@ function renderArenaContent() {
   loaded = true;
   dataReady = false;
   showToast('Оновлено ✓');
+  markUpdated('reloadArena');
 }
 
 // ---- Render deferred content when tab becomes active ----

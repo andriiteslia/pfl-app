@@ -4,7 +4,7 @@
    ============================================ */
 
 import { fetchSheetData } from './api.js';
-import { $, $$, escapeHtml, setButtonLoading, haptic, parseDividers, shareCard, buildShareLink, SHARE_ICON_SVG, showToast } from './utils.js';
+import { $, $$, escapeHtml, setButtonLoading, haptic, parseDividers, shareCard, buildShareLink, SHARE_ICON_SVG, showToast, markUpdated } from './utils.js';
 
 // ---- State ----
 let tags = [];
@@ -336,6 +336,7 @@ export async function loadDidyliv({ force = false } = {}) {
     if (!tags.length) {
       setDidylivState('empty');
       loaded = true;
+      markUpdated('reloadDidyliv');
       return;
     }
 
@@ -616,6 +617,7 @@ function renderContent(aboutKv) {
   dataReady = false;
   pendingAbout = null;
   showToast('Оновлено ✓');
+  markUpdated('reloadDidyliv');
 }
 
 // ---- Render deferred content when tab becomes active ----

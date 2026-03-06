@@ -168,6 +168,51 @@ export function formatDate(date) {
   }).format(new Date(date));
 }
 
+// ---- Last Updated Timestamp ----
+const updatedTimestamps = new Map();
+
+function timeAgo(ts) {
+  const diff = Math.floor((Date.now() - ts) / 1000);
+  if (diff < 30) return 'щойно';
+  if (diff < 60) return `${diff} с тому`;
+  const mins = Math.floor(diff / 60);
+  if (mins < 60) return `${mins} хв тому`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours} год тому`;
+  const days = Math.floor(hours / 24);
+  return `${days} д тому`;
+}
+
+export function markUpdated(btnId) {
+  const btn = document.getElementById(btnId);
+  if (!btn) return;
+
+  const now = Date.now();
+  updatedTimestamps.set(btnId, now);
+
+  // Find or create timestamp label
+  const parent = btn.parentElement;
+  let label = parent?.querySelector('.last-updated');
+  if (!label) {
+    label = document.createElement('span');
+    label.className = 'last-updated';
+    parent?.appendChild(label);
+  }
+  label.textContent = timeAgo(now);
+}
+
+// Auto-refresh all visible timestamps
+function refreshTimestamps() {
+  updatedTimestamps.forEach((ts, btnId) => {
+    const btn = document.getElementById(btnId);
+    const label = btn?.parentElement?.querySelector('.last-updated');
+    if (label) label.textContent = timeAgo(ts);
+  });
+}
+
+// Start interval (every 30s)
+setInterval(refreshTimestamps, 30000);
+
 // ---- Toast Notification ----
 let toastTimeout = null;
 export function showToast(message = 'Оновлено ✓', duration = 2000) {

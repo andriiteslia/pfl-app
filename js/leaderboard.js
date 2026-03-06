@@ -6,7 +6,7 @@
 import { fetchLeaderboard, fetchLeaderboardConfig } from './api.js';
 import { 
   $, escapeHtml, setButtonLoading, formatNameTwoLines, 
-  formatPointsLabel, haptic, showToast, shareCard, buildShareLink, SHARE_ICON_SVG
+  formatPointsLabel, haptic, showToast, shareCard, buildShareLink, SHARE_ICON_SVG, markUpdated
 } from './utils.js';
 
 // ---- State ----
@@ -129,6 +129,7 @@ export async function loadLeaderboard({ force = false } = {}) {
     
     if (card) card.classList.add('is-loaded');
     isLoaded = true;
+    markUpdated('reloadLeaderboard');
     
     // Toast on force reload
     if (force) showToast('Оновлено ✓');
