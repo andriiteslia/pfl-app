@@ -198,6 +198,16 @@ img {
   height: 160px;
   object-fit: contain;
   margin-bottom: var(--spacing-md);
+  animation: emptyFloat 3s ease-in-out infinite;
+}
+
+@keyframes emptyFloat {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-10px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .empty-state img { animation: none; }
 }
 
 .empty-state__text {
