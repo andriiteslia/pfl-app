@@ -4,10 +4,11 @@
    ============================================ */
 
 import CONFIG from './config.js';
-import { initTabs, onTabActivate, getActiveTab } from './tabs.js';
+import { initTabs, onTabActivate, getActiveTab, navigateTo } from './tabs.js';
 import { initFests, loadFestsData, isFestsLoaded } from './fests.js';
 import { initLeaderboard, loadLeaderboard, isLeaderboardLoaded } from './leaderboard.js';
-import { initArena, loadArena, isArenaLoaded } from './arena.js';
+import { initArena, loadArena, isArenaLoaded, renderArenaIfReady } from './arena.js';
+import { initDidyliv, loadDidyliv, isDidylivLoaded, renderDidylivIfReady } from './didyliv.js';
 import { initPartners } from './partners.js';
 import { fetchAppStyles } from './api.js';
 import { $ } from './utils.js';
@@ -162,6 +163,7 @@ function initTelegram() {
     
     function setPad(px) {
       document.documentElement.style.setProperty('--app-top-pad', px + 'px');
+      document.body.classList.toggle('fullscreen-active', px >= FULLSCREEN_PAD);
     }
     
     function isMobileClient() {
@@ -313,8 +315,16 @@ function setupTabCallbacks() {
   });
 
   onTabActivate('arena', () => {
+    renderArenaIfReady();
     if (!isArenaLoaded()) {
       loadArena();
+    }
+  });
+
+  onTabActivate('didyliv', () => {
+    renderDidylivIfReady();
+    if (!isDidylivLoaded()) {
+      loadDidyliv();
     }
   });
 }
@@ -338,6 +348,7 @@ async function init() {
   initFests();
   initLeaderboard();
   initArena();
+  initDidyliv();
   initPartners();
   
   // 5. Setup tab activation callbacks
@@ -349,7 +360,10 @@ async function init() {
   // 7. Bypass Telegram confirmation modal for external links
   initExternalLinks();
   
-  // 7. Load initial data for visible tab
+  // 8. Row highlight in tables
+  initRowHighlight();
+  
+  // 9. Load initial data for visible tab
   const activeTab = getActiveTab();
   if (activeTab === 'fests') {
     loadFestsData();
@@ -357,7 +371,89 @@ async function init() {
     loadLeaderboard();
   }
   
+  // 10. Deep link via Telegram start_param
+  handleDeepLink();
+  
   console.log('[PFL App] Ready!');
+}
+
+// ---- Deep Link ----
+function handleDeepLink() {
+  try {
+    // Try Telegram start_param first, then web URL params
+    const tg = window.Telegram?.WebApp;
+    let payload = tg?.initDataUnsafe?.start_param;
+    
+    if (!payload) {
+      // Web fallback: ?startapp=arena__cardId
+      const urlParams = new URLSearchParams(window.location.search);
+      payload = urlParams.get('startapp');
+    }
+    
+    if (!payload) return;
+    
+    // Format: "tabKey" or "tabKey__cardId"
+    const [tabKey, cardId] = payload.split('__');
+    
+    const validTabs = ['fests', 'leaderboard', 'partners', 'arena', 'didyliv', 'about'];
+    if (!validTabs.includes(tabKey)) {
+      console.warn('[DeepLink] Unknown tab:', tabKey);
+      return;
+    }
+    
+    console.log('[DeepLink] Navigating to:', tabKey, cardId ? `card: ${cardId}` : '');
+    
+    // Navigate to tab
+    navigateTo(tabKey);
+    
+    // If cardId provided, store it for the module to pick up after loading
+    if (cardId) {
+      window.__deepLinkCard = cardId;
+    }
+    
+    // Clean URL params without reload
+    if (window.location.search) {
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+  } catch (e) {
+    console.warn('[DeepLink] Error:', e);
+  }
+}
+
+// ---- Row Highlight ----
+function initRowHighlight() {
+  const content = document.getElementById('app-content');
+  if (!content) return;
+
+  // Tap on row → toggle highlight (one per table)
+  content.addEventListener('click', (e) => {
+    const row = e.target.closest('tbody tr');
+    if (!row) return;
+
+    const tbody = row.closest('tbody');
+    if (!tbody) return;
+
+    const wasActive = row.classList.contains('row-highlight');
+
+    // Clear other highlights in same table
+    tbody.querySelectorAll('tr.row-highlight').forEach(r => r.classList.remove('row-highlight'));
+
+    // Toggle: if it was already active, leave deselected; otherwise select
+    if (!wasActive) {
+      row.classList.add('row-highlight');
+    }
+  });
+
+  // Card header click → clear highlights inside that card
+  content.addEventListener('click', (e) => {
+    const header = e.target.closest('.table-header');
+    if (!header) return;
+
+    const card = header.closest('.card, article');
+    if (!card) return;
+
+    card.querySelectorAll('tr.row-highlight').forEach(r => r.classList.remove('row-highlight'));
+  });
 }
 
 // ---- Start ----

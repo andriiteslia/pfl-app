@@ -6,7 +6,7 @@
 import { fetchLeaderboard, fetchLeaderboardConfig } from './api.js';
 import { 
   $, escapeHtml, setButtonLoading, formatNameTwoLines, 
-  formatPointsLabel, haptic, showToast 
+  formatPointsLabel, haptic, showToast, shareCard, buildShareLink, SHARE_ICON_SVG
 } from './utils.js';
 
 // ---- State ----
@@ -137,7 +137,7 @@ export async function loadLeaderboard({ force = false } = {}) {
     console.error('[Leaderboard] Load error:', error);
     
     if (subtitle) {
-      subtitle.textContent = 'Помилка завантаження, натисніть оновити ще раз';
+      subtitle.textContent = 'Помилка завантаження';
     }
     container.innerHTML = '<div class="loading-text">Не вдалося завантажити дані.</div>';
     
@@ -332,6 +332,15 @@ function renderLeaderboard(values) {
   
   // Connect Easter eggs (crown tap, long-press 2nd place)
   initEasterEggs();
+  
+  // Share button
+  const shareBtn = container.querySelector('.lb-share-btn');
+  if (shareBtn) {
+    shareBtn.addEventListener('click', () => {
+      const deepLink = buildShareLink('leaderboard');
+      shareCard(deepLink, 'PFL Leaderboard');
+    });
+  }
 }
 
 // ---- Easter Eggs ----
@@ -429,6 +438,7 @@ function buildTop3Podium(rows, nameIdx, pointsIdx) {
     <div class="top3-podium" aria-label="Top 3 winners podium">
       <div class="top3-podium__inner">
         <div id="lbStatusBadge" class="lb-status-badge" style="display:none;"></div>
+        <button class="lb-share-btn" type="button" aria-label="Share">${SHARE_ICON_SVG}</button>
         
         ${buildAquarium()}
         
@@ -468,24 +478,27 @@ function buildAquarium() {
   // 10 fish with varied movement: speed, depth, size, direction, delay
   // Some swim in pairs (similar y + close delays)
   const fish = [
-    // Deep pair — two friends near the bottom
-    { e:'🐟', d:'14s',  y:'78%', del:'0s',   s:'.80', flip:1 },
-    { e:'🐠', d:'15s',  y:'75%', del:'0.8s', s:'.75', flip:1 },
-    // Mid-water solo cruiser
-    { e:'🐡', d:'18s',  y:'50%', del:'3s',   s:'1.0', flip:0 },
-    // Upper pair — chasing each other
-    { e:'🐟', d:'11s',  y:'22%', del:'1.5s', s:'1.15', flip:0 },
-    { e:'🐠', d:'11.5s',y:'25%', del:'2.2s', s:'1.05', flip:0 },
-    // Fast surface fish
-    { e:'🐟', d:'9s',   y:'12%', del:'5s',   s:'1.25', flip:1 },
-    // Slow deep drifter
-    { e:'🐡', d:'22s',  y:'85%', del:'4s',   s:'.70', flip:0 },
-    // Mid solo
-    { e:'🐠', d:'13s',  y:'42%', del:'7s',   s:'.95', flip:1 },
-    // Another mid trio straggler
-    { e:'🐟', d:'16s',  y:'60%', del:'10s',  s:'.88', flip:1 },
-    // Top loner — big and slow
-    { e:'🐠', d:'20s',  y:'16%', del:'6s',   s:'1.30', flip:0 },
+    // === Pair 1: deep friends, same direction, close Y ===
+    { e:'🐟', d:'16s',  y:'76%', del:'0s',    s:'.78', flip:1 },
+    { e:'🐠', d:'17s',  y:'79%', del:'0.6s',  s:'.74', flip:1 },
+
+    // === Solo: mid-water big cruiser ===
+    { e:'🐡', d:'24s',  y:'45%', del:'4s',    s:'1.0', flip:0 },
+
+    // === Pair 2: upper duo, chasing ===
+    { e:'🐟', d:'12s',  y:'22%', del:'2s',    s:'1.08', flip:0 },
+    { e:'🐠', d:'12.5s',y:'24%', del:'2.8s',  s:'1.0',  flip:0 },
+
+    // === Solo: fast surface dart ===
+    { e:'🐟', d:'9s',   y:'10%', del:'7s',    s:'1.18', flip:1 },
+
+    // === Trio: loose mid-group ===
+    { e:'🐠', d:'15s',  y:'55%', del:'5s',    s:'.90', flip:1 },
+    { e:'🐟', d:'16s',  y:'58%', del:'5.8s',  s:'.85', flip:1 },
+    { e:'🐡', d:'17s',  y:'52%', del:'6.5s',  s:'.82', flip:1 },
+
+    // === Solo: deep slow drifter ===
+    { e:'🐠', d:'28s',  y:'88%', del:'10s',   s:'.68', flip:0 },
   ];
 
   const fishHTML = fish.map(f =>

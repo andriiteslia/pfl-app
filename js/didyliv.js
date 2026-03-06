@@ -1,9 +1,8 @@
 /* ============================================
-   PFL App — Arena Module
-   Config-driven rating cards
+   PFL App — Didyliv Module
+   Config-driven venue cards for Ozero Didyliv
    ============================================ */
 
-import CONFIG from './config.js';
 import { fetchSheetData } from './api.js';
 import { $, $$, escapeHtml, setButtonLoading, haptic, parseDividers, shareCard, buildShareLink, SHARE_ICON_SVG } from './utils.js';
 
@@ -16,6 +15,7 @@ const cardState = new Map();
 let loaded = false;
 let isLoading = false;
 let dataReady = false;
+let pendingAbout = null;
 
 // ---- Helpers ----
 function normBool(v) {
@@ -29,48 +29,66 @@ function normStr(v) {
 }
 
 // ---- Initialize ----
-export function initArena() {
-  const reloadBtn = $('#reloadArena');
+export function initDidyliv() {
+  const reloadBtn = $('#reloadDidyliv');
   if (reloadBtn) {
     reloadBtn.addEventListener('click', () => {
       haptic('light');
-      loadArena({ force: true });
+      loadDidyliv({ force: true });
     });
   }
 
-  console.log('[Arena] Initialized');
+  console.log('[Didyliv] Initialized');
 }
 
 // ---- UI State ----
-function setArenaState(state) {
-  const subtitle = $('#subtitle-arena');
-  const emptyEl = $('#arenaEmptyState');
-  const emptyText = $('#arenaEmptyText');
-  const tagsEl = $('#arenaTags');
-  const cardsEl = $('#arenaCards');
-  const tab = $('#tab-arena');
+function setDidylivState(state) {
+  const subtitle = $('#subtitle-didyliv');
+  const emptyEl = $('#didylivEmptyState');
+  const emptyText = $('#didylivEmptyText');
+  const tagsEl = $('#didylivTags');
+  const cardsEl = $('#didylivCards');
+  const aboutEl = $('#didylivAbout');
+  const dividerEl = $('#didylivDivider');
+  const tab = $('#tab-didyliv');
 
-  const DEFAULT_SUB = 'Рейтинг і результати змагань різних форматів та дисциплін.';
-  const LOADING_HTML = `Зачекайте будь ласка...<br>Ех, зараз би якийсь фюжин 2.5' 🤤`;
-  const EMPTY_HTML = `Поки в розробці...<br>Ех, зараз би якийсь фюжин 2.5' 🤤`;
+  const DEFAULT_SUB = 'Актуальні результати';
+  const LOADING_HTML = `Зачекайте будь ласка,<br>оновлюю дані...`;
+  const EMPTY_HTML = `Схоже, сезон ще не розпочато,<br>повертайся пізніше...`;
 
   if (state === 'content') {
-    if (subtitle) subtitle.textContent = DEFAULT_SUB;
+    if (subtitle && !aboutLoaded) subtitle.textContent = DEFAULT_SUB;
     if (emptyEl) emptyEl.style.display = 'none';
     if (tagsEl) tagsEl.style.display = 'flex';
     if (cardsEl) cardsEl.style.display = 'block';
-    if (tab) tab.classList.remove('arena-empty');
+    if (aboutEl && aboutLoaded) aboutEl.style.display = '';
+    if (dividerEl && aboutLoaded) dividerEl.style.display = '';
+    if (tab) tab.classList.remove('didyliv-empty');
     return;
   }
 
-  // Show empty/loading state
+  if (state === 'empty') {
+    // No cards but still show about
+    if (emptyEl) emptyEl.style.display = 'flex';
+    if (tagsEl) tagsEl.style.display = 'none';
+    if (cardsEl) cardsEl.style.display = 'none';
+    if (aboutEl && aboutLoaded) aboutEl.style.display = '';
+    if (dividerEl && aboutLoaded) dividerEl.style.display = '';
+    if (tab) tab.classList.add('didyliv-empty');
+    if (emptyText) emptyText.innerHTML = EMPTY_HTML;
+    return;
+  }
+
+  // Show loading/error state — hide everything
   if (emptyEl) emptyEl.style.display = 'flex';
   if (tagsEl) tagsEl.style.display = 'none';
   if (cardsEl) cardsEl.style.display = 'none';
-  if (tab) tab.classList.add('arena-empty');
+  if (aboutEl) aboutEl.style.display = 'none';
+  if (dividerEl) dividerEl.style.display = 'none';
+  if (tab) tab.classList.add('didyliv-empty');
 
   if (state === 'loading') {
-    if (subtitle) subtitle.textContent = 'Оновлюю рейтинг і результати…';
+    if (subtitle) subtitle.textContent = 'Оновлюю дані...';
     if (emptyText) emptyText.innerHTML = LOADING_HTML;
   } else if (state === 'error') {
     if (subtitle) subtitle.textContent = 'Помилка завантаження.';
@@ -81,12 +99,93 @@ function setArenaState(state) {
   }
 }
 
+// ---- Load ABOUT ----
+let aboutLoaded = false;
+let aboutData = null;
+
+async function loadDidylivAbout({ force = false } = {}) {
+  if (aboutLoaded && !force) return aboutData;
+
+  try {
+    const data = await fetchSheetData({
+      sheetId: '1iYaFcFvCAN0R8Wr2cc6grMCVQG9ggFQ3HuEggvFM3xc',
+      sheetName: 'ABOUT_Didyliv',
+      range: 'A1:B20',
+    }, { force });
+
+    if (!data?.ok || !Array.isArray(data.values)) return null;
+
+    // Parse key-value pairs from ABOUT sheet
+    const kv = {};
+    data.values.forEach(row => {
+      if (!Array.isArray(row) || row.length < 2) return;
+      const key = String(row[0] ?? '').trim().toLowerCase();
+      const val = String(row[1] ?? '').trim();
+      if (key && val) kv[key] = val;
+    });
+
+    aboutData = kv;
+    console.log('[Didyliv] ABOUT fetched');
+    return kv;
+  } catch (e) {
+    console.warn('[Didyliv] ABOUT load error:', e);
+    return null;
+  }
+}
+
+function applyAbout(kv) {
+  if (!kv) return;
+
+  const subtitle = $('#subtitle-didyliv');
+  const aboutEl = $('#didylivAbout');
+  const btn1 = $('#didylivBtnPrimary');
+  const btn2 = $('#didylivBtnSecondary');
+
+  const description = kv['description'] || '';
+  const btn1Label = kv['btn1_label'] || '';
+  const btn1Link = kv['btn1_link'] || '';
+  const btn2Label = kv['btn2_label'] || '';
+  const btn2Link = kv['btn2_link'] || '';
+
+  // Description -> subtitle
+  if (subtitle && description) {
+    subtitle.textContent = description;
+  }
+
+  const hasLinks = btn1Label || btn2Label;
+
+  if (btn1 && btn1Label && btn1Link) {
+    btn1.textContent = btn1Label;
+    btn1.href = btn1Link;
+    btn1.style.display = '';
+  }
+
+  if (btn2 && btn2Label && btn2Link) {
+    btn2.textContent = btn2Label;
+    btn2.href = btn2Link;
+    btn2.style.display = '';
+  }
+
+  // Show dot separator only if both links present
+  const dot = $('#didylivAboutDot');
+  if (dot && btn1Label && btn1Link && btn2Label && btn2Link) {
+    dot.style.display = '';
+  }
+
+  if (aboutEl && hasLinks) aboutEl.style.display = '';
+  const dividerEl = $('#didylivDivider');
+  if (dividerEl && hasLinks) dividerEl.style.display = '';
+  aboutLoaded = true;
+
+  console.log('[Didyliv] ABOUT applied');
+}
+
 // ---- Load Config ----
-async function loadArenaConfig({ force = false } = {}) {
+async function loadDidylivConfig({ force = false } = {}) {
   const data = await fetchSheetData({
-    sheetId: CONFIG.ARENA.CONFIG_SHEET_ID,
-    sheetName: CONFIG.ARENA.CONFIG_SHEET_NAME,
-    range: CONFIG.ARENA.CONFIG_RANGE,
+    sheetId: '1iYaFcFvCAN0R8Wr2cc6grMCVQG9ggFQ3HuEggvFM3xc',
+    sheetName: 'CONFIG_Didyliv',
+    range: 'A1:Z1000',
   }, { force });
 
   if (!data?.ok || !Array.isArray(data.values) || data.values.length < 2) {
@@ -160,7 +259,7 @@ async function loadArenaConfig({ force = false } = {}) {
       tagId,
       title: normStr(get(r, 'cardTitle')) || cardId,
       subtitle: normStr(get(r, 'cardDescription')),
-      sheetId: normStr(get(r, 'sheetId')) || CONFIG.ARENA.CONFIG_SHEET_ID,
+      sheetId: normStr(get(r, 'sheetId')) || '1iYaFcFvCAN0R8Wr2cc6grMCVQG9ggFQ3HuEggvFM3xc',
       sheetName: normStr(get(r, 'sheetName')) || 'Results',
       tagClass: normStr(get(r, 'tagClass')),
       tagText: normStr(get(r, 'tagText')),
@@ -175,9 +274,9 @@ async function loadArenaConfig({ force = false } = {}) {
   return { tags: sortedTags, cards: parsedCards };
 }
 
-// ---- Load Arena ----
-export async function loadArena({ force = false } = {}) {
-  const reloadBtn = $('#reloadArena');
+// ---- Load Didyliv ----
+export async function loadDidyliv({ force = false } = {}) {
+  const reloadBtn = $('#reloadDidyliv');
 
   if (loaded && !force) return;
   if (isLoading) return;
@@ -186,15 +285,22 @@ export async function loadArena({ force = false } = {}) {
   // Reset active tag on force reload
   if (force) {
     activeTagId = null;
+    aboutLoaded = false;
+    aboutData = null;
     dataReady = false;
+    pendingAbout = null;
   }
 
   setButtonLoading(reloadBtn, true);
-  setArenaState('loading');
+  setDidylivState('loading');
 
   try {
-    const config = await loadArenaConfig({ force });
+    const [config, aboutKv] = await Promise.all([
+      loadDidylivConfig({ force }),
+      loadDidylivAbout({ force }),
+    ]);
 
+    // Store data regardless of active tab
     tags = config.tags;
     cards = config.cards;
 
@@ -221,8 +327,15 @@ export async function loadArena({ force = false } = {}) {
       }
     });
 
+    // Save about data for deferred render
+    pendingAbout = aboutKv;
+
+    // Apply about data regardless of cards
+    applyAbout(aboutKv);
+
     if (!tags.length) {
-      setArenaState('empty');
+      setDidylivState('empty');
+      loaded = true;
       return;
     }
 
@@ -231,18 +344,18 @@ export async function loadArena({ force = false } = {}) {
       activeTagId = tags[0].id;
     }
 
-    // If user navigated away, defer render
-    if (window.__activeTabKey !== 'arena') {
+    // If user navigated away, defer render until they come back
+    if (window.__activeTabKey !== 'didyliv') {
       dataReady = true;
-      console.log('[Arena] Data ready, render deferred');
+      console.log('[Didyliv] Data ready, render deferred');
       return;
     }
 
-    renderArenaContent();
+    renderContent(aboutKv);
 
   } catch (e) {
-    console.error('[Arena] Load error:', e);
-    setArenaState('error');
+    console.error('[Didyliv] Load error:', e);
+    setDidylivState('error');
   } finally {
     isLoading = false;
     setButtonLoading(reloadBtn, false);
@@ -251,7 +364,7 @@ export async function loadArena({ force = false } = {}) {
 
 // ---- Render Tags ----
 function renderTags() {
-  const tagsEl = $('#arenaTags');
+  const tagsEl = $('#didylivTags');
   if (!tagsEl) return;
 
   tagsEl.innerHTML = tags.map(t =>
@@ -279,7 +392,7 @@ function setActiveTag(tagId) {
   activeTagId = tagId;
   haptic('light');
 
-  $$('#arenaTags .fests-year-tag').forEach(btn => {
+  $$('#didylivTags .fests-year-tag').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.tag === tagId);
   });
 
@@ -288,7 +401,7 @@ function setActiveTag(tagId) {
 
 // ---- Render Cards ----
 function renderCards() {
-  const cardsEl = $('#arenaCards');
+  const cardsEl = $('#didylivCards');
   if (!cardsEl) return;
 
   const tagCards = cardsByTag.get(activeTagId) || [];
@@ -311,28 +424,28 @@ function renderCard(card) {
   const tagClass = tagClassMap[card.tagClass] || card.tagClass || '';
 
   const segHtml = views.length > 1
-    ? `<div class="segmented-control" id="segArena_${card.id}" style="display:none;">
+    ? `<div class="segmented-control" id="segDidyliv_${card.id}" style="display:none;">
         ${views.map(v => `<button class="segment${v.key === activeKey ? ' active' : ''}" type="button" data-view="${v.key}">${escapeHtml(v.label)}</button>`).join('')}
        </div>`
     : '';
 
   const outsHtml = views.map(v =>
-    `<div id="outArena_${v.key}_${card.id}" class="table-content table-collapsed">
+    `<div id="outDidyliv_${v.key}_${card.id}" class="table-content table-collapsed">
       <div class="loading-text">Завантажую дані…</div>
     </div>`
   ).join('');
 
   return `
-    <article class="card" data-arena-id="${card.id}">
-      <div class="table-header" id="headerArena_${card.id}">
+    <article class="card" data-didyliv-id="${card.id}">
+      <div class="table-header" id="headerDidyliv_${card.id}">
         <div class="table-header__text">
           <div class="card-title" style="font-weight:800;">${escapeHtml(card.title)}</div>
           ${card.subtitle ? `<div style="font-size:15px; color:var(--muted);">${escapeHtml(card.subtitle)}</div>` : ''}
           ${tagClass && card.tagText ? `<div class="${tagClass}">${escapeHtml(card.tagText)}</div>` : ''}
         </div>
         <div class="table-header__actions">
-          <button class="share-btn" type="button" data-share="arena__${card.id}" aria-label="Share">${SHARE_ICON_SVG}</button>
-          <div class="chevron" id="chevronArena_${card.id}">
+          <button class="share-btn" type="button" data-share="didyliv__${card.id}" aria-label="Share">${SHARE_ICON_SVG}</button>
+          <div class="chevron" id="chevronDidyliv_${card.id}">
             <svg class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
               <path d="M6 9l6 6 6-6"/>
             </svg>
@@ -347,9 +460,9 @@ function renderCard(card) {
 
 // ---- Init Card ----
 function initCard(card) {
-  const header = $(`#headerArena_${card.id}`);
-  const chevron = $(`#chevronArena_${card.id}`);
-  const segment = $(`#segArena_${card.id}`);
+  const header = $(`#headerDidyliv_${card.id}`);
+  const chevron = $(`#chevronDidyliv_${card.id}`);
+  const segment = $(`#segDidyliv_${card.id}`);
 
   if (!header) return;
 
@@ -403,14 +516,14 @@ function updateCardView(card) {
   const st = cardState.get(card.id);
   if (!st) return;
 
-  const chevron = $(`#chevronArena_${card.id}`);
-  const segment = $(`#segArena_${card.id}`);
+  const chevron = $(`#chevronDidyliv_${card.id}`);
+  const segment = $(`#segDidyliv_${card.id}`);
 
   chevron?.classList.toggle('open', st.isOpen);
   if (segment) segment.style.display = st.isOpen && st.views.length > 1 ? 'flex' : 'none';
 
   st.views.forEach(v => {
-    const outEl = $(`#outArena_${v.key}_${card.id}`);
+    const outEl = $(`#outDidyliv_${v.key}_${card.id}`);
     if (outEl) {
       outEl.classList.toggle('table-collapsed', !(st.isOpen && st.view === v.key));
     }
@@ -421,7 +534,7 @@ function updateCardView(card) {
 async function loadCardData(card, viewKey, force = false) {
   const st = cardState.get(card.id);
   const view = st?.views?.find(v => v.key === viewKey);
-  const outEl = $(`#outArena_${viewKey}_${card.id}`);
+  const outEl = $(`#outDidyliv_${viewKey}_${card.id}`);
 
   if (!outEl || !view) return;
 
@@ -488,22 +601,24 @@ function renderTableInto(values, targetEl, options = {}) {
 }
 
 // ---- Render Content (called immediately or deferred) ----
-function renderArenaContent() {
+function renderContent(aboutKv) {
   renderTags();
   renderCards();
-  setArenaState('content');
+  applyAbout(aboutKv);
+  setDidylivState('content');
   loaded = true;
   dataReady = false;
+  pendingAbout = null;
 }
 
 // ---- Render deferred content when tab becomes active ----
-export function renderArenaIfReady() {
+export function renderDidylivIfReady() {
   if (!dataReady || loaded) return;
-  renderArenaContent();
-  console.log('[Arena] Deferred render complete');
+  renderContent(pendingAbout);
+  console.log('[Didyliv] Deferred render complete');
 }
 
 // ---- Export ----
-export function isArenaLoaded() {
+export function isDidylivLoaded() {
   return loaded;
 }

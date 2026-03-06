@@ -3,7 +3,7 @@
    Year switching, fest cards, hardcoded 2025 data
    ============================================ */
 
-import { $, $$, escapeHtml, setButtonLoading, haptic, showToast } from './utils.js';
+import { $, $$, escapeHtml, setButtonLoading, haptic, showToast, shareCard, buildShareLink } from './utils.js';
 import { mountFests2026, resetFests2026 } from './fests2026.js';
 
 // ---- Hardcoded Data 2025 ----
@@ -173,7 +173,7 @@ const DATA_2025 = {
 };
 
 // ---- State ----
-let activeYear = '2025';
+let activeYear = '2026';
 
 const cardStates = {
   perch: { isOpen: false, view: 'results' },
@@ -226,27 +226,17 @@ function switchYear(year) {
   if (panel2025) panel2025.style.display = year === '2025' ? 'block' : 'none';
 
   const subtitle = $('#subtitle-fests');
-const reloadBtn = $('#reload');
+  if (subtitle) {
+    subtitle.textContent = year === '2026' ? 'Фести 2026 року' : 'Результати сезону 2025';
+  }
 
-if (year === '2026') {
-  // Show loading state while fetching 2026 config
-  if (subtitle) subtitle.textContent = 'Оновлюю дані…';
-  setButtonLoading(reloadBtn, true);
-
-  mountFests2026().then(() => {
-    if (activeYear === '2026' && subtitle) {
-      subtitle.textContent = 'Фести 2026 року';
-    }
-  }).catch(() => {
-    if (activeYear === '2026' && subtitle) {
-      subtitle.textContent = 'Помилка завантаження, натисніть оновити ще раз';
-    }
-  }).finally(() => {
-    setButtonLoading(reloadBtn, false);
-  });
-} else {
-  if (subtitle) subtitle.textContent = 'Результати сезону 2025';
-}
+  if (year === '2026') {
+    const reloadBtn = $('#reload');
+    setButtonLoading(reloadBtn, true);
+    mountFests2026().finally(() => {
+      setButtonLoading(reloadBtn, false);
+    });
+  }
 }
 
 // ---- Reload Fests ----
@@ -283,7 +273,7 @@ async function reloadFests() {
     }
   } catch (e) {
     console.error('[Fests] Reload error:', e);
-    if (subtitle) subtitle.textContent = 'Помилка завантаження, натисніть оновити ще раз';
+    if (subtitle) subtitle.textContent = 'Помилка завантаження';
   } finally {
     setButtonLoading(reloadBtn, false);
   }
@@ -291,7 +281,14 @@ async function reloadFests() {
 
 // ---- Load Fests Data ----
 export async function loadFestsData({ force = false } = {}) {
-  console.log('[Fests] Ready (2025 data hardcoded)');
+  if (activeYear === '2026') {
+    const reloadBtn = $('#reload');
+    setButtonLoading(reloadBtn, true);
+    mountFests2026({ force }).finally(() => {
+      setButtonLoading(reloadBtn, false);
+    });
+  }
+  console.log('[Fests] Ready');
 }
 
 // ---- Perch Card ----
@@ -310,6 +307,16 @@ function setupPerchCard() {
       renderPerchData();
     }
   });
+
+  // Share button
+  const shareBtn = header.querySelector('.share-btn');
+  if (shareBtn) {
+    shareBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const deepLink = buildShareLink(shareBtn.dataset.share);
+      shareCard(deepLink, 'PERCH MASTER');
+    });
+  }
 
   if (segment) {
     segment.querySelectorAll('.segment').forEach(btn => {
@@ -387,6 +394,16 @@ function setupPredatorCard() {
       renderPredatorData();
     }
   });
+
+  // Share button
+  const shareBtn = header.querySelector('.share-btn');
+  if (shareBtn) {
+    shareBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const deepLink = buildShareLink(shareBtn.dataset.share);
+      shareCard(deepLink, 'PREDATOR CUP 2025');
+    });
+  }
 
   if (segment) {
     segment.querySelectorAll('.segment').forEach(btn => {
@@ -468,6 +485,16 @@ function setupPredator2Card() {
       renderPredator2Data();
     }
   });
+
+  // Share button
+  const shareBtn = header.querySelector('.share-btn');
+  if (shareBtn) {
+    shareBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const deepLink = buildShareLink(shareBtn.dataset.share);
+      shareCard(deepLink, 'Predator 2025');
+    });
+  }
 }
 
 function renderPredator2Data() {

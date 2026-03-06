@@ -7,7 +7,7 @@ import { $ } from './utils.js';
 import { getActiveTab } from './tabs.js';
 
 // ---- Config ----
-const THRESHOLD = 120;
+const THRESHOLD = 160;
 const RESIST = 0.4;
 
 // ---- State ----
@@ -20,6 +20,8 @@ function getActiveReloadBtn() {
   if (tab === 'fests') return $('#reload');
   if (tab === 'leaderboard') return $('#reloadLeaderboard');
   if (tab === 'arena') return $('#reloadArena');
+  if (tab === 'hradivka') return $('#reloadHradivka');
+  if (tab === 'didyliv') return $('#reloadDidyliv');
   return null;
 }
 

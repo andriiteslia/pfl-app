@@ -5,7 +5,7 @@
 
 import CONFIG from './config.js';
 import { fetchSheetData } from './api.js';
-import { $, $$, escapeHtml, haptic, parseDividers } from './utils.js';
+import { $, $$, escapeHtml, haptic, parseDividers, shareCard, buildShareLink, SHARE_ICON_SVG } from './utils.js';
 
 // ---- Config ----
 const CONFIG_2026 = {
@@ -205,10 +205,13 @@ function renderCard(fest) {
           <div style="font-size:15px; color:var(--muted);">${escapeHtml(fest.subtitle)}</div>
           <div class="${tagClass}">${escapeHtml(fest.tagText)}</div>
         </div>
-        <div class="chevron" id="chevron2026_${fest.id}">
-          <svg class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M6 9l6 6 6-6"/>
-          </svg>
+        <div class="table-header__actions">
+          <button class="share-btn" type="button" data-share="fests__${fest.id}" aria-label="Share">${SHARE_ICON_SVG}</button>
+          <div class="chevron" id="chevron2026_${fest.id}">
+            <svg class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M6 9l6 6 6-6"/>
+            </svg>
+          </div>
         </div>
       </div>
       ${registerHtml}
@@ -238,6 +241,16 @@ function initCard(fest) {
       loadCardData(fest, st.view);
     }
   });
+
+  // Share button
+  const shareBtn = header.querySelector('.share-btn');
+  if (shareBtn) {
+    shareBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const deepLink = buildShareLink(shareBtn.dataset.share);
+      shareCard(deepLink, fest.title);
+    });
+  }
 
   // Segment buttons
   if (segment) {
@@ -307,7 +320,7 @@ async function loadCardData(fest, viewKey, force = false) {
     renderTableInto(data.values, outEl, { dividers: view.dividers });
     st.loaded[viewKey] = true;
   } catch (e) {
-    outEl.innerHTML = '<div class="loading-text">Помилка завантаження, натисніть оновити ще раз</div>';
+    outEl.innerHTML = '<div class="loading-text">Помилка завантаження.</div>';
   }
 }
 
@@ -328,7 +341,7 @@ function renderTableInto(values, targetEl, options = {}) {
 
   const colCount = header.length;
   const dividerCols = parseDividers(options.dividers, colCount);
-  const borderStyle = '1px solid var(--border)';
+  const borderStyle = '1px solid #E6EAF4';
 
   const cellStyle = (colIdx) =>
     dividerCols.has(colIdx + 1) ? ` style="border-right:${borderStyle};"` : '';
