@@ -510,12 +510,27 @@ function renderTableInto(values, targetEl) {
   }
 
   const header = values[0];
-  const rows = values.slice(1);
+  let rows = values.slice(1);
 
-  const thead = '<tr>' + header.map(h => `<th>${escapeHtml(h)}</th>`).join('') + '</tr>';
+  // Filter empty rows
+  rows = rows.filter(r =>
+    Array.isArray(r) && r.some(c => String(c ?? '').trim() !== '')
+  );
+
+  // Filter empty columns
+  const colHasData = header.map((h, i) =>
+    String(h ?? '').trim() !== '' || rows.some(r => String(r?.[i] ?? '').trim() !== '')
+  );
+  const activeCols = colHasData.reduce((acc, has, i) => { if (has) acc.push(i); return acc; }, []);
+
+  const thead = '<tr>' + activeCols.map(ci =>
+    `<th>${escapeHtml(header[ci])}</th>`
+  ).join('') + '</tr>';
 
   const tbody = rows.map(r =>
-    '<tr>' + r.map(c => `<td>${escapeHtml(c).replace(/\n/g, '<br>')}</td>`).join('') + '</tr>'
+    '<tr>' + activeCols.map(ci =>
+      `<td>${escapeHtml(r?.[ci] ?? '').replace(/\n/g, '<br>')}</td>`
+    ).join('') + '</tr>'
   ).join('');
 
   targetEl.innerHTML = `
