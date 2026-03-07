@@ -195,7 +195,7 @@ th {
 
 td {
   font-size: var(--table-font-size);
-  border-bottom: 1px solid #E6EAF4;
+  border-bottom: 1px solid var(--border);
 }
 
 :root[data-theme="dark"] td {
@@ -295,8 +295,8 @@ tbody tr.row-highlight td {
 
 .table-content .table-wrap {
   margin-top: 0;
-  border-top: 1px solid #E6EAF4;
-  border-bottom: 1px solid #E6EAF4;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
 }
 
 :root[data-theme="dark"] .table-content .table-wrap {
@@ -595,8 +595,8 @@ tbody tr.row-highlight td {
 
 .table-content .table-wrap {
   margin-top: 0;
-  border-top: 1px solid #E6EAF4;
-  border-bottom: 1px solid #E6EAF4;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
 }
 
 :root[data-theme="dark"] .table-content .table-wrap {
