@@ -11,7 +11,7 @@ import { $, $$, escapeHtml, haptic, parseDividers, shareCard, buildShareLink, SH
 const CONFIG_2026 = {
   SHEET_ID: '1BbRlP6S2OejgiCkQKdoTRqm-przP_qz1Ge17BTmnIbs',
   SHEET_NAME: 'CONFIG_2026',
-  RANGE: 'A1:AA1000',
+  RANGE: 'A1:AJ50',
 };
 
 // ---- State ----
@@ -329,7 +329,7 @@ async function loadCardData(fest, viewKey, force = false) {
       return;
     }
 
-    renderTableInto(data.values, outEl, { dividers: view.dividers });
+    await renderTableInto(data.values, outEl, { dividers: view.dividers });
     st.loaded[viewKey] = true;
   } catch (e) {
     outEl.innerHTML = '<div class="loading-text">Помилка завантаження.</div>';
@@ -337,7 +337,7 @@ async function loadCardData(fest, viewKey, force = false) {
 }
 
 // ---- Render Table ----
-function renderTableInto(values, targetEl, options = {}) {
+async function renderTableInto(values, targetEl, options = {}) {
   if (!Array.isArray(values) || values.length === 0) {
     targetEl.innerHTML = '<div class="loading-text">Немає даних</div>';
     return;
@@ -373,6 +373,8 @@ function renderTableInto(values, targetEl, options = {}) {
       `<td${cellStyle(idx)}>${escapeHtml(Array.isArray(r) ? r[ci] : '')}</td>`
     ).join('') + '</tr>'
   ).join('');
+
+  await yieldToMain();
 
   targetEl.innerHTML = `
     <div class="table-wrap" role="region" aria-label="Table">
