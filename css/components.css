@@ -584,6 +584,11 @@ tbody tr.row-highlight td {
   margin-top: var(--spacing-md);
 }
 
+.register-btn--mono {
+  background: #000000;
+  margin-top: var(--spacing-sm);
+}
+
 /* ---- Table Content ---- */
 .table-content {
   margin-top: 12px;
