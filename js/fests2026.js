@@ -11,7 +11,7 @@ import { $, $$, escapeHtml, haptic, parseDividers, shareCard, buildShareLink, SH
 const CONFIG_2026 = {
   SHEET_ID: '1BbRlP6S2OejgiCkQKdoTRqm-przP_qz1Ge17BTmnIbs',
   SHEET_NAME: 'CONFIG_2026',
-  RANGE: 'A1:AJ50',
+  RANGE: 'A1:AE30',
 };
 
 // ---- State ----
@@ -154,6 +154,9 @@ async function loadConfig2026({ force = false } = {}) {
       registerBtn: normBool(o.registerBtn) && !!normStr(o.registerBtnLink),
       registerBtnLabel: normStr(o.registerBtnLabel),
       registerBtnLink: normStr(o.registerBtnLink),
+      monoBtn: normBool(o.monoBtn) && !!normStr(o.monoBtnLink),
+      monoBtnLabel: normStr(o.monoBtnLabel),
+      monoBtnLink: normStr(o.monoBtnLink),
       cover: normStr(o.cover),
       defaultState: normStr(o.defaultState).toLowerCase() === 'open' ? 'open' : 'closed',
       order: normNum(o.order, 999),
@@ -201,6 +204,13 @@ function renderCard(fest) {
     ? `<a class="btn register-btn" href="${escapeHtml(regLink)}" target="_blank" rel="noopener">${escapeHtml(fest.registerBtnLabel || 'Зареєструватись')}</a>`
     : '';
 
+  // Mono button
+  const monoLink = fest.monoBtnLink;
+  const monoOk = fest.monoBtn && monoLink && /^(https?:\/\/|tg:\/\/)/i.test(monoLink);
+  const monoHtml = monoOk
+    ? `<a class="btn register-btn register-btn--mono" href="${escapeHtml(monoLink)}" target="_blank" rel="noopener">${escapeHtml(fest.monoBtnLabel || 'Оплатити')}</a>`
+    : '';
+
   const coverHtml = fest.cover
     ? `<div class="card-cover">
         <img class="card-cover__blur" src="./assets/imgs/${escapeHtml(fest.cover)}" alt="" loading="lazy">
@@ -227,6 +237,7 @@ function renderCard(fest) {
         </div>
       </div>
       ${registerHtml}
+      ${monoHtml}
       ${segHtml}
       ${outsHtml}
     </article>
