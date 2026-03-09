@@ -453,7 +453,7 @@ export async function mountFests2026({ force = false } = {}) {
     fests2026.forEach(f => {
       const st = festState.get(f.id);
       if (st?.isOpen && !st.loaded[st.view]) {
-        loadCardData(f, st.view);
+        loadCardData(f, st.view, force);
       }
     });
 

@@ -4,7 +4,7 @@
    ============================================ */
 
 import CONFIG from './config.js';
-import { fetchSheetData } from './api.js';
+import { fetchSheetData, clearCache } from './api.js';
 import { $, $$, escapeHtml, setButtonLoading, haptic, parseDividers, shareCard, buildShareLink, SHARE_ICON_SVG, showToast, markUpdated, yieldToMain } from './utils.js';
 
 // ---- State ----
@@ -187,6 +187,7 @@ export async function loadArena({ force = false } = {}) {
   if (force) {
     activeTagId = null;
     dataReady = false;
+    clearCache();
   }
 
   setButtonLoading(reloadBtn, true);
@@ -439,7 +440,7 @@ async function loadCardData(card, viewKey, force = false) {
       return;
     }
 
-    renderTableInto(data.values, outEl, { dividers: view.dividers });
+    await renderTableInto(data.values, outEl, { dividers: view.dividers });
     st.loaded[viewKey] = true;
   } catch (e) {
     outEl.innerHTML = '<div class="loading-text">Помилка завантаження.</div>';
@@ -447,7 +448,7 @@ async function loadCardData(card, viewKey, force = false) {
 }
 
 // ---- Render Table ----
-function renderTableInto(values, targetEl, options = {}) {
+async function renderTableInto(values, targetEl, options = {}) {
   if (!Array.isArray(values) || values.length === 0) {
     targetEl.innerHTML = '<div class="loading-text">Немає даних</div>';
     return;
@@ -482,6 +483,8 @@ function renderTableInto(values, targetEl, options = {}) {
       `<td${cellStyle(idx)}>${escapeHtml(Array.isArray(r) ? r[ci] : '')}</td>`
     ).join('') + '</tr>'
   ).join('');
+
+  await yieldToMain();
 
   targetEl.innerHTML = `
     <div class="table-wrap" role="region" aria-label="Table">

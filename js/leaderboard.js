@@ -3,7 +3,7 @@
    Top 3 podium, rankings table
    ============================================ */
 
-import { fetchLeaderboard, fetchLeaderboardConfig } from './api.js';
+import { fetchLeaderboard, fetchLeaderboardConfig, clearCache } from './api.js';
 import { 
   $, escapeHtml, setButtonLoading, formatNameTwoLines, 
   formatPointsLabel, haptic, showToast, shareCard, buildShareLink, SHARE_ICON_SVG, markUpdated, yieldToMain
@@ -86,6 +86,8 @@ export async function loadLeaderboard({ force = false } = {}) {
   if (!container) return;
   if (isLoading) return;
   isLoading = true;
+  
+  if (force) clearCache();
   
   // Show loading state
   setButtonLoading(reloadBtn, true);

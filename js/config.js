@@ -8,7 +8,7 @@ const CONFIG = {
   API_URL: 'https://script.google.com/macros/s/AKfycbyCPOHRIiJSqh-0xRVPWnJBPUuj0mtTcjUCRHa1ioT8aKuFO7TKB8Wd1cNr41RxL4gQDQ/exec',
 
   // ---- Cache Settings ----
-  CACHE_TTL_MS: 3 * 60 * 1000, // 3 minutes
+  CACHE_TTL_MS: 2 * 60 * 60 * 1000, // 2 hours
   CACHE_VERSION_KEY: '__pfl_cache_version_v2',
 
   // ---- Google Sheets: Leaderboard ----
