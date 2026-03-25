@@ -98,7 +98,7 @@ export async function loadLeaderboard({ force = false } = {}) {
     container.classList.remove('content-fade-in');
     if (card) card.classList.remove('is-loaded');
     if (subtitle) {
-      subtitle.textContent = 'Оновлюю дані Predator Fest League. Головний приз - 23 Shimano Vanquish 2500S!';
+      subtitle.textContent = 'Оновлюю дані Predator Fest League. Головний приз Shimano Vanquish CE C2500S!';
     }
   }
   
@@ -123,7 +123,7 @@ export async function loadLeaderboard({ force = false } = {}) {
     await renderLeaderboard(leaderboardData.values);
     
     if (subtitle) {
-      subtitle.textContent = 'Рейтинг учасників Predator Fest League. Головний приз - 23 Shimano Vanquish 2500S!';
+      subtitle.textContent = 'Рейтинг учасників Predator Fest League. Головний приз Shimano Vanquish CE C2500S!';
     }
     
     // Fade-in content after skeleton
