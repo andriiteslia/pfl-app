@@ -14,7 +14,7 @@ const CONFIG = {
   // ---- Google Sheets: Leaderboard ----
   LEADERBOARD: {
     SHEET_ID: '1xUnEaAtgj5rE87LBPfQJeydXj-wI_D4JzwNjwadusao',
-    RESULTS_SHEET: 'LeaderboardResults',
+    RESULTS_SHEET: 'LeaderboardResults2026',
     RESULTS_RANGE: 'A1:D100',
     CONFIG_SHEET: 'CONFIG_LB',
     CONFIG_RANGE: 'A1:B50',
