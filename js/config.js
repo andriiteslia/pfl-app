@@ -15,9 +15,9 @@ const CONFIG = {
   LEADERBOARD: {
     SHEET_ID: '1xUnEaAtgj5rE87LBPfQJeydXj-wI_D4JzwNjwadusao',
     RESULTS_SHEET: 'LeaderboardResults2026',
-    RESULTS_RANGE: 'A1:D100',
+    RESULTS_RANGE: 'A1:E100',
     CONFIG_SHEET: 'CONFIG_LB',
-    CONFIG_RANGE: 'A1:B50',
+    CONFIG_RANGE: 'A1:B10',
   },
 
   // ---- Google Sheets: Arena ----
