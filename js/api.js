@@ -72,7 +72,7 @@ function setToCache(key, value) {
 
 // ---- Fetch from Supabase ----
 async function fetchFromSupabase(cacheId, timeout = 12000) {
-  const url = `${SUPABASE_URL}/rest/v1/sheet_cache?id=eq.${cacheId}&select=values,updated_at`;
+  const url = `${SUPABASE_URL}/rest/v1/sheet_cache?id=eq.${encodeURIComponent(cacheId)}&select=values,updated_at`;
 
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeout);
