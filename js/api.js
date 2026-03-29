@@ -1,9 +1,13 @@
 /* ============================================
    PFL App — API Module
-   Fetch with caching, stale-while-revalidate
+   Supabase backend, local cache with SWR
    ============================================ */
 
 import CONFIG from './config.js';
+
+// ---- Supabase Config ----
+const SUPABASE_URL = 'https://wehepxiajsdtsaslexqm.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndlaGVweGlhanNkdHNhc2xleHFtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4MTg0NjcsImV4cCI6MjA5MDM5NDQ2N30.4n-AfS-tg_XQ3_kxVJpEhecqQ3qS7NXWttI3X_war8I';
 
 // ---- Cache Version Management ----
 let cacheVersion = 0;
@@ -28,9 +32,8 @@ function bumpCacheVersion() {
 cacheVersion = getCacheVersion();
 
 // ---- Cache Helpers ----
-// Stable key (no version) — version stored inside the cache entry
-function makeCacheKey(url) {
-  return `pfl_cache::${url}`;
+function makeCacheKey(id) {
+  return `pfl_cache::${id}`;
 }
 
 function getFromCache(key) {
@@ -67,14 +70,19 @@ function setToCache(key, value) {
   }
 }
 
-// ---- Network Fetch ----
-async function fetchFromNetwork(url, timeout = 15000) {
+// ---- Fetch from Supabase ----
+async function fetchFromSupabase(cacheId, timeout = 12000) {
+  const url = `${SUPABASE_URL}/rest/v1/sheet_cache?id=eq.${encodeURIComponent(cacheId)}&select=values,updated_at`;
+
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeout);
 
   try {
     const response = await fetch(url, {
-      cache: 'no-store',
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+      },
       signal: controller.signal,
     });
 
@@ -82,7 +90,18 @@ async function fetchFromNetwork(url, timeout = 15000) {
 
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
-    return await response.json();
+    const rows = await response.json();
+
+    if (!Array.isArray(rows) || rows.length === 0) {
+      return null;
+    }
+
+    // Transform to match expected format: { ok: true, values: [...] }
+    return {
+      ok: true,
+      values: rows[0].values,
+      updated_at: rows[0].updated_at,
+    };
   } catch (error) {
     clearTimeout(timeoutId);
     if (error.name === 'AbortError') throw new Error('Час очікування вичерпано');
@@ -91,22 +110,22 @@ async function fetchFromNetwork(url, timeout = 15000) {
 }
 
 // ---- Main Fetch: Stale-While-Revalidate ----
-export async function fetchWithCache(url, { force = false, timeout = 15000 } = {}) {
-  const cacheKey = makeCacheKey(url);
+async function fetchWithSWR(cacheId, { force = false, timeout = 12000 } = {}) {
+  const cacheKey = makeCacheKey(cacheId);
   const cached = getFromCache(cacheKey);
 
-  // 1. Non-force + fresh cache → return immediately
+  // 1. Fresh cache → return immediately
   if (!force && cached?.fresh) {
-    console.log('[API] Cache hit (fresh):', url.substring(0, 50) + '...');
+    console.log('[API] Cache hit (fresh):', cacheId.substring(0, 40) + '...');
     return cached.data;
   }
 
-  // 2. Non-force + stale cache → return stale, revalidate in background
+  // 2. Stale cache → return stale, revalidate in background
   if (!force && cached?.data) {
-    console.log('[API] Cache hit (stale), revalidating:', url.substring(0, 50) + '...');
+    console.log('[API] Cache hit (stale), revalidating:', cacheId.substring(0, 40) + '...');
 
-    fetchFromNetwork(url, timeout).then(json => {
-      if (json?.ok === true) {
+    fetchFromSupabase(cacheId, timeout).then(json => {
+      if (json?.ok) {
         setToCache(cacheKey, json);
         console.log('[API] Background revalidation done');
       }
@@ -115,12 +134,12 @@ export async function fetchWithCache(url, { force = false, timeout = 15000 } = {
     return cached.data;
   }
 
-  // 3. Force or no cache → fetch from network
+  // 3. Force or no cache → fetch from Supabase
   try {
-    console.log('[API] Fetching:', url.substring(0, 50) + '...');
-    const json = await fetchFromNetwork(url, timeout);
+    console.log('[API] Fetching from Supabase:', cacheId.substring(0, 40) + '...');
+    const json = await fetchFromSupabase(cacheId, timeout);
 
-    if (json?.ok === true) {
+    if (json?.ok) {
       setToCache(cacheKey, json);
     }
 
@@ -136,15 +155,15 @@ export async function fetchWithCache(url, { force = false, timeout = 15000 } = {
   }
 }
 
+// ---- Build cache ID from sheet params ----
+function buildCacheId(params) {
+  return `${params.sheetId}::${params.sheetName}::${params.range}`;
+}
+
 // ---- Specialized Fetch Functions ----
 export async function fetchSheetData(params, options = {}) {
-  const url = new URL(CONFIG.API_URL);
-  
-  Object.entries(params).forEach(([key, value]) => {
-    if (value) url.searchParams.set(key, value);
-  });
-
-  return fetchWithCache(url.toString(), options);
+  const cacheId = buildCacheId(params);
+  return fetchWithSWR(cacheId, options);
 }
 
 export async function fetchLeaderboard(options = {}) {
@@ -185,8 +204,9 @@ export function clearCache() {
   console.log('[Cache] Version bumped to:', cacheVersion);
 }
 
-export function hasCachedData(url) {
-  const cacheKey = makeCacheKey(url);
+export function hasCachedData(params) {
+  const cacheId = buildCacheId(params);
+  const cacheKey = makeCacheKey(cacheId);
   return getFromCache(cacheKey) !== null;
 }
 
