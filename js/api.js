@@ -74,6 +74,8 @@ function setToCache(key, value) {
 async function fetchFromSupabase(cacheId, timeout = 12000) {
   const url = `${SUPABASE_URL}/rest/v1/sheet_cache?id=eq.${encodeURIComponent(cacheId)}&select=values,updated_at`;
 
+  console.log('[API] URL:', url);
+
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeout);
 
@@ -92,7 +94,10 @@ async function fetchFromSupabase(cacheId, timeout = 12000) {
 
     const rows = await response.json();
 
+    console.log('[API] Response:', Array.isArray(rows), 'len:', rows?.length, 'hasValues:', !!rows?.[0]?.values);
+
     if (!Array.isArray(rows) || rows.length === 0) {
+      console.warn('[API] Empty response for:', cacheId);
       return null;
     }
 
