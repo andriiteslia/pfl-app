@@ -1,6 +1,6 @@
 /* ============================================
    PFL App — API Module
-   Fetch with caching, error handling
+   Fetch with caching, stale-while-revalidate
    ============================================ */
 
 import CONFIG from './config.js';
@@ -21,18 +21,16 @@ function bumpCacheVersion() {
   cacheVersion = (cacheVersion || 0) + 1;
   try {
     localStorage.setItem(CONFIG.CACHE_VERSION_KEY, String(cacheVersion));
-  } catch (e) {
-    // localStorage might be full or unavailable
-  }
+  } catch (e) {}
   return cacheVersion;
 }
 
-// Initialize cache version
 cacheVersion = getCacheVersion();
 
 // ---- Cache Helpers ----
+// Stable key (no version) — version stored inside the cache entry
 function makeCacheKey(url) {
-  return `${url}::v=${cacheVersion}`;
+  return `pfl_cache::${url}`;
 }
 
 function getFromCache(key) {
@@ -41,17 +39,17 @@ function getFromCache(key) {
     if (!raw) return null;
 
     const obj = JSON.parse(raw);
-    if (!obj || typeof obj !== 'object' || !obj.t || !obj.v) {
-      return null;
-    }
+    if (!obj || typeof obj !== 'object' || !obj.t || !obj.v) return null;
 
-    // Check if expired
-    if (Date.now() - obj.t > CONFIG.CACHE_TTL_MS) {
-      localStorage.removeItem(key);
-      return null;
-    }
+    const age = Date.now() - obj.t;
+    const sameVersion = (obj.cv || 0) === cacheVersion;
+    const withinTTL = age <= CONFIG.CACHE_TTL_MS;
 
-    return obj.v;
+    return {
+      data: obj.v,
+      fresh: sameVersion && withinTTL,
+      age,
+    };
   } catch (e) {
     return null;
   }
@@ -61,34 +59,20 @@ function setToCache(key, value) {
   try {
     localStorage.setItem(key, JSON.stringify({
       t: Date.now(),
+      cv: cacheVersion,
       v: value,
     }));
   } catch (e) {
-    // localStorage might be full
     console.warn('[Cache] Failed to save:', e.message);
   }
 }
 
-// ---- Main Fetch Function ----
-export async function fetchWithCache(url, { force = false, timeout = 15000 } = {}) {
-  const cacheKey = makeCacheKey(url);
-
-  // Try cache first (unless forced refresh)
-  if (!force) {
-    const cached = getFromCache(cacheKey);
-    if (cached) {
-      console.log('[API] Cache hit:', url.substring(0, 50) + '...');
-      return cached;
-    }
-  }
-
-  // Fetch from network with timeout
+// ---- Network Fetch ----
+async function fetchFromNetwork(url, timeout = 15000) {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeout);
 
   try {
-    console.log('[API] Fetching:', url.substring(0, 50) + '...');
-    
     const response = await fetch(url, {
       cache: 'no-store',
       signal: controller.signal,
@@ -96,23 +80,56 @@ export async function fetchWithCache(url, { force = false, timeout = 15000 } = {
 
     clearTimeout(timeoutId);
 
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}`);
-    }
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
-    const json = await response.json();
+    return await response.json();
+  } catch (error) {
+    clearTimeout(timeoutId);
+    if (error.name === 'AbortError') throw new Error('Час очікування вичерпано');
+    throw error;
+  }
+}
 
-    // Cache successful responses
-    if (json && json.ok === true) {
+// ---- Main Fetch: Stale-While-Revalidate ----
+export async function fetchWithCache(url, { force = false, timeout = 15000 } = {}) {
+  const cacheKey = makeCacheKey(url);
+  const cached = getFromCache(cacheKey);
+
+  // 1. Non-force + fresh cache → return immediately
+  if (!force && cached?.fresh) {
+    console.log('[API] Cache hit (fresh):', url.substring(0, 50) + '...');
+    return cached.data;
+  }
+
+  // 2. Non-force + stale cache → return stale, revalidate in background
+  if (!force && cached?.data) {
+    console.log('[API] Cache hit (stale), revalidating:', url.substring(0, 50) + '...');
+
+    fetchFromNetwork(url, timeout).then(json => {
+      if (json?.ok === true) {
+        setToCache(cacheKey, json);
+        console.log('[API] Background revalidation done');
+      }
+    }).catch(() => {});
+
+    return cached.data;
+  }
+
+  // 3. Force or no cache → fetch from network
+  try {
+    console.log('[API] Fetching:', url.substring(0, 50) + '...');
+    const json = await fetchFromNetwork(url, timeout);
+
+    if (json?.ok === true) {
       setToCache(cacheKey, json);
     }
 
     return json;
   } catch (error) {
-    clearTimeout(timeoutId);
-
-    if (error.name === 'AbortError') {
-      throw new Error('Час очікування вичерпано');
+    // 4. Network failed → fall back to stale cache
+    if (cached?.data) {
+      console.warn('[API] Network error, serving stale cache:', error.message);
+      return cached.data;
     }
 
     throw error;
@@ -176,7 +193,7 @@ export function hasCachedData(url) {
 // ---- Debug ----
 export function getCacheStats() {
   try {
-    const keys = Object.keys(localStorage).filter(k => k.includes('::v='));
+    const keys = Object.keys(localStorage).filter(k => k.startsWith('pfl_cache::'));
     return {
       version: cacheVersion,
       entries: keys.length,
