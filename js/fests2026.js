@@ -59,11 +59,17 @@ function showLoader(mode = 'loading') {
     container.style.display = 'none';
     container.innerHTML = '';
   }
+
+  const donation = $('#donation2026');
+  if (donation) {
+    donation.style.display = 'none';
+  }
 }
 
 function hideLoader() {
   const loader = $('#yearLoader2026');
   const container = $('#fests2026Container');
+  const donation = $('#donation2026');
 
   if (loader) {
     loader.style.display = 'none';
@@ -71,6 +77,10 @@ function hideLoader() {
 
   if (container) {
     container.style.display = 'block';
+  }
+
+  if (donation) {
+    donation.style.display = '';
   }
 }
 
