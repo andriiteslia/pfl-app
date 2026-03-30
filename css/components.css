@@ -593,6 +593,15 @@ tbody tr.row-highlight td {
     0 2px 8px rgba(0, 0, 0, 0.25);
 }
 
+/* ---- Donation Info ---- */
+.donation-info {
+  margin-top: 32px;
+  margin-bottom: 32px;
+  font-size: 16px;
+  color: var(--muted);
+  text-align: center;
+}
+
 /* ---- Table Content ---- */
 .table-content {
   margin-top: 12px;
