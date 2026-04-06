@@ -301,7 +301,8 @@ function renderCards() {
   tagCards.forEach(initCard);
 
   const lfrInfo = $('#arenaLfrInfo');
-  if (lfrInfo) lfrInfo.style.display = activeTagId === 'LFR 2026' ? '' : 'none';
+  const activeTag = tags.find(t => t.id === activeTagId);
+  if (lfrInfo) lfrInfo.style.display = (activeTagId === 'lfrating') ? '' : 'none';
 }
 
 function renderCard(card) {
