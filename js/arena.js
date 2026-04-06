@@ -69,6 +69,9 @@ function setArenaState(state) {
   if (cardsEl) cardsEl.style.display = 'none';
   if (tab) tab.classList.add('arena-empty');
 
+  const lfrInfo = $('#arenaLfrInfo');
+  if (lfrInfo) lfrInfo.style.display = 'none';
+
   if (state === 'loading') {
     if (subtitle) subtitle.textContent = 'Оновлюю рейтинг і результати…';
     if (emptyText) emptyText.innerHTML = LOADING_HTML;
@@ -296,6 +299,9 @@ function renderCards() {
   cardsEl.innerHTML = tagCards.map(renderCard).join('');
 
   tagCards.forEach(initCard);
+
+  const lfrInfo = $('#arenaLfrInfo');
+  if (lfrInfo) lfrInfo.style.display = activeTagId === 'LFR' ? '' : 'none';
 }
 
 function renderCard(card) {
