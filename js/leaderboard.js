@@ -3,7 +3,8 @@
    Top 3 podium, rankings table
    ============================================ */
 
-import { fetchLeaderboard, fetchLeaderboardConfig, clearCache } from './api.js';
+import CONFIG from './config.js';
+import { fetchLeaderboard, fetchLeaderboardConfig, clearCache, buildCacheId } from './api.js';
 import { 
   $, escapeHtml, setButtonLoading, formatNameTwoLines, 
   formatPointsLabel, haptic, showToast, shareCard, buildShareLink, SHARE_ICON_SVG, markUpdated, yieldToMain
@@ -98,7 +99,7 @@ export async function loadLeaderboard({ force = false } = {}) {
     container.classList.remove('content-fade-in');
     if (card) card.classList.remove('is-loaded');
     if (subtitle) {
-      subtitle.textContent = 'Оновлюю дані Predator Fest League. Головний приз Shimano Vanquish CE C2500S!';
+      subtitle.textContent = 'Оновлюю дані Predator Fest League. Головний приз - 23 Shimano Vanquish 2500S!';
     }
   }
   
@@ -123,7 +124,7 @@ export async function loadLeaderboard({ force = false } = {}) {
     await renderLeaderboard(leaderboardData.values);
     
     if (subtitle) {
-      subtitle.textContent = 'Рейтинг учасників Predator Fest League. Головний приз Shimano Vanquish CE C2500S!';
+      subtitle.textContent = 'Рейтинг учасників Predator Fest League. Головний приз - 23 Shimano Vanquish 2500S!';
     }
     
     // Fade-in content after skeleton
@@ -551,3 +552,27 @@ function buildTable(header, rows) {
 export function isLeaderboardLoaded() {
   return isLoaded;
 }
+
+// ---- Live Update Listener ----
+(function () {
+  const RESULTS_CACHE_ID = buildCacheId({
+    sheetId: CONFIG.LEADERBOARD.SHEET_ID,
+    sheetName: CONFIG.LEADERBOARD.RESULTS_SHEET,
+    range: CONFIG.LEADERBOARD.RESULTS_RANGE,
+  });
+  const CONFIG_CACHE_ID = buildCacheId({
+    sheetId: CONFIG.LEADERBOARD.SHEET_ID,
+    sheetName: CONFIG.LEADERBOARD.CONFIG_SHEET,
+    range: CONFIG.LEADERBOARD.CONFIG_RANGE,
+  });
+
+  document.addEventListener('pflCacheUpdated', async (e) => {
+    const cid = e.detail?.cacheId;
+    if (cid !== RESULTS_CACHE_ID && cid !== CONFIG_CACHE_ID) return;
+    if (!isLeaderboardLoaded()) return;
+
+    console.log('[Leaderboard] Live update: newer data detected, reloading...');
+    await loadLeaderboard({ force: false });
+    showToast('Дані оновлено ✓');
+  });
+}());
