@@ -185,11 +185,6 @@ async function fetchWithSWR(cacheId, { force = false, liveUpdate = false, timeou
   }
 }
 
-// ---- Build cache ID from sheet params ----
-function buildCacheId(params) {
-  return `${params.sheetId}__${params.sheetName}__${params.range}`;
-}
-
 // ---- Build cache ID (exported for use in module listeners) ----
 export function buildCacheId(params) {
   return `${params.sheetId}__${params.sheetName}__${params.range}`;
