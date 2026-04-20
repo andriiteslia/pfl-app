@@ -3,12 +3,21 @@
    Top 3 podium, rankings table
    ============================================ */
 
-import CONFIG from './config.js';
-import { fetchLeaderboard, fetchLeaderboardConfig, clearCache, buildCacheId } from './api.js';
+import { fetchLeaderboard, fetchLeaderboardConfig, clearCache } from './api.js';
 import { 
   $, escapeHtml, setButtonLoading, formatNameTwoLines, 
   formatPointsLabel, haptic, showToast, shareCard, buildShareLink, SHARE_ICON_SVG, markUpdated, yieldToMain
 } from './utils.js';
+
+// ---- Preload podium images ----
+// Start fetching photos immediately on module load so they are cached
+// by the time the podium renders (avoids slow image pop-in)
+(function preloadPodiumImages() {
+  ['podium-1.png', 'podium-2.png', 'podium-3.png'].forEach(name => {
+    const img = new Image();
+    img.src = `./assets/imgs/${name}`;
+  });
+}());
 
 // ---- State ----
 let isLoaded = false;
@@ -437,9 +446,6 @@ function buildTop3Podium(rows, nameIdx, pointsIdx) {
   const pts2 = getPoints(winners[1]);
   const pts3 = getPoints(winners[2]);
   
-  // Cache-bust images so updated photos always load
-  const cb = `?v=${Date.now()}`;
-  
   return `
     <div class="top3-podium" aria-label="Top 3 winners podium">
       <div class="top3-podium__inner">
@@ -450,20 +456,20 @@ function buildTop3Podium(rows, nameIdx, pointsIdx) {
         
         <div class="top3-people">
           <div class="top3-person place2">
-            <div class="top3-avatar"><img src="./assets/imgs/podium-2.png${cb}" alt="" /></div>
+            <div class="top3-avatar"><img src="./assets/imgs/podium-2.png" alt="" fetchpriority="high" /></div>
             <div class="top3-name">${n2}</div>
             <div class="top3-points">${pts2}</div>
           </div>
           
           <div class="top3-person place1">
             <div class="top3-crown">👑</div>
-            <div class="top3-avatar"><img src="./assets/imgs/podium-1.png${cb}" alt="" /></div>
+            <div class="top3-avatar"><img src="./assets/imgs/podium-1.png" alt="" fetchpriority="high" /></div>
             <div class="top3-name">${n1}</div>
             <div class="top3-points">${pts1}</div>
           </div>
           
           <div class="top3-person place3">
-            <div class="top3-avatar"><img src="./assets/imgs/podium-3.png${cb}" alt="" /></div>
+            <div class="top3-avatar"><img src="./assets/imgs/podium-3.png" alt="" fetchpriority="high" /></div>
             <div class="top3-name">${n3}</div>
             <div class="top3-points">${pts3}</div>
           </div>
@@ -552,27 +558,3 @@ function buildTable(header, rows) {
 export function isLeaderboardLoaded() {
   return isLoaded;
 }
-
-// ---- Live Update Listener ----
-(function () {
-  const RESULTS_CACHE_ID = buildCacheId({
-    sheetId: CONFIG.LEADERBOARD.SHEET_ID,
-    sheetName: CONFIG.LEADERBOARD.RESULTS_SHEET,
-    range: CONFIG.LEADERBOARD.RESULTS_RANGE,
-  });
-  const CONFIG_CACHE_ID = buildCacheId({
-    sheetId: CONFIG.LEADERBOARD.SHEET_ID,
-    sheetName: CONFIG.LEADERBOARD.CONFIG_SHEET,
-    range: CONFIG.LEADERBOARD.CONFIG_RANGE,
-  });
-
-  document.addEventListener('pflCacheUpdated', async (e) => {
-    const cid = e.detail?.cacheId;
-    if (cid !== RESULTS_CACHE_ID && cid !== CONFIG_CACHE_ID) return;
-    if (!isLeaderboardLoaded()) return;
-
-    console.log('[Leaderboard] Live update: newer data detected, reloading...');
-    await loadLeaderboard({ force: false });
-    showToast('Дані оновлено ✓');
-  });
-}());
