@@ -72,7 +72,7 @@ function setToCache(key, value) {
 
 // ---- Fetch from Supabase ----
 async function fetchFromSupabase(cacheId, timeout = 12000, force = false) {
-  // On force: add timestamp to bust Supabase CDN cache
+  // On force: add timestamp to bust any CDN/proxy cache
   const bust = force ? `&_t=${Date.now()}` : '';
   const url = `${SUPABASE_URL}/rest/v1/sheet_cache?id=eq.${encodeURIComponent(cacheId)}&select=values,updated_at${bust}`;
 
@@ -86,11 +86,7 @@ async function fetchFromSupabase(cacheId, timeout = 12000, force = false) {
       headers: {
         'apikey': SUPABASE_KEY,
         'Authorization': `Bearer ${SUPABASE_KEY}`,
-        // On force reload: bypass browser HTTP cache entirely
-        ...(force ? { 'Cache-Control': 'no-store' } : {}),
       },
-      // On force reload: skip browser cache
-      cache: force ? 'no-store' : 'default',
       signal: controller.signal,
     });
 
