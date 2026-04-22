@@ -71,8 +71,10 @@ function setToCache(key, value) {
 }
 
 // ---- Fetch from Supabase ----
-async function fetchFromSupabase(cacheId, timeout = 12000) {
-  const url = `${SUPABASE_URL}/rest/v1/sheet_cache?id=eq.${encodeURIComponent(cacheId)}&select=values,updated_at`;
+async function fetchFromSupabase(cacheId, timeout = 12000, force = false) {
+  // On force: add timestamp to bust Supabase CDN cache
+  const bust = force ? `&_t=${Date.now()}` : '';
+  const url = `${SUPABASE_URL}/rest/v1/sheet_cache?id=eq.${encodeURIComponent(cacheId)}&select=values,updated_at${bust}`;
 
   console.log('[API] URL:', url);
 
@@ -84,7 +86,11 @@ async function fetchFromSupabase(cacheId, timeout = 12000) {
       headers: {
         'apikey': SUPABASE_KEY,
         'Authorization': `Bearer ${SUPABASE_KEY}`,
+        // On force reload: bypass browser HTTP cache entirely
+        ...(force ? { 'Cache-Control': 'no-store' } : {}),
       },
+      // On force reload: skip browser cache
+      cache: force ? 'no-store' : 'default',
       signal: controller.signal,
     });
 
@@ -114,60 +120,35 @@ async function fetchFromSupabase(cacheId, timeout = 12000) {
   }
 }
 
-// ---- Background Fetch with Live Update ----
-// Fetches from Supabase in background. If data is newer than cache (by updated_at),
-// saves to cache and dispatches 'pflCacheUpdated' event so UI can re-render.
-function startBackgroundFetch(cacheId, cacheKey, versionSnapshot, timeout) {
-  fetchFromSupabase(cacheId, timeout).then(json => {
-    if (!json?.ok) return;
-
-    // If clearCache() was called while fetch was in-flight — discard result
-    if (cacheVersion !== versionSnapshot) {
-      console.log('[API] Background fetch discarded — cache version changed');
-      return;
-    }
-
-    const existingUpdatedAt = getFromCache(cacheKey)?.data?.updated_at;
-    const isNewer = !existingUpdatedAt || json.updated_at > existingUpdatedAt;
-
-    setToCache(cacheKey, json);
-
-    if (isNewer) {
-      console.log('[API] Background fetch: newer data found, dispatching update event');
-      document.dispatchEvent(new CustomEvent('pflCacheUpdated', {
-        detail: { cacheId }
-      }));
-    } else {
-      console.log('[API] Background fetch: data unchanged');
-    }
-  }).catch(() => {});
-}
-
-// ---- Main Fetch: Cache-First with Live Background Update ----
-async function fetchWithSWR(cacheId, { force = false, liveUpdate = false, timeout = 12000 } = {}) {
+// ---- Main Fetch: Stale-While-Revalidate ----
+async function fetchWithSWR(cacheId, { force = false, timeout = 12000 } = {}) {
   const cacheKey = makeCacheKey(cacheId);
   const cached = getFromCache(cacheKey);
 
-  // 1. Fresh cache → return immediately; optionally background-fetch for live updates
+  // 1. Fresh cache → return immediately
   if (!force && cached?.fresh) {
     console.log('[API] Cache hit (fresh):', cacheId.substring(0, 40) + '...');
-    if (liveUpdate) {
-      startBackgroundFetch(cacheId, cacheKey, cacheVersion, timeout);
-    }
     return cached.data;
   }
 
   // 2. Stale cache → return stale, revalidate in background
   if (!force && cached?.data) {
     console.log('[API] Cache hit (stale), revalidating:', cacheId.substring(0, 40) + '...');
-    startBackgroundFetch(cacheId, cacheKey, cacheVersion, timeout);
+
+    fetchFromSupabase(cacheId, timeout).then(json => {
+      if (json?.ok) {
+        setToCache(cacheKey, json);
+        console.log('[API] Background revalidation done');
+      }
+    }).catch(() => {});
+
     return cached.data;
   }
 
   // 3. Force or no cache → fetch from Supabase
   try {
     console.log('[API] Fetching from Supabase:', cacheId.substring(0, 40) + '...');
-    const json = await fetchFromSupabase(cacheId, timeout);
+    const json = await fetchFromSupabase(cacheId, timeout, force);
 
     if (json?.ok) {
       setToCache(cacheKey, json);
@@ -185,8 +166,8 @@ async function fetchWithSWR(cacheId, { force = false, liveUpdate = false, timeou
   }
 }
 
-// ---- Build cache ID (exported for use in module listeners) ----
-export function buildCacheId(params) {
+// ---- Build cache ID from sheet params ----
+function buildCacheId(params) {
   return `${params.sheetId}__${params.sheetName}__${params.range}`;
 }
 
@@ -196,37 +177,28 @@ export async function fetchSheetData(params, options = {}) {
   return fetchWithSWR(cacheId, options);
 }
 
-// Same as fetchSheetData but always background-fetches and fires pflCacheUpdated if data changed
-export async function fetchSheetDataLive(params, options = {}) {
-  const cacheId = buildCacheId(params);
-  return fetchWithSWR(cacheId, { ...options, liveUpdate: true });
-}
-
 export async function fetchLeaderboard(options = {}) {
-  const params = {
+  return fetchSheetData({
     sheetId: CONFIG.LEADERBOARD.SHEET_ID,
     sheetName: CONFIG.LEADERBOARD.RESULTS_SHEET,
     range: CONFIG.LEADERBOARD.RESULTS_RANGE,
-  };
-  return options.liveUpdate ? fetchSheetDataLive(params, options) : fetchSheetData(params, options);
+  }, options);
 }
 
 export async function fetchLeaderboardConfig(options = {}) {
-  const params = {
+  return fetchSheetData({
     sheetId: CONFIG.LEADERBOARD.SHEET_ID,
     sheetName: CONFIG.LEADERBOARD.CONFIG_SHEET,
     range: CONFIG.LEADERBOARD.CONFIG_RANGE,
-  };
-  return options.liveUpdate ? fetchSheetDataLive(params, options) : fetchSheetData(params, options);
+  }, options);
 }
 
 export async function fetchArenaConfig(options = {}) {
-  const params = {
+  return fetchSheetData({
     sheetId: CONFIG.ARENA.CONFIG_SHEET_ID,
     sheetName: CONFIG.ARENA.CONFIG_SHEET_NAME,
     range: CONFIG.ARENA.CONFIG_RANGE,
-  };
-  return options.liveUpdate ? fetchSheetDataLive(params, options) : fetchSheetData(params, options);
+  }, options);
 }
 
 export async function fetchAppStyles(options = {}) {
