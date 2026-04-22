@@ -226,8 +226,14 @@ export async function fetchAppStyles(options = {}) {
 
 // ---- Cache Management ----
 export function clearCache() {
+  // Delete all cache entries so stale data is never returned after reload.
+  // Simply bumping the version causes stale-path fallback which shows old data.
+  try {
+    const keys = Object.keys(localStorage).filter(k => k.startsWith('pfl_cache::'));
+    keys.forEach(k => localStorage.removeItem(k));
+    console.log('[Cache] Cleared', keys.length, 'entries');
+  } catch (e) {}
   bumpCacheVersion();
-  console.log('[Cache] Version bumped to:', cacheVersion);
 }
 
 export function hasCachedData(params) {
