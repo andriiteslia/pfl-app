@@ -71,10 +71,8 @@ function setToCache(key, value) {
 }
 
 // ---- Fetch from Supabase ----
-async function fetchFromSupabase(cacheId, timeout = 12000, force = false) {
-  // On force: add timestamp to bust any CDN/proxy cache
-  const bust = force ? `&_t=${Date.now()}` : '';
-  const url = `${SUPABASE_URL}/rest/v1/sheet_cache?id=eq.${encodeURIComponent(cacheId)}&select=values,updated_at${bust}`;
+async function fetchFromSupabase(cacheId, timeout = 12000) {
+  const url = `${SUPABASE_URL}/rest/v1/sheet_cache?id=eq.${encodeURIComponent(cacheId)}&select=values,updated_at`;
 
   console.log('[API] URL:', url);
 
@@ -116,35 +114,60 @@ async function fetchFromSupabase(cacheId, timeout = 12000, force = false) {
   }
 }
 
-// ---- Main Fetch: Stale-While-Revalidate ----
-async function fetchWithSWR(cacheId, { force = false, timeout = 12000 } = {}) {
+// ---- Background Fetch with Live Update ----
+// Fetches from Supabase in background. If data is newer than cache (by updated_at),
+// saves to cache and dispatches 'pflCacheUpdated' event so UI can re-render.
+function startBackgroundFetch(cacheId, cacheKey, versionSnapshot, timeout) {
+  fetchFromSupabase(cacheId, timeout).then(json => {
+    if (!json?.ok) return;
+
+    // If clearCache() was called while fetch was in-flight — discard result
+    if (cacheVersion !== versionSnapshot) {
+      console.log('[API] Background fetch discarded — cache version changed');
+      return;
+    }
+
+    const existingUpdatedAt = getFromCache(cacheKey)?.data?.updated_at;
+    const isNewer = !existingUpdatedAt || json.updated_at > existingUpdatedAt;
+
+    setToCache(cacheKey, json);
+
+    if (isNewer) {
+      console.log('[API] Background fetch: newer data found, dispatching update event');
+      document.dispatchEvent(new CustomEvent('pflCacheUpdated', {
+        detail: { cacheId }
+      }));
+    } else {
+      console.log('[API] Background fetch: data unchanged');
+    }
+  }).catch(() => {});
+}
+
+// ---- Main Fetch: Cache-First with Live Background Update ----
+async function fetchWithSWR(cacheId, { force = false, liveUpdate = false, timeout = 12000 } = {}) {
   const cacheKey = makeCacheKey(cacheId);
   const cached = getFromCache(cacheKey);
 
-  // 1. Fresh cache → return immediately
+  // 1. Fresh cache → return immediately; optionally background-fetch for live updates
   if (!force && cached?.fresh) {
     console.log('[API] Cache hit (fresh):', cacheId.substring(0, 40) + '...');
+    if (liveUpdate) {
+      startBackgroundFetch(cacheId, cacheKey, cacheVersion, timeout);
+    }
     return cached.data;
   }
 
   // 2. Stale cache → return stale, revalidate in background
   if (!force && cached?.data) {
     console.log('[API] Cache hit (stale), revalidating:', cacheId.substring(0, 40) + '...');
-
-    fetchFromSupabase(cacheId, timeout).then(json => {
-      if (json?.ok) {
-        setToCache(cacheKey, json);
-        console.log('[API] Background revalidation done');
-      }
-    }).catch(() => {});
-
+    startBackgroundFetch(cacheId, cacheKey, cacheVersion, timeout);
     return cached.data;
   }
 
   // 3. Force or no cache → fetch from Supabase
   try {
     console.log('[API] Fetching from Supabase:', cacheId.substring(0, 40) + '...');
-    const json = await fetchFromSupabase(cacheId, timeout, force);
+    const json = await fetchFromSupabase(cacheId, timeout);
 
     if (json?.ok) {
       setToCache(cacheKey, json);
@@ -162,8 +185,8 @@ async function fetchWithSWR(cacheId, { force = false, timeout = 12000 } = {}) {
   }
 }
 
-// ---- Build cache ID from sheet params ----
-function buildCacheId(params) {
+// ---- Build cache ID (exported for use in module listeners) ----
+export function buildCacheId(params) {
   return `${params.sheetId}__${params.sheetName}__${params.range}`;
 }
 
@@ -173,28 +196,37 @@ export async function fetchSheetData(params, options = {}) {
   return fetchWithSWR(cacheId, options);
 }
 
+// Same as fetchSheetData but always background-fetches and fires pflCacheUpdated if data changed
+export async function fetchSheetDataLive(params, options = {}) {
+  const cacheId = buildCacheId(params);
+  return fetchWithSWR(cacheId, { ...options, liveUpdate: true });
+}
+
 export async function fetchLeaderboard(options = {}) {
-  return fetchSheetData({
+  const params = {
     sheetId: CONFIG.LEADERBOARD.SHEET_ID,
     sheetName: CONFIG.LEADERBOARD.RESULTS_SHEET,
     range: CONFIG.LEADERBOARD.RESULTS_RANGE,
-  }, options);
+  };
+  return options.liveUpdate ? fetchSheetDataLive(params, options) : fetchSheetData(params, options);
 }
 
 export async function fetchLeaderboardConfig(options = {}) {
-  return fetchSheetData({
+  const params = {
     sheetId: CONFIG.LEADERBOARD.SHEET_ID,
     sheetName: CONFIG.LEADERBOARD.CONFIG_SHEET,
     range: CONFIG.LEADERBOARD.CONFIG_RANGE,
-  }, options);
+  };
+  return options.liveUpdate ? fetchSheetDataLive(params, options) : fetchSheetData(params, options);
 }
 
 export async function fetchArenaConfig(options = {}) {
-  return fetchSheetData({
+  const params = {
     sheetId: CONFIG.ARENA.CONFIG_SHEET_ID,
     sheetName: CONFIG.ARENA.CONFIG_SHEET_NAME,
     range: CONFIG.ARENA.CONFIG_RANGE,
-  }, options);
+  };
+  return options.liveUpdate ? fetchSheetDataLive(params, options) : fetchSheetData(params, options);
 }
 
 export async function fetchAppStyles(options = {}) {
