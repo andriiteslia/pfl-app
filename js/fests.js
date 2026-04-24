@@ -228,7 +228,7 @@ function switchYear(year) {
 
   const subtitle = $('#subtitle-fests');
   if (subtitle) {
-    subtitle.textContent = year === '2026' ? 'Фести 2026 року' : 'Результати сезону 2025';
+    subtitle.textContent = year === '2026' ? 'Фести та результати' : 'Результати сезону 2025';
   }
 
   if (year === '2026') {
@@ -271,7 +271,7 @@ async function reloadFests() {
     } else {
       resetFests2026();
       await mountFests2026({ force: true });
-      if (subtitle) subtitle.textContent = 'Фести 2026 року';
+      if (subtitle) subtitle.textContent = 'Фести та результати';
     }
   } catch (e) {
     console.error('[Fests] Reload error:', e);
