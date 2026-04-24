@@ -184,6 +184,12 @@ const cardStates = {
 
 // ---- Initialize ----
 export function initFests() {
+  // Set initial subtitle based on default active year
+  const subtitle = $('#subtitle-fests');
+  if (subtitle) {
+    subtitle.textContent = activeYear === '2026' ? 'Фести та результати' : 'Результати сезону 2025';
+  }
+
   // Year tags
   $$('.fests-year-tag').forEach(tag => {
     tag.addEventListener('click', () => {
