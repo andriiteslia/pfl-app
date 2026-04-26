@@ -412,7 +412,10 @@ function initCard(card) {
 
         updateCardView(card);
 
-        if (!st.loaded[view]) {
+        if (st.loaded[view] && st.renderedHtml?.[view]) {
+          const outEl = $(`#outArena_${view}_${card.id}`);
+          if (outEl) outEl.innerHTML = st.renderedHtml[view];
+        } else if (!st.loaded[view]) {
           loadCardData(card, view);
         }
       });
