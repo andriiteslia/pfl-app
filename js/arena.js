@@ -301,9 +301,14 @@ function renderCards() {
     const st = cardState.get(card.id);
     if (st?.isOpen) {
       updateCardView(card);
-      if (!st.loaded[st.view]) {
-        loadCardData(card, st.view);
-      }
+      st.views.forEach(v => {
+        const outEl = $(`#outArena_${v.key}_${card.id}`);
+        if (st.loaded[v.key] && st.renderedHtml?.[v.key]) {
+          if (outEl) outEl.innerHTML = st.renderedHtml[v.key];
+        } else if (v.key === st.view && !st.loaded[v.key]) {
+          loadCardData(card, v.key);
+        }
+      });
     }
   });
 }
@@ -452,6 +457,8 @@ async function loadCardData(card, viewKey, force = false) {
 
     await renderTableInto(data.values, outEl, { dividers: view.dividers });
     st.loaded[viewKey] = true;
+    if (!st.renderedHtml) st.renderedHtml = {};
+    st.renderedHtml[viewKey] = outEl.innerHTML;
   } catch (e) {
     outEl.innerHTML = '<div class="loading-text">Помилка завантаження.</div>';
   }
