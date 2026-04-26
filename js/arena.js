@@ -376,8 +376,13 @@ function initCard(card) {
     haptic('light');
     updateCardView(card);
 
-    if (st.isOpen && !st.loaded[st.view]) {
-      loadCardData(card, st.view);
+    if (st.isOpen) {
+      if (st.loaded[st.view] && st.renderedHtml?.[st.view]) {
+        const outEl = $(`#outArena_${st.view}_${card.id}`);
+        if (outEl) outEl.innerHTML = st.renderedHtml[st.view];
+      } else if (!st.loaded[st.view]) {
+        loadCardData(card, st.view);
+      }
     }
   });
 
