@@ -18,6 +18,8 @@ const CONFIG_2026 = {
 let fests2026 = [];
 const festState = new Map();
 let mounted = false;
+let _configUpdatedAt = null;
+let _lastForce = false;
 
 // ---- Helpers ----
 function normBool(v) {
@@ -429,12 +431,12 @@ export async function mountFests2026({ force = false } = {}) {
 
   try {
     // Load config
-    let configUpdatedAt = null;
     if (!fests2026.length || force) {
       const result = await loadConfig2026({ force });
       fests2026 = result.fests;
-      configUpdatedAt = result.updatedAt;
+      _configUpdatedAt = result.updatedAt;
     }
+    _lastForce = force;
 
     if (!fests2026.length) {
       showLoader('empty');
@@ -475,7 +477,7 @@ export async function mountFests2026({ force = false } = {}) {
     // Only show toast on explicit force reload, not on initial cache load
     if (force) showToast('Оновлено ✓');
     // Pass real cache timestamp so label shows actual data age, not щойно
-    markUpdated('reload', force ? undefined : configUpdatedAt);
+    markUpdated('reload', _lastForce ? undefined : _configUpdatedAt);
 
   } catch (e) {
     console.error('[Fests2026] Mount error:', e);

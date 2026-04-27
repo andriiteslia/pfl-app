@@ -198,7 +198,8 @@ export async function loadArena({ force = false } = {}) {
 
     tags = config.tags;
     cards = config.cards;
-    const configUpdatedAt = config.updatedAt;
+    _configUpdatedAt = config.updatedAt;
+    _lastForce = force;
 
     // Group cards by tag
     cardsByTag.clear();
@@ -507,7 +508,7 @@ async function renderArenaContent() {
   loaded = true;
   dataReady = false;
   showToast('Оновлено ✓');
-  markUpdated('reloadArena', force ? undefined : configUpdatedAt);
+  markUpdated('reloadArena', _lastForce ? undefined : _configUpdatedAt);
 }
 
 // ---- Render deferred content when tab becomes active ----

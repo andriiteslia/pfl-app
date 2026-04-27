@@ -304,7 +304,8 @@ export async function loadDidyliv({ force = false } = {}) {
     // Store data regardless of active tab
     tags = config.tags;
     cards = config.cards;
-    const configUpdatedAt = config.updatedAt;
+    _configUpdatedAt = config.updatedAt;
+    _lastForce = force;
 
     // Group cards by tag
     cardsByTag.clear();
@@ -338,7 +339,7 @@ export async function loadDidyliv({ force = false } = {}) {
     if (!tags.length) {
       setDidylivState('empty');
       loaded = true;
-      markUpdated('reloadDidyliv', force ? undefined : configUpdatedAt);
+      markUpdated('reloadDidyliv', _lastForce ? undefined : _configUpdatedAt);
       return;
     }
 
@@ -623,7 +624,7 @@ async function renderContent(aboutKv) {
   dataReady = false;
   pendingAbout = null;
   showToast('Оновлено ✓');
-  markUpdated('reloadDidyliv', force ? undefined : configUpdatedAt);
+  markUpdated('reloadDidyliv', _lastForce ? undefined : _configUpdatedAt);
 }
 
 // ---- Render deferred content when tab becomes active ----
