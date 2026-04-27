@@ -188,11 +188,24 @@ function timeAgo(ts) {
   return `${days} д тому`;
 }
 
-export function markUpdated(btnId) {
+export function markUpdated(btnId, updatedAt) {
   const btn = document.getElementById(btnId);
   if (!btn) return;
 
-  const now = Date.now();
+  const rawTs = updatedAt ? new Date(updatedAt).getTime() : NaN;
+  const now = (rawTs && !isNaN(rawTs)) ? rawTs : Date.now();
+
+  // Never overwrite a newer persisted timestamp with an older one.
+  // Example: user force-reloaded 5 min ago (saved), then app re-opens and
+  // markUpdated is called with Supabase updated_at = 45 min ago — must keep 5 min.
+  try {
+    const saved = parseInt(localStorage.getItem('pfl_ts::' + btnId) || '0', 10);
+    if (Number.isFinite(saved) && saved > now) return;
+  } catch(e) {}
+
+  // Persist timestamp so next session restores correct label
+  try { localStorage.setItem('pfl_ts::' + btnId, String(now)); } catch(e) {}
+
   updatedTimestamps.set(btnId, now);
 
   // Wrap button if not already wrapped
@@ -212,6 +225,35 @@ export function markUpdated(btnId) {
     wrap.appendChild(label);
   }
   label.textContent = timeAgo(now);
+}
+
+// Restore persisted timestamp label on app open (before data loads)
+export function restoreUpdated(btnId) {
+  try {
+    const saved = localStorage.getItem('pfl_ts::' + btnId);
+    if (!saved) return;
+    const ts = parseInt(saved, 10);
+    if (!Number.isFinite(ts)) return;
+    const btn = document.getElementById(btnId);
+    if (!btn) return;
+
+    updatedTimestamps.set(btnId, ts);
+
+    let wrap = btn.closest('.btn-updated-wrap');
+    if (!wrap) {
+      wrap = document.createElement('div');
+      wrap.className = 'btn-updated-wrap';
+      btn.parentNode.insertBefore(wrap, btn);
+      wrap.appendChild(btn);
+    }
+    let label = wrap.querySelector('.last-updated');
+    if (!label) {
+      label = document.createElement('span');
+      label.className = 'last-updated';
+      wrap.appendChild(label);
+    }
+    label.textContent = timeAgo(ts);
+  } catch(e) {}
 }
 
 // Auto-refresh all visible timestamps

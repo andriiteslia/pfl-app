@@ -5,7 +5,7 @@
 
 import CONFIG from './config.js';
 import { fetchSheetData, clearCache } from './api.js';
-import { $, $$, escapeHtml, setButtonLoading, haptic, parseDividers, shareCard, buildShareLink, SHARE_ICON_SVG, showToast, markUpdated, yieldToMain } from './utils.js';
+import { $, $$, escapeHtml, setButtonLoading, haptic, parseDividers, shareCard, buildShareLink, SHARE_ICON_SVG, showToast, markUpdated, restoreUpdated, yieldToMain } from './utils.js';
 
 // ---- State ----
 let tags = [];
@@ -16,6 +16,8 @@ const cardState = new Map();
 let loaded = false;
 let isLoading = false;
 let dataReady = false;
+let _arenaUpdatedAt = null;
+let _arenaForce = false;
 
 // ---- Helpers ----
 function normBool(v) {
@@ -90,7 +92,7 @@ async function loadArenaConfig({ force = false } = {}) {
   }, { force });
 
   if (!data?.ok || !Array.isArray(data.values) || data.values.length < 2) {
-    return { tags: [], cards: [] };
+    return { tags: [], cards: [], updatedAt: null };
   }
 
   const [headerRow, ...rows] = data.values;
@@ -173,11 +175,12 @@ async function loadArenaConfig({ force = false } = {}) {
     (a.order - b.order) || a.title.localeCompare(b.title, 'uk')
   );
 
-  return { tags: sortedTags, cards: parsedCards };
+  return { tags: sortedTags, cards: parsedCards, updatedAt: data.updated_at || null };
 }
 
 // ---- Load Arena ----
 export async function loadArena({ force = false } = {}) {
+  if (!force) restoreUpdated('reloadArena');
   const reloadBtn = $('#reloadArena');
 
   if (loaded && !force) return;
@@ -199,6 +202,8 @@ export async function loadArena({ force = false } = {}) {
 
     tags = config.tags;
     cards = config.cards;
+    _arenaUpdatedAt = config.updatedAt;
+    _arenaForce = force;
 
     // Group cards by tag
     cardsByTag.clear();
@@ -531,7 +536,7 @@ async function renderArenaContent() {
   loaded = true;
   dataReady = false;
   showToast('Оновлено ✓');
-  markUpdated('reloadArena');
+  markUpdated('reloadArena', _arenaForce ? undefined : _arenaUpdatedAt);
 }
 
 // ---- Render deferred content when tab becomes active ----

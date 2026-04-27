@@ -6,7 +6,7 @@
 import { fetchLeaderboard, fetchLeaderboardConfig, clearCache } from './api.js';
 import { 
   $, escapeHtml, setButtonLoading, formatNameTwoLines, 
-  formatPointsLabel, haptic, showToast, shareCard, buildShareLink, SHARE_ICON_SVG, markUpdated, yieldToMain
+  formatPointsLabel, haptic, showToast, shareCard, buildShareLink, SHARE_ICON_SVG, markUpdated, restoreUpdated, yieldToMain
 } from './utils.js';
 
 // ---- Preload podium images ----
@@ -91,6 +91,7 @@ const SKELETON_HTML = `
 
 // ---- Load Data ----
 export async function loadLeaderboard({ force = false } = {}) {
+  if (!force) restoreUpdated('reloadLeaderboard');
   const { container, card, subtitle, reloadBtn } = getElements();
   
   if (!container) return;
@@ -141,7 +142,7 @@ export async function loadLeaderboard({ force = false } = {}) {
     
     if (card) card.classList.add('is-loaded');
     isLoaded = true;
-    markUpdated('reloadLeaderboard');
+    markUpdated('reloadLeaderboard', force ? undefined : leaderboardData.updated_at);
     
     // Toast on force reload
     if (force) showToast('Оновлено ✓');

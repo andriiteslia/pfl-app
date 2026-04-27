@@ -5,7 +5,7 @@
 
 import CONFIG from './config.js';
 import { fetchSheetData, fetchSheetDataLive } from './api.js';
-import { $, $$, escapeHtml, haptic, parseDividers, shareCard, buildShareLink, SHARE_ICON_SVG, showToast, markUpdated, yieldToMain } from './utils.js';
+import { $, $$, escapeHtml, haptic, parseDividers, shareCard, buildShareLink, SHARE_ICON_SVG, showToast, markUpdated, restoreUpdated, yieldToMain } from './utils.js';
 
 // ---- Config ----
 const CONFIG_2026 = {
@@ -18,6 +18,7 @@ const CONFIG_2026 = {
 let fests2026 = [];
 const festState = new Map();
 let mounted = false;
+let _festConfigUpdatedAt = null;
 
 // ---- Helpers ----
 function normBool(v) {
@@ -176,6 +177,7 @@ async function loadConfig2026({ force = false } = {}) {
     .filter(o => o.id && o.sheetName);
 
   fests.sort((a, b) => (a.order - b.order) || a.id.localeCompare(b.id));
+  _festConfigUpdatedAt = data.updated_at || null;
   return fests;
 }
 
@@ -411,6 +413,8 @@ async function renderTableInto(values, targetEl, options = {}) {
 
 // ---- Mount Fests 2026 ----
 export async function mountFests2026({ force = false } = {}) {
+  // Restore last-updated label immediately before async data loads
+  if (!force) restoreUpdated('reload');
   const container = $('#fests2026Container');
   const panel = $('#festsYear2026');
 
@@ -471,8 +475,8 @@ export async function mountFests2026({ force = false } = {}) {
 
     mounted = true;
     hideLoader();
-    showToast('Оновлено ✓');
-    markUpdated('reload');
+    if (force) showToast('Оновлено ✓');
+    markUpdated('reload', force ? undefined : _festConfigUpdatedAt);
 
   } catch (e) {
     console.error('[Fests2026] Mount error:', e);
