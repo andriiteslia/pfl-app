@@ -3,7 +3,7 @@
    Config-driven venue cards for Ozero Didyliv
    ============================================ */
 
-import { fetchSheetData, clearCache } from './api.js';
+import { fetchSheetData, fetchSheetDataLive, clearCache, buildCacheId } from './api.js';
 import { $, $$, escapeHtml, setButtonLoading, haptic, parseDividers, shareCard, buildShareLink, SHARE_ICON_SVG, showToast, markUpdated, yieldToMain } from './utils.js';
 
 // ---- State ----
@@ -16,8 +16,6 @@ let loaded = false;
 let isLoading = false;
 let dataReady = false;
 let pendingAbout = null;
-let _configUpdatedAt = null;
-let _lastForce = false;
 
 // ---- Helpers ----
 function normBool(v) {
@@ -109,7 +107,8 @@ async function loadDidylivAbout({ force = false } = {}) {
   if (aboutLoaded && !force) return aboutData;
 
   try {
-    const data = await fetchSheetData({
+    const fetchFn = force ? fetchSheetData : fetchSheetDataLive;
+    const data = await fetchFn({
       sheetId: '1iYaFcFvCAN0R8Wr2cc6grMCVQG9ggFQ3HuEggvFM3xc',
       sheetName: 'ABOUT_Didyliv',
       range: 'A1:B20',
@@ -184,14 +183,15 @@ function applyAbout(kv) {
 
 // ---- Load Config ----
 async function loadDidylivConfig({ force = false } = {}) {
-  const data = await fetchSheetData({
+  const fetchFn = force ? fetchSheetData : fetchSheetDataLive;
+  const data = await fetchFn({
     sheetId: '1iYaFcFvCAN0R8Wr2cc6grMCVQG9ggFQ3HuEggvFM3xc',
     sheetName: 'CONFIG_Didyliv',
     range: 'A1:Z1000',
   }, { force });
 
   if (!data?.ok || !Array.isArray(data.values) || data.values.length < 2) {
-    return { tags: [], cards: [], updatedAt: null };
+    return { tags: [], cards: [] };
   }
 
   const [headerRow, ...rows] = data.values;
@@ -273,7 +273,7 @@ async function loadDidylivConfig({ force = false } = {}) {
     (a.order - b.order) || a.title.localeCompare(b.title, 'uk')
   );
 
-  return { tags: sortedTags, cards: parsedCards, updatedAt: data.updated_at || null };
+  return { tags: sortedTags, cards: parsedCards };
 }
 
 // ---- Load Didyliv ----
@@ -306,8 +306,6 @@ export async function loadDidyliv({ force = false } = {}) {
     // Store data regardless of active tab
     tags = config.tags;
     cards = config.cards;
-    _configUpdatedAt = config.updatedAt;
-    _lastForce = force;
 
     // Group cards by tag
     cardsByTag.clear();
@@ -341,7 +339,7 @@ export async function loadDidyliv({ force = false } = {}) {
     if (!tags.length) {
       setDidylivState('empty');
       loaded = true;
-      markUpdated('reloadDidyliv', _lastForce ? undefined : _configUpdatedAt);
+      markUpdated('reloadDidyliv');
       return;
     }
 
@@ -626,7 +624,7 @@ async function renderContent(aboutKv) {
   dataReady = false;
   pendingAbout = null;
   showToast('Оновлено ✓');
-  markUpdated('reloadDidyliv', _lastForce ? undefined : _configUpdatedAt);
+  markUpdated('reloadDidyliv');
 }
 
 // ---- Render deferred content when tab becomes active ----
@@ -640,3 +638,28 @@ export async function renderDidylivIfReady() {
 export function isDidylivLoaded() {
   return loaded;
 }
+
+// ---- Live Update Listener ----
+(function () {
+  const CONFIG_CACHE_ID = buildCacheId({
+    sheetId: '1iYaFcFvCAN0R8Wr2cc6grMCVQG9ggFQ3HuEggvFM3xc',
+    sheetName: 'CONFIG_Didyliv',
+    range: 'A1:Z1000',
+  });
+  const ABOUT_CACHE_ID = buildCacheId({
+    sheetId: '1iYaFcFvCAN0R8Wr2cc6grMCVQG9ggFQ3HuEggvFM3xc',
+    sheetName: 'ABOUT_Didyliv',
+    range: 'A1:B20',
+  });
+
+  document.addEventListener('pflCacheUpdated', async (e) => {
+    const cid = e.detail?.cacheId;
+    if (cid !== CONFIG_CACHE_ID && cid !== ABOUT_CACHE_ID) return;
+    if (!isDidylivLoaded()) return;
+
+    console.log('[Didyliv] Live update: newer data detected, reloading...');
+    loaded = false;
+    await loadDidyliv({ force: false });
+    showToast('Дані оновлено ✓');
+  });
+}());
