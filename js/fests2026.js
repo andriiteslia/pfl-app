@@ -4,14 +4,14 @@
    ============================================ */
 
 import CONFIG from './config.js';
-import { fetchSheetData, fetchSheetDataLive } from './api.js';
+import { fetchSheetData } from './api.js';
 import { $, $$, escapeHtml, haptic, parseDividers, shareCard, buildShareLink, SHARE_ICON_SVG, showToast, markUpdated, yieldToMain } from './utils.js';
 
 // ---- Config ----
 const CONFIG_2026 = {
   SHEET_ID: '1BbRlP6S2OejgiCkQKdoTRqm-przP_qz1Ge17BTmnIbs',
   SHEET_NAME: 'CONFIG_2026',
-  RANGE: 'A1:AF30',
+  RANGE: 'A1:AE30',
 };
 
 // ---- State ----
@@ -119,16 +119,14 @@ function pickDefaultView(fest, views) {
 
 // ---- Load Config ----
 async function loadConfig2026({ force = false } = {}) {
-  // Use liveUpdate=true so the app auto-refreshes if Supabase has newer data
-  const fetchFn = force ? fetchSheetData : fetchSheetDataLive;
-  const data = await fetchFn({
+  const data = await fetchSheetData({
     sheetId: CONFIG_2026.SHEET_ID,
     sheetName: CONFIG_2026.SHEET_NAME,
     range: CONFIG_2026.RANGE,
   }, { force });
 
   if (!data?.ok || !Array.isArray(data.values) || data.values.length < 2) {
-    return [];
+    return { fests: [], updatedAt: null };
   }
 
   const headers = data.values[0].map(h => normStr(h));
@@ -431,8 +429,11 @@ export async function mountFests2026({ force = false } = {}) {
 
   try {
     // Load config
+    let configUpdatedAt = null;
     if (!fests2026.length || force) {
-      fests2026 = await loadConfig2026({ force });
+      const result = await loadConfig2026({ force });
+      fests2026 = result.fests;
+      configUpdatedAt = result.updatedAt;
     }
 
     if (!fests2026.length) {
@@ -471,8 +472,10 @@ export async function mountFests2026({ force = false } = {}) {
 
     mounted = true;
     hideLoader();
-    showToast('Оновлено ✓');
-    markUpdated('reload');
+    // Only show toast on explicit force reload, not on initial cache load
+    if (force) showToast('Оновлено ✓');
+    // Pass real cache timestamp so label shows actual data age, not щойно
+    markUpdated('reload', force ? undefined : configUpdatedAt);
 
   } catch (e) {
     console.error('[Fests2026] Mount error:', e);
@@ -486,20 +489,3 @@ export function resetFests2026() {
   festState.clear();
   mounted = false;
 }
-
-// ---- Live Update Listener ----
-// When background fetch detects newer CONFIG_2026 data in Supabase,
-// silently re-mount so users see fresh cards without manual refresh.
-(function () {
-  const CONFIG_CACHE_ID = `${CONFIG_2026.SHEET_ID}__${CONFIG_2026.SHEET_NAME}__${CONFIG_2026.RANGE}`;
-
-  document.addEventListener('pflCacheUpdated', async (e) => {
-    if (e.detail?.cacheId !== CONFIG_CACHE_ID) return;
-    if (!mounted) return;
-
-    console.log('[Fests2026] Live update: newer config detected, re-mounting...');
-    resetFests2026();
-    await mountFests2026({ force: false });
-    showToast('Дані оновлено ✓');
-  });
-}());

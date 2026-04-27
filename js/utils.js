@@ -188,11 +188,14 @@ function timeAgo(ts) {
   return `${days} д тому`;
 }
 
-export function markUpdated(btnId) {
+// updatedAt — optional ISO string or ms timestamp from cache/API.
+// If omitted, uses Date.now() (i.e. the user just force-reloaded).
+export function markUpdated(btnId, updatedAt) {
   const btn = document.getElementById(btnId);
   if (!btn) return;
 
-  const now = Date.now();
+  const ts = updatedAt ? new Date(updatedAt).getTime() : Date.now();
+  const now = isNaN(ts) ? Date.now() : ts;
   updatedTimestamps.set(btnId, now);
 
   // Wrap button if not already wrapped
