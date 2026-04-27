@@ -116,8 +116,8 @@ export async function loadLeaderboard({ force = false } = {}) {
   try {
     // Load config and data in parallel
     const [configData, leaderboardData] = await Promise.all([
-      fetchLeaderboardConfig({ force }),
-      fetchLeaderboard({ force }),
+      fetchLeaderboardConfig({ force, liveUpdate: !force }),
+      fetchLeaderboard({ force, liveUpdate: !force }),
     ]);
     
     // Parse config
@@ -559,3 +559,16 @@ function buildTable(header, rows) {
 export function isLeaderboardLoaded() {
   return isLoaded;
 }
+
+// ---- Live Update Listener ----
+(function () {
+  document.addEventListener('pflCacheUpdated', async (e) => {
+    if (!isLeaderboardLoaded()) return;
+
+    console.log('[Leaderboard] Live update: newer data detected, reloading...');
+    isLoaded = false;
+    await loadLeaderboard({ force: false });
+    showToast('Дані оновлено ✓');
+    markUpdated('reloadLeaderboard');
+  });
+}());
