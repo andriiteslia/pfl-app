@@ -16,8 +16,6 @@ const cardState = new Map();
 let loaded = false;
 let isLoading = false;
 let dataReady = false;
-let _configUpdatedAt = null;
-let _lastForce = false;
 
 // ---- Helpers ----
 function normBool(v) {
@@ -92,7 +90,7 @@ async function loadArenaConfig({ force = false } = {}) {
   }, { force });
 
   if (!data?.ok || !Array.isArray(data.values) || data.values.length < 2) {
-    return { tags: [], cards: [], updatedAt: null };
+    return { tags: [], cards: [] };
   }
 
   const [headerRow, ...rows] = data.values;
@@ -166,6 +164,7 @@ async function loadArenaConfig({ force = false } = {}) {
       sheetName: normStr(get(r, 'sheetName')) || 'Results',
       tagClass: normStr(get(r, 'tagClass')),
       tagText: normStr(get(r, 'tagText')),
+      autoOpen: normBool(get(r, 'cardAutoOpen')) && normStr(get(r, 'cardAutoOpen')) !== '',
       views,
     });
   });
@@ -174,7 +173,7 @@ async function loadArenaConfig({ force = false } = {}) {
     (a.order - b.order) || a.title.localeCompare(b.title, 'uk')
   );
 
-  return { tags: sortedTags, cards: parsedCards, updatedAt: data.updated_at || null };
+  return { tags: sortedTags, cards: parsedCards };
 }
 
 // ---- Load Arena ----
@@ -200,8 +199,6 @@ export async function loadArena({ force = false } = {}) {
 
     tags = config.tags;
     cards = config.cards;
-    _configUpdatedAt = config.updatedAt;
-    _lastForce = force;
 
     // Group cards by tag
     cardsByTag.clear();
@@ -218,7 +215,7 @@ export async function loadArena({ force = false } = {}) {
         const loaded = {};
         c.views.forEach(v => { loaded[v.key] = false; });
         cardState.set(c.id, {
-          isOpen: false,
+          isOpen: c.autoOpen === true,
           view: c.views[0]?.key || 'rating',
           loaded,
           views: c.views,
@@ -299,7 +296,21 @@ function renderCards() {
   const tagCards = cardsByTag.get(activeTagId) || [];
   cardsEl.innerHTML = tagCards.map(renderCard).join('');
 
-  tagCards.forEach(initCard);
+  tagCards.forEach(card => {
+    initCard(card);
+    const st = cardState.get(card.id);
+    if (st?.isOpen) {
+      updateCardView(card);
+      st.views.forEach(v => {
+        const outEl = $(`#outArena_${v.key}_${card.id}`);
+        if (st.loaded[v.key] && st.renderedHtml?.[v.key]) {
+          if (outEl) outEl.innerHTML = st.renderedHtml[v.key];
+        } else if (v.key === st.view && !st.loaded[v.key]) {
+          loadCardData(card, v.key);
+        }
+      });
+    }
+  });
 }
 
 function renderCard(card) {
@@ -365,8 +376,13 @@ function initCard(card) {
     haptic('light');
     updateCardView(card);
 
-    if (st.isOpen && !st.loaded[st.view]) {
-      loadCardData(card, st.view);
+    if (st.isOpen) {
+      if (st.loaded[st.view] && st.renderedHtml?.[st.view]) {
+        const outEl = $(`#outArena_${st.view}_${card.id}`);
+        if (outEl) outEl.innerHTML = st.renderedHtml[st.view];
+      } else if (!st.loaded[st.view]) {
+        loadCardData(card, st.view);
+      }
     }
   });
 
@@ -396,7 +412,10 @@ function initCard(card) {
 
         updateCardView(card);
 
-        if (!st.loaded[view]) {
+        if (st.loaded[view] && st.renderedHtml?.[view]) {
+          const outEl = $(`#outArena_${view}_${card.id}`);
+          if (outEl) outEl.innerHTML = st.renderedHtml[view];
+        } else if (!st.loaded[view]) {
           loadCardData(card, view);
         }
       });
@@ -446,6 +465,8 @@ async function loadCardData(card, viewKey, force = false) {
 
     await renderTableInto(data.values, outEl, { dividers: view.dividers });
     st.loaded[viewKey] = true;
+    if (!st.renderedHtml) st.renderedHtml = {};
+    st.renderedHtml[viewKey] = outEl.innerHTML;
   } catch (e) {
     outEl.innerHTML = '<div class="loading-text">Помилка завантаження.</div>';
   }
@@ -510,7 +531,7 @@ async function renderArenaContent() {
   loaded = true;
   dataReady = false;
   showToast('Оновлено ✓');
-  markUpdated('reloadArena', _lastForce ? undefined : _configUpdatedAt);
+  markUpdated('reloadArena');
 }
 
 // ---- Render deferred content when tab becomes active ----
