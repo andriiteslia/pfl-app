@@ -176,7 +176,7 @@ async function loadConfig2026({ force = false } = {}) {
     .filter(o => o.id && o.sheetName);
 
   fests.sort((a, b) => (a.order - b.order) || a.id.localeCompare(b.id));
-  return fests;
+  return { fests, updatedAt: data.updated_at || null };
 }
 
 // ---- Render Card ----
