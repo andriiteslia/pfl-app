@@ -9,6 +9,16 @@ import {
   formatPointsLabel, haptic, showToast, shareCard, buildShareLink, SHARE_ICON_SVG, markUpdated, yieldToMain
 } from './utils.js';
 
+// ---- Preload podium images ----
+// Start fetching photos immediately on module load so they are cached
+// by the time the podium renders (avoids slow image pop-in)
+(function preloadPodiumImages() {
+  ['podium-1.png', 'podium-2.png', 'podium-3.png'].forEach(name => {
+    const img = new Image();
+    img.src = `./assets/imgs/${name}`;
+  });
+}());
+
 // ---- State ----
 let isLoaded = false;
 let isLoading = false;
@@ -98,7 +108,7 @@ export async function loadLeaderboard({ force = false } = {}) {
     container.classList.remove('content-fade-in');
     if (card) card.classList.remove('is-loaded');
     if (subtitle) {
-      subtitle.textContent = 'Оновлюю дані Predator Fest League. Головний приз - 23 Shimano Vanquish 2500S!';
+      subtitle.textContent = 'Оновлюю дані Predator Fest League. Головний приз - Shimano Vanquish CE C2500S!';
     }
   }
   
@@ -123,7 +133,7 @@ export async function loadLeaderboard({ force = false } = {}) {
     await renderLeaderboard(leaderboardData.values);
     
     if (subtitle) {
-      subtitle.textContent = 'Рейтинг учасників Predator Fest League. Головний приз - 23 Shimano Vanquish 2500S!';
+      subtitle.textContent = 'Рейтинг учасників Predator Fest League. Головний приз - Shimano Vanquish CE C2500S!';
     }
     
     // Fade-in content after skeleton
@@ -131,8 +141,7 @@ export async function loadLeaderboard({ force = false } = {}) {
     
     if (card) card.classList.add('is-loaded');
     isLoaded = true;
-    // Pass real cache timestamp; only show щойно after explicit force reload
-    markUpdated('reloadLeaderboard', force ? undefined : (leaderboardData.updated_at || configData?.updated_at));
+    markUpdated('reloadLeaderboard');
     
     // Toast on force reload
     if (force) showToast('Оновлено ✓');
@@ -437,9 +446,6 @@ function buildTop3Podium(rows, nameIdx, pointsIdx) {
   const pts2 = getPoints(winners[1]);
   const pts3 = getPoints(winners[2]);
   
-  // Cache-bust images so updated photos always load
-  const cb = `?v=${Date.now()}`;
-  
   return `
     <div class="top3-podium" aria-label="Top 3 winners podium">
       <div class="top3-podium__inner">
@@ -450,20 +456,20 @@ function buildTop3Podium(rows, nameIdx, pointsIdx) {
         
         <div class="top3-people">
           <div class="top3-person place2">
-            <div class="top3-avatar"><img src="./assets/imgs/podium-2.png${cb}" alt="" /></div>
+            <div class="top3-avatar"><img src="./assets/imgs/podium-2.png" alt="" fetchpriority="high" /></div>
             <div class="top3-name">${n2}</div>
             <div class="top3-points">${pts2}</div>
           </div>
           
           <div class="top3-person place1">
             <div class="top3-crown">👑</div>
-            <div class="top3-avatar"><img src="./assets/imgs/podium-1.png${cb}" alt="" /></div>
+            <div class="top3-avatar"><img src="./assets/imgs/podium-1.png" alt="" fetchpriority="high" /></div>
             <div class="top3-name">${n1}</div>
             <div class="top3-points">${pts1}</div>
           </div>
           
           <div class="top3-person place3">
-            <div class="top3-avatar"><img src="./assets/imgs/podium-3.png${cb}" alt="" /></div>
+            <div class="top3-avatar"><img src="./assets/imgs/podium-3.png" alt="" fetchpriority="high" /></div>
             <div class="top3-name">${n3}</div>
             <div class="top3-points">${pts3}</div>
           </div>
