@@ -16,6 +16,8 @@ let loaded = false;
 let isLoading = false;
 let dataReady = false;
 let pendingAbout = null;
+let _configUpdatedAt = null;
+let _lastForce = false;
 
 // ---- Helpers ----
 function normBool(v) {

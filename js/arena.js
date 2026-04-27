@@ -16,6 +16,8 @@ const cardState = new Map();
 let loaded = false;
 let isLoading = false;
 let dataReady = false;
+let _configUpdatedAt = null;
+let _lastForce = false;
 
 // ---- Helpers ----
 function normBool(v) {
