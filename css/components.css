@@ -518,16 +518,16 @@ tbody tr.row-highlight td {
 }
 
 /* ============================================
-   Fests Contacts (TG + Instagram)
+   Contact Cards (PFL TG + Instagram)
    ============================================ */
-.fests-contacts {
+.contact-cards {
   display: flex;
   gap: var(--spacing-sm);
   margin-top: var(--spacing-md);
   margin-bottom: var(--spacing-md);
 }
 
-.fests-contact {
+.contact-card {
   flex: 1 1 0;
   display: flex;
   align-items: center;
@@ -543,36 +543,36 @@ tbody tr.row-highlight td {
   min-width: 0;
 }
 
-.fests-contact:hover {
+.contact-card:hover {
   text-decoration: none;
 }
 
-.fests-contact:active {
+.contact-card:active {
   transform: scale(0.97);
 }
 
-.fests-contact__icon {
+.contact-card__icon {
   width: 28px;
   height: 28px;
   flex-shrink: 0;
   display: block;
 }
 
-.fests-contact__text {
+.contact-card__text {
   display: flex;
   flex-direction: column;
   gap: 1px;
   min-width: 0;
 }
 
-.fests-contact__label {
+.contact-card__label {
   font-size: 14px;
   font-weight: 700;
   line-height: 1.2;
   color: var(--text);
 }
 
-.fests-contact__sub {
+.contact-card__sub {
   font-size: 12px;
   color: var(--muted);
   line-height: 1.3;
