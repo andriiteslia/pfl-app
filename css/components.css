@@ -494,6 +494,76 @@ tbody tr.row-highlight td {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
 }
 
+/* ============================================
+   Year Row (year tags + quick-link round buttons)
+   ============================================ */
+.fests-year-row {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+}
+
+.fests-year-row .fests-year-tags {
+  flex: 1 1 auto;
+  margin-bottom: 0;
+  margin-right: 0;
+  padding-right: var(--spacing-sm);
+}
+
+.fests-quick-links {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.quick-link-btn {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  transition: transform var(--transition-fast);
+
+  /* Glass light — matches theme toggle */
+  background: rgba(255, 255, 255, 0.60);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.80),
+    0 8px 16px rgba(0, 99, 178, 0.06);
+  backdrop-filter: blur(12px) saturate(1.6);
+  -webkit-backdrop-filter: blur(12px) saturate(1.6);
+}
+
+.quick-link-btn:hover {
+  text-decoration: none;
+}
+
+.quick-link-btn:active {
+  transform: scale(0.95);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.60),
+    0 4px 8px rgba(0, 99, 178, 0.06);
+}
+
+.quick-link-btn img {
+  width: 22px;
+  height: 22px;
+  display: block;
+}
+
+:root[data-theme="dark"] .quick-link-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 4px 12px rgba(0, 0, 0, 0.04);
+}
+
 /* ---- Header Layout ---- */
 .fests-header {
   display: flex;
