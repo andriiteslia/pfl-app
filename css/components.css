@@ -502,7 +502,7 @@ tbody tr.row-highlight td {
   align-items: center;
   gap: var(--spacing-sm);
   margin-top: 4px;
-  margin-bottom: var(--spacing-md);
+  margin-bottom: var(--spacing-xl);
 }
 
 .fests-year-row .fests-year-tags {
