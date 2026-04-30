@@ -501,6 +501,7 @@ tbody tr.row-highlight td {
   display: flex;
   align-items: center;
   gap: var(--spacing-sm);
+  margin-top: 4px;
   margin-bottom: var(--spacing-md);
 }
 
@@ -509,6 +510,7 @@ tbody tr.row-highlight td {
   margin-bottom: 0;
   margin-right: 0;
   padding-right: var(--spacing-sm);
+  padding-bottom: 0;
 }
 
 .fests-quick-links {
