@@ -499,10 +499,10 @@ tbody tr.row-highlight td {
    ============================================ */
 .fests-year-row {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: var(--spacing-sm);
   margin-top: 4px;
-  margin-bottom: var(--spacing-xl);
+  margin-bottom: var(--spacing-md);
 }
 
 .fests-year-row .fests-year-tags {
@@ -510,7 +510,6 @@ tbody tr.row-highlight td {
   margin-bottom: 0;
   margin-right: 0;
   padding-right: var(--spacing-sm);
-  padding-bottom: 0;
 }
 
 .fests-quick-links {
