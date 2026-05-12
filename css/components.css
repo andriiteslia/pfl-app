@@ -710,18 +710,23 @@ tbody tr.row-highlight td {
     0 4px 12px rgba(0, 0, 0, 0.04);
 }
 
-/* ---- Register Button (2026 fest cards) ---- */
+/* ---- Register / Action Buttons (2026 fest cards) ---- */
+.card-btns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-md);
+}
+
 .register-btn {
+  flex: 1 1 480px;
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 100%;
-  margin-top: var(--spacing-md);
 }
 
 .register-btn--mono {
   background: #000000;
-  margin-top: var(--spacing-sm);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.15),
     inset 0 -1px 0 rgba(0, 0, 0, 0.2),
