@@ -250,8 +250,7 @@ function renderCard(fest) {
           </div>
         </div>
       </div>
-      ${registerHtml}
-      ${monoHtml}
+      ${(registerHtml || monoHtml) ? `<div class="card-btns">${registerHtml}${monoHtml}</div>` : ''}
       ${segHtml}
       ${outsHtml}
     </article>
