@@ -719,7 +719,7 @@ tbody tr.row-highlight td {
 }
 
 .register-btn {
-  flex: 1 1 480px;
+  flex: 1 1 400px;
   display: flex;
   justify-content: center;
   align-items: center;
