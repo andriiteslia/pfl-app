@@ -75,6 +75,7 @@
 .partner-tile__body--featured {
   padding: 0;
   flex: 0 0 auto;
+  margin-left: auto;
 }
 
 .partner-tile__featured-arrow {
