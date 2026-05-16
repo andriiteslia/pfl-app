@@ -36,6 +36,7 @@ const PARTNER_DATA = {
     ctaHref: 'https://ibis-gear.com/',
     instagram: 'https://www.instagram.com/ibisfishing/',
     logoBg: '#00785F',
+    detailsLogoSrc: './assets/logos/ibis_big_logo.svg',
   },
   upstream: {
     title: 'Upstream',
@@ -213,8 +214,9 @@ function openPartnerDetails(tile) {
   }
 
   // Set logo
-  if (logoImg?.src) {
-    els.detailsLogoImg.src = logoImg.src;
+  const detailsSrc = data.detailsLogoSrc || logoImg?.src;
+  if (detailsSrc) {
+    els.detailsLogoImg.src = detailsSrc;
     els.detailsLogoImg.alt = data.title || defaultTitle;
     els.detailsLogoImg.style.display = 'block';
   } else {
