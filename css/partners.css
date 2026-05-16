@@ -3,54 +3,6 @@
    Grid layout, partner tiles, details view
    ============================================ */
 
-/* ---- Featured Partner Tile (full-width) ---- */
-.partner-tile--featured {
-  flex-direction: row;
-  align-items: center;
-  margin-top: var(--spacing-lg);
-  height: 72px;
-  border-radius: var(--radius-md);
-}
-
-.partner-tile--featured .partner-tile__logo {
-  height: 100%;
-  flex: 1;
-  min-width: 0;
-  border-radius: 0;
-}
-
-.partner-tile--featured .partner-tile__logo img {
-  width: auto;
-  height: 60%;
-  max-width: 100%;
-  object-fit: contain;
-}
-
-.partner-tile[data-partner="ibis"] .partner-tile__logo {
-  background: #00785F;
-}
-
-.partner-tile__body--featured {
-  padding: var(--spacing-md);
-  flex: 0 0 auto;
-}
-
-.partner-tile__featured-cta {
-  white-space: nowrap;
-  font-size: 14px;
-  font-weight: 700;
-  padding: 0 var(--spacing-md);
-  height: 40px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  text-decoration: none;
-}
-
-.partner-tile__featured-cta:hover {
-  text-decoration: none;
-}
-
 /* ---- Partners Grid ---- */
 .partners-grid {
   display: grid;
@@ -84,6 +36,49 @@
   transform: scale(0.98);
 }
 
+/* ---- Featured Partner Tile (full-width banner) ---- */
+.partner-tile--featured {
+  flex-direction: row;
+  align-items: center;
+  margin-top: var(--spacing-lg);
+  height: 72px;
+}
+
+.partner-tile--featured .partner-tile__logo {
+  height: 100%;
+  flex: 1;
+  min-width: 0;
+  border-radius: 0;
+}
+
+.partner-tile--featured .partner-tile__logo img {
+  height: 55%;
+  width: auto;
+  max-width: 80%;
+  object-fit: contain;
+}
+
+.partner-tile__body--featured {
+  padding: var(--spacing-md);
+  flex: 0 0 auto;
+}
+
+.partner-tile__featured-cta {
+  white-space: nowrap;
+  font-size: 14px;
+  font-weight: 700;
+  padding: 0 var(--spacing-md);
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
+.partner-tile__featured-cta:hover {
+  text-decoration: none;
+}
+
 /* ---- Logo Section ---- */
 .partner-tile__logo {
   position: relative;
@@ -111,6 +106,10 @@
 
 .partner-tile[data-partner="themain"] .partner-tile__logo {
   background: #000000;
+}
+
+.partner-tile[data-partner="ibis"] .partner-tile__logo {
+  background: #00785F;
 }
 
 .partner-tile__logo img {
