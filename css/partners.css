@@ -73,10 +73,12 @@
   font-weight: 800;
 }
 
-.partner-tile__body--featured {
+.partner-tile--featured .partner-tile__body {
   padding: 0;
-  flex: 0 0 auto;
+  flex: 0 0 auto !important;
   margin-left: auto;
+  display: flex;
+  align-items: center;
 }
 
 .partner-tile__featured-arrow {
