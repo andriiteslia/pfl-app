@@ -43,7 +43,7 @@
   justify-content: space-between;
   margin-top: var(--spacing-lg);
   height: 72px;
-  padding: 0 var(--spacing-md);
+  padding: 0 24px;
   background: #00785F !important;
   border-color: transparent;
 }
@@ -77,20 +77,18 @@
   flex: 0 0 auto;
 }
 
-.partner-tile__featured-cta {
-  white-space: nowrap;
-  font-size: 14px;
-  font-weight: 700;
-  padding: 0 var(--spacing-md);
-  height: 40px;
-  display: inline-flex;
+.partner-tile__featured-arrow {
+  display: flex;
   align-items: center;
   justify-content: center;
+  color: #fff;
   text-decoration: none;
+  flex-shrink: 0;
 }
 
-.partner-tile__featured-cta:hover {
-  text-decoration: none;
+.partner-tile__featured-arrow svg {
+  width: 24px;
+  height: 24px;
 }
 
 /* ---- Logo Section ---- */
