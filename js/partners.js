@@ -235,6 +235,7 @@ function openPartnerDetails(tile) {
   els.listView.style.display = 'none';
   els.detailsView.style.display = 'block';
   els.detailsView.classList.add('slide-in');
+  els.detailsView.dataset.currentPartner = partnerId;
   currentView = 'details';
 
   // Show FAB back
