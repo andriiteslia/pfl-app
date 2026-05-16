@@ -245,10 +245,6 @@
   object-fit: contain;
 }
 
-#partnerDetailsView[data-current-partner="ibis"] .partner-details__header img {
-  max-width: 90%;
-}
-
 /* ---- Details Body ---- */
 .partner-details__body {
   padding-top: var(--spacing-xl);
