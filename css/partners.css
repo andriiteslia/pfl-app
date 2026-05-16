@@ -40,26 +40,40 @@
 .partner-tile--featured {
   flex-direction: row;
   align-items: center;
+  justify-content: space-between;
   margin-top: var(--spacing-lg);
   height: 72px;
+  padding: 0 var(--spacing-md);
+  background: #00785F !important;
+  border-color: transparent;
 }
 
 .partner-tile--featured .partner-tile__logo {
-  height: 100%;
-  flex: 1;
-  min-width: 0;
+  position: static;
+  height: 44px;
+  width: auto;
+  flex: 0 0 auto;
+  background: transparent !important;
+  padding: 0;
   border-radius: 0;
+  overflow: visible;
 }
 
 .partner-tile--featured .partner-tile__logo img {
-  height: 55%;
+  height: 100%;
   width: auto;
-  max-width: 80%;
+  max-width: 160px;
   object-fit: contain;
 }
 
+.partner-tile--featured .logo-fallback {
+  color: rgba(255,255,255,0.5);
+  font-size: 16px;
+  font-weight: 800;
+}
+
 .partner-tile__body--featured {
-  padding: var(--spacing-md);
+  padding: 0;
   flex: 0 0 auto;
 }
 
