@@ -51,12 +51,13 @@
 .partner-tile--featured .partner-tile__logo {
   position: static;
   height: 44px;
-  width: auto;
-  flex: 0 0 auto;
+  flex: 1;
+  min-width: 0;
   background: transparent !important;
   padding: 0;
   border-radius: 0;
   overflow: visible;
+  justify-content: flex-start;
 }
 
 .partner-tile--featured .partner-tile__logo img {
