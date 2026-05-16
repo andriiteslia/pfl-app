@@ -34,7 +34,7 @@ const PARTNER_DATA = {
     info: '🌐 Інтернет-магазин та магазини по всій Україні<br>🕘 Пн – Нд з 10:00 до 21:00<br>📱 Телефон: 0 800 337 280',
     ctaText: 'В магазин 🐟',
     ctaHref: 'https://ibis-gear.com/',
-    instagram: 'https://www.instagram.com/ibis.com.ua/',
+    instagram: 'https://www.instagram.com/ibisfishing/',
     logoBg: '#00785F',
   },
   upstream: {
