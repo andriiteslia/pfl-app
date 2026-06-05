@@ -13,8 +13,8 @@
 /* ---- Bottom Tab Bar Container ---- */
 .tabs-bar {
   position: fixed;
-  left: max(20px, calc(50% - 260px));
-  right: max(20px, calc(50% - 260px));
+  left: max(20px, calc(50% - min(50vw, 640px) + 20px));
+  right: max(20px, calc(50% - min(50vw, 640px) + 20px));
   bottom: 28px;
   display: flex;
   align-items: center;
