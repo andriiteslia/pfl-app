@@ -13,14 +13,17 @@
 /* ---- Bottom Tab Bar Container ---- */
 .tabs-bar {
   position: fixed;
-  left: max(20px, calc(50% - min(50vw, 640px) + 20px));
-  right: max(20px, calc(50% - min(50vw, 640px) + 20px));
+  left: 20px;
+  right: 20px;
   bottom: 28px;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 0;
   z-index: 100;
   padding-bottom: env(safe-area-inset-bottom, 0px);
+  max-width: 520px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 /* ---- Shared Glass Pill ---- */
@@ -38,11 +41,6 @@
     inset 0 1px 0 rgba(255, 255, 255, 0.90);
   border: 1px solid rgba(255, 255, 255, 0.60);
   overflow: hidden;
-}
-
-/* Override padding for solo pill — it's a circle, not a container */
-.tabs.tabs-solo {
-  padding: 0;
 }
 
 /* Dark theme tabs */
@@ -71,7 +69,7 @@
   flex: 0 0 64px;
   height: 64px;
   padding: 0;
-  margin-left: 0;
+  margin-left: 8px;
   justify-content: center;
   transition: flex var(--morph-duration) var(--morph-ease),
               padding var(--morph-duration) var(--morph-ease);
@@ -276,6 +274,7 @@
   width: 64px;
   opacity: 1;
   pointer-events: auto;
+  margin-left: 8px;
   transition-delay: 0.06s;
 }
 
