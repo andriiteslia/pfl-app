@@ -42,6 +42,11 @@
   overflow: hidden;
 }
 
+/* Override padding for solo pill — it's a circle, not a container */
+.tabs.tabs-solo {
+  padding: 0;
+}
+
 /* Dark theme tabs */
 :root[data-theme="dark"] .tabs {
   background: rgba(32, 41, 50, 0.80);
