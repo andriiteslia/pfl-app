@@ -18,7 +18,7 @@
   bottom: 28px;
   display: flex;
   align-items: center;
-  gap: 0;
+  gap: 8px;
   z-index: 100;
   padding-bottom: env(safe-area-inset-bottom, 0px);
   max-width: 520px;
@@ -69,7 +69,7 @@
   flex: 0 0 64px;
   height: 64px;
   padding: 0;
-  margin-left: 8px;
+  margin-left: 0;
   justify-content: center;
   transition: flex var(--morph-duration) var(--morph-ease),
               padding var(--morph-duration) var(--morph-ease);
@@ -274,7 +274,6 @@
   width: 64px;
   opacity: 1;
   pointer-events: auto;
-  margin-left: 8px;
   transition-delay: 0.06s;
 }
 
