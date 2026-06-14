@@ -362,6 +362,18 @@ async function loadCardData(fest, viewKey, force = false) {
 }
 
 // ---- Render Table ----
+// Format cell value — fixes floating point noise (17.099999999998 → 17.1)
+function formatCellValue(val) {
+  const s = String(val ?? '').trim();
+  if (s === '') return '';
+  const n = Number(s);
+  if (!isNaN(n) && s !== '') {
+    // toPrecision(10) removes floating point noise, parseFloat strips trailing zeros
+    return String(parseFloat(n.toPrecision(10)));
+  }
+  return s;
+}
+
 async function renderTableInto(values, targetEl, options = {}) {
   if (!Array.isArray(values) || values.length === 0) {
     targetEl.innerHTML = '<div class="loading-text">Немає даних</div>';
@@ -395,7 +407,7 @@ async function renderTableInto(values, targetEl, options = {}) {
 
   const tbody = rows.map(r =>
     '<tr>' + activeCols.map((ci, idx) =>
-      `<td${cellStyle(idx)}>${escapeHtml(Array.isArray(r) ? r[ci] : '')}</td>`
+      `<td${cellStyle(idx)}>${escapeHtml(formatCellValue(Array.isArray(r) ? r[ci] : ''))}</td>`
     ).join('') + '</tr>'
   ).join('');
 
