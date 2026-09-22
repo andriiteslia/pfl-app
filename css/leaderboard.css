@@ -85,6 +85,47 @@
 }
 
 /* ============================================
+   Position-change badge (▲/▼/NEW next to name)
+   ============================================ */
+#tab-leaderboard table td .lb-delta {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 1px;
+  margin-left: 6px;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+#tab-leaderboard table td .lb-delta--up {
+  color: #17A34A;
+}
+
+#tab-leaderboard table td .lb-delta--down {
+  color: #E23D3D;
+}
+
+#tab-leaderboard table td .lb-delta--new {
+  color: #2563EB;
+  font-size: 10px;
+  letter-spacing: .03em;
+}
+
+:root[data-theme="dark"] #tab-leaderboard table td .lb-delta--up {
+  color: #4ADE80;
+}
+
+:root[data-theme="dark"] #tab-leaderboard table td .lb-delta--down {
+  color: #F87171;
+}
+
+:root[data-theme="dark"] #tab-leaderboard table td .lb-delta--new {
+  color: #60A5FA;
+}
+
+/* ============================================
    Leaderboard Skeleton (from index_old.html)
    ============================================ */
 @keyframes skeletonShimmer {
@@ -144,10 +185,10 @@
   padding: 4px 2px 10px;
 }
 
-.lb-skel-person { 
-  display: flex; 
-  flex-direction: column; 
-  align-items: center; 
+.lb-skel-person {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .lb-skel-person.p1 { flex: 1.2; }
@@ -158,74 +199,74 @@
 .lb-skel-person.p2 { transform: translateY(24px); }
 .lb-skel-person.p3 { transform: translateY(40px); }
 
-.lb-skel-avatar { 
-  border-radius: 50%; 
-  flex-shrink: 0; 
+.lb-skel-avatar {
+  border-radius: 50%;
+  flex-shrink: 0;
 }
 
-.lb-skel-crown { 
-  width: 26px; 
-  height: 26px; 
-  margin-bottom: 4px; 
+.lb-skel-crown {
+  width: 26px;
+  height: 26px;
+  margin-bottom: 4px;
 }
 
-.lb-skel-name1 { 
-  margin-top: 8px; 
+.lb-skel-name1 {
+  margin-top: 8px;
   /* 14.8px x2 + 8px + 4px ~= 41.6px (matches loaded name block) */
-  height: 14.8px; 
+  height: 14.8px;
 }
 
-.lb-skel-name2 { 
-  margin-top: 4px; 
-  height: 14.8px; 
+.lb-skel-name2 {
+  margin-top: 4px;
+  height: 14.8px;
 }
 
-.lb-skel-pts { 
-  margin-top: 6px; 
+.lb-skel-pts {
+  margin-top: 6px;
   /* Loaded points pill is ~30px incl. borders */
-  height: 30px; 
-  border-radius: 999px !important; 
+  height: 30px;
+  border-radius: 999px !important;
 }
 
-.lb-skel-stands { 
-  display: flex; 
-  align-items: flex-end; 
-  justify-content: space-between; 
-  gap: 10px; 
-  padding: 0 2px 2px; 
+.lb-skel-stands {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 0 2px 2px;
 }
 
-.lb-skel-stand { 
-  flex: 1; 
-  border-radius: 4px 4px 0 0; 
+.lb-skel-stand {
+  flex: 1;
+  border-radius: 4px 4px 0 0;
 }
 
-.lb-skel-stand.s1 { 
-  flex: 1.2; 
-  height: 104px; 
+.lb-skel-stand.s1 {
+  flex: 1.2;
+  height: 104px;
 }
 
 .lb-skel-stand.s2 { height: 80px; }
 .lb-skel-stand.s3 { height: 64px; }
 
-.lb-skel-table { 
-  padding: 4px 12px 8px; 
+.lb-skel-table {
+  padding: 4px 12px 8px;
 }
 
-.lb-skel-row { 
-  display: flex; 
-  gap: 10px; 
-  align-items: center; 
-  padding: 11px 0; 
-  border-bottom: 1px solid var(--border); 
+.lb-skel-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--border);
 }
 
-.lb-skel-row:last-child { 
-  border-bottom: none; 
+.lb-skel-row:last-child {
+  border-bottom: none;
 }
 
-.lb-skel-cell { 
-  flex-shrink: 0; 
+.lb-skel-cell {
+  flex-shrink: 0;
 }
 
 /* ============================================
