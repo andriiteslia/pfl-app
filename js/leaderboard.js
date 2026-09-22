@@ -295,6 +295,8 @@ function guessNameIdx(headersLower, colStats, pointsIdx) {
 // ---- Position-Change Badge ----
 // Looks up a participant's delta in the map fetched from leaderboard_current
 // and returns the ▲ / ▼ / NEW badge markup (or '' if no data / no change).
+// The arrow is a CSS-drawn triangle (not a unicode glyph) so both directions
+// render as the exact same shape and size across all fonts/platforms.
 function buildDeltaBadge(rawName, deltaMap) {
   const name = String(rawName ?? '').trim();
   if (!name || !deltaMap) return '';
@@ -310,9 +312,8 @@ function buildDeltaBadge(rawName, deltaMap) {
   if (d === null || d === undefined || d === 0) return '';
 
   const up = d > 0;
-  const arrow = up ? '▲' : '▼';
   const cls = up ? 'lb-delta--up' : 'lb-delta--down';
-  return `<span class="lb-delta ${cls}">${arrow}${Math.abs(d)}</span>`;
+  return `<span class="lb-delta ${cls}"><span class="lb-delta-arrow"></span>${Math.abs(d)}</span>`;
 }
 
 // ---- Render Leaderboard ----
