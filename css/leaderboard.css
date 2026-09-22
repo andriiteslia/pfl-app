@@ -89,14 +89,32 @@
    ============================================ */
 #tab-leaderboard table td .lb-delta {
   display: inline-flex;
-  align-items: baseline;
-  gap: 1px;
+  align-items: center;
+  gap: 4px;
   margin-left: 6px;
   font-size: 12px;
   font-weight: 800;
   line-height: 1;
   vertical-align: middle;
   white-space: nowrap;
+}
+
+/* CSS-drawn triangle — same exact shape/size for both directions,
+   unlike the unicode ▲/▼ glyphs which render inconsistently across fonts */
+#tab-leaderboard table td .lb-delta-arrow {
+  width: 0;
+  height: 0;
+  border-left: 4.5px solid transparent;
+  border-right: 4.5px solid transparent;
+  flex-shrink: 0;
+}
+
+#tab-leaderboard table td .lb-delta--up .lb-delta-arrow {
+  border-bottom: 7px solid currentColor;
+}
+
+#tab-leaderboard table td .lb-delta--down .lb-delta-arrow {
+  border-top: 7px solid currentColor;
 }
 
 #tab-leaderboard table td .lb-delta--up {
