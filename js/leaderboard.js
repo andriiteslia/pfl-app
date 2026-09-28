@@ -61,6 +61,7 @@ export function initLeaderboard() {
 
   bindTelegramBackButtonForHistory();
   initFestivalHistorySegments();
+  initHistoryEdgeSwipe();
 
   console.log('[Leaderboard] Initialized');
 }
@@ -250,6 +251,50 @@ function bindTelegramBackButtonForHistory() {
       });
     }
   } catch (e) {}
+}
+
+// ---- Edge Swipe Back Gesture (same behavior as partner detail pages) ----
+const HISTORY_EDGE_ZONE = 28;         // px from left edge to start tracking
+const HISTORY_SWIPE_THRESHOLD = 80;   // px to trigger back
+const HISTORY_SWIPE_MAX_Y = 60;       // max vertical drift before cancelling
+
+let historySwipeStartX = 0;
+let historySwipeStartY = 0;
+let isHistorySwiping = false;
+
+function initHistoryEdgeSwipe() {
+  const scroller = document.getElementById('app-wrap');
+  if (!scroller) return;
+
+  scroller.addEventListener('touchstart', (e) => {
+    if (!isHistoryOpen) return;
+    const touch = e.touches[0];
+    if (touch.clientX <= HISTORY_EDGE_ZONE) {
+      historySwipeStartX = touch.clientX;
+      historySwipeStartY = touch.clientY;
+      isHistorySwiping = true;
+    }
+  }, { passive: true });
+
+  scroller.addEventListener('touchmove', (e) => {
+    if (!isHistorySwiping) return;
+    const touch = e.touches[0];
+    const dy = Math.abs(touch.clientY - historySwipeStartY);
+    if (dy > HISTORY_SWIPE_MAX_Y) {
+      isHistorySwiping = false;
+    }
+  }, { passive: true });
+
+  scroller.addEventListener('touchend', (e) => {
+    if (!isHistorySwiping) return;
+    isHistorySwiping = false;
+    const touch = e.changedTouches[0];
+    const dx = touch.clientX - historySwipeStartX;
+    if (dx >= HISTORY_SWIPE_THRESHOLD) {
+      haptic('light');
+      closeFestivalHistory();
+    }
+  }, { passive: true });
 }
 
 // ---- Skeleton HTML ----
