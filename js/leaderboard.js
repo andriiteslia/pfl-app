@@ -77,6 +77,15 @@ const FEST_LOADING_HTML = `
   </div>
 `;
 
+// Shown for a fest that hasn't happened / been seeded yet (e.g. #5, #6) —
+// same perch, different caption.
+const FEST_NO_DATA_HTML = `
+  <div class="empty-state lb-history-loading">
+    <img src="./assets/imgs/perch.png" alt="Perch" width="100" height="100">
+    <p class="empty-state__text">Дані по цьому фесту ще не додані,<br>повертайся пізніше 🙌</p>
+  </div>
+`;
+
 function initFestivalHistorySegments() {
   const seg = $('#lbHistorySeg');
   if (!seg) return;
@@ -118,7 +127,7 @@ async function loadFestTab(festNum) {
   ]);
 
   if (!current || current.length === 0) {
-    out.innerHTML = `<div class="loading-text">Дані по цьому фесту ще не додані.</div>`;
+    out.innerHTML = FEST_NO_DATA_HTML;
     return;
   }
 
