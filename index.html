@@ -38,14 +38,16 @@
   <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <!-- Styles -->
-  <link rel="stylesheet" href="css/variables.css">
-  <link rel="stylesheet" href="css/base.css">
-  <link rel="stylesheet" href="css/components.css">
-  <link rel="stylesheet" href="css/tabs.css">
-  <link rel="stylesheet" href="css/leaderboard.css">
-  <link rel="stylesheet" href="css/partners.css">
-  <link rel="stylesheet" href="css/skeleton.css">
-  <link rel="stylesheet" href="css/animations.css">
+  <!-- ?v= cache-busting query so browsers/CDN fetch fresh CSS after every deploy
+       instead of serving a stale cached copy under the same filename -->
+  <link rel="stylesheet" href="css/variables.css?v=20260922">
+  <link rel="stylesheet" href="css/base.css?v=20260922">
+  <link rel="stylesheet" href="css/components.css?v=20260922">
+  <link rel="stylesheet" href="css/tabs.css?v=20260922">
+  <link rel="stylesheet" href="css/leaderboard.css?v=20260922">
+  <link rel="stylesheet" href="css/partners.css?v=20260922">
+  <link rel="stylesheet" href="css/skeleton.css?v=20260922">
+  <link rel="stylesheet" href="css/animations.css?v=20260922">
 </head>
 <body>
 
@@ -80,7 +82,7 @@
           <div id="fests2026Container"></div>
           <!-- Donation info -->
           <div id="donation2026" class="donation-info" style="display:none;">
-            Передано на потреби збройних сил – <span style="white-space:nowrap;">56 250 грн 🇺🇦</span>
+            Передано на потреби збройних сил – <span style="white-space:nowrap;">40 245 грн 🇺🇦</span>
           </div>
         </div>
 
@@ -179,6 +181,7 @@
 
       <!-- ========== LEADERBOARD TAB ========== -->
       <section id="tab-leaderboard" class="tab-content" aria-label="Leaderboard tab">
+      <div id="leaderboardMainView">
         <header class="fests-header">
           <div class="fests-header__text">
             <h1 class="page-title">Leaderboard 🏆</h1>
@@ -281,6 +284,47 @@
             Переглянути умови PFL 2026 📝
           </a>
         </div>
+      </div>
+
+      <!-- Festival History View (hidden by default) -->
+      <div id="lbHistoryView" class="lb-history-view" style="display:none;">
+        <header class="fests-header">
+          <div class="fests-header__text">
+            <h1 class="page-title">Історія фестивалів 🤌</h1>
+            <p class="page-subtitle">Як змінювались позиції учасників після кожного фестивалю PFL 2026</p>
+          </div>
+        </header>
+
+        <article class="card lb-history-card">
+          <div class="segmented-control" id="lbHistorySeg">
+            <button class="segment active" type="button" data-fest="1">1</button>
+            <button class="segment" type="button" data-fest="2">2</button>
+            <button class="segment" type="button" data-fest="3">3</button>
+            <button class="segment" type="button" data-fest="4">4</button>
+            <button class="segment" type="button" data-fest="5">5</button>
+            <button class="segment" type="button" data-fest="6">6</button>
+          </div>
+
+          <div id="lbHistoryOut1" class="table-content">
+            <div class="loading-text">Дані з'являться тут незабаром.</div>
+          </div>
+          <div id="lbHistoryOut2" class="table-content table-collapsed">
+            <div class="loading-text">Дані з'являться тут незабаром.</div>
+          </div>
+          <div id="lbHistoryOut3" class="table-content table-collapsed">
+            <div class="loading-text">Дані з'являться тут незабаром.</div>
+          </div>
+          <div id="lbHistoryOut4" class="table-content table-collapsed">
+            <div class="loading-text">Дані з'являться тут незабаром.</div>
+          </div>
+          <div id="lbHistoryOut5" class="table-content table-collapsed">
+            <div class="loading-text">Дані з'являться тут незабаром.</div>
+          </div>
+          <div id="lbHistoryOut6" class="table-content table-collapsed">
+            <div class="loading-text">Дані з'являться тут незабаром.</div>
+          </div>
+        </article>
+      </div>
       </section>
 
       <!-- ========== ARENA TAB ========== -->
@@ -577,6 +621,13 @@
 
   <!-- Back FAB (for partner details) -->
   <button id="fabBack" class="fab-back" type="button" aria-label="Back">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+      <path d="M10.293 5.293a1 1 0 011.414 1.414L7.414 11H19a1 1 0 110 2H7.414l4.293 4.293a1 1 0 01-1.414 1.414l-6-6a1 1 0 010-1.414l6-6z" fill="currentColor"/>
+    </svg>
+  </button>
+
+  <!-- Back FAB (for leaderboard festival history view) -->
+  <button id="fabBackHistory" class="fab-back" type="button" aria-label="Back">
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
       <path d="M10.293 5.293a1 1 0 011.414 1.414L7.414 11H19a1 1 0 110 2H7.414l4.293 4.293a1 1 0 01-1.414 1.414l-6-6a1 1 0 010-1.414l6-6z" fill="currentColor"/>
     </svg>
