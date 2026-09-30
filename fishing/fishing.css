@@ -293,6 +293,8 @@
 }
 /* dbg: small, under the exit button (centered under it) */
 .fg-debug-toggle { left: calc(16px + (var(--hud-h) - 32px) / 2); font-size: 11px; opacity: .5; width: 32px; height: 32px; top: calc(var(--fg-safe-top) + 16px + var(--hud-h) + 12px); }
+/* PFL app: debug button hidden for players (the panel still opens with ?debug=1 in the URL) */
+.fg-debug-toggle { display: none !important; }
 /* sound toggle: same round glass button as exit, top right */
 .fg-sound { left: auto; right: 16px; }
 .fg-sound .fg-sound__off { display: none; }
