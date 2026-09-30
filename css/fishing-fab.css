@@ -32,6 +32,41 @@
   transform: scale(0.95);
 }
 
+/* catch counter while the game is minimised (like an unread badge) */
+.fab-fishing__badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  min-width: 24px;
+  height: 24px;
+  padding: 0 7px;
+  border-radius: 12px;
+  background: #ff8a3d;
+  color: #fff;
+  font-family: 'Manrope', var(--font-ui);
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 24px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  box-shadow: 0 0 0 2px var(--bg), 0 2px 6px rgba(0, 0, 0, 0.2);
+  pointer-events: none;
+  animation: fabBadgeIn 0.28s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.fab-fishing__badge[hidden] {
+  display: none;
+}
+
+@keyframes fabBadgeIn {
+  from { transform: scale(0.4); opacity: 0; }
+  to   { transform: scale(1); opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fab-fishing__badge { animation: none; }
+}
+
 /* `translate` (not transform) so the float never fights :active */
 @keyframes fabFishingFloat {
   0%, 100% { translate: 0 0; }
