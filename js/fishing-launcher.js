@@ -14,7 +14,7 @@
 
 import { haptic, showToast } from './utils.js';
 
-const GAME_VERSION = '20260930k';          // cache-busting for the game files
+const GAME_VERSION = '20260930l';          // cache-busting for the game files
 const BASE = 'fishing/';
 const SCRIPTS = ['fishing-engine.js', 'fishing-audio.js', 'fishing-view.js'];
 const SPLASH_MIN_MS = 1200;               // splash stays at least this long
@@ -200,6 +200,37 @@ function bindTgHeader() {
   } catch (e) { /* older clients */ }
 }
 
+// ---- One catch per Telegram launch ----
+// Minimising keeps the game (and the catch) while the user stays in PFL App.
+// Leaving the bot / closing Telegram ends it: every Telegram launch gets a new
+// initData (auth_date + hash), so a different launch id than the saved one
+// means a fresh start → wipe the saved catch. A WebView reload (iOS killed it)
+// keeps the same initData → the catch stays.
+const LAUNCH_KEY = 'pfl.fishing.launch';
+const SESSION_KEY = 'pfl.fishing.session';     // written by fishing-view.js
+
+function telegramLaunchId() {
+  try {
+    const u = window.Telegram?.WebApp?.initDataUnsafe || {};
+    if (u.hash) return String(u.hash);
+    if (u.auth_date) return String(u.auth_date);
+    return window.Telegram?.WebApp?.initData || '';
+  } catch (e) { return ''; }
+}
+
+function resetOnNewLaunch() {
+  const id = telegramLaunchId();
+  if (!id) return;                               // outside Telegram: plain sessionStorage rules
+  const prev = ssGet(LAUNCH_KEY);
+  if (prev && prev !== id) {
+    ssDel(SESSION_KEY);
+    ssDel(ALIVE_KEY);
+    ssDel(RESUMES_KEY);
+    console.log('[Fishing] New Telegram launch → fresh game');
+  }
+  ssSet(LAUNCH_KEY, id);
+}
+
 // ---- Auto-resume after a page restart ----
 // iOS can kill Telegram's WebView mid-game (memory / heat); Telegram then
 // reloads the mini app from scratch on the Fests tab. While the game is open
@@ -285,8 +316,8 @@ export async function openFishingGame({ auto = false } = {}) {
 export async function closeFishingGame() {
   if (!isOpen || closing) return;
   closing = true;
-  if (game?.isRunning?.()) game.stop();     // X already stopped it; this covers other callers
-  stopHeartbeat();                           // closed on purpose → no auto-resume
+  if (game?.isRunning?.()) game.pause();    // the chevron already paused it; this covers other callers
+  stopHeartbeat();                           // minimised on purpose → a reload won't reopen the game
 
   // exit splash: same logo, then the whole view fades back to the app
   showSplash();
@@ -330,6 +361,7 @@ export function initFishingLauncher() {
   }
   updateFab();
 
+  resetOnNewLaunch();
   if (shouldResume()) {
     console.log('[Fishing] Page restarted mid-game → reopening');
     openFishingGame({ auto: true });
