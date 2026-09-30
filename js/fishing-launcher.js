@@ -14,7 +14,7 @@
 
 import { haptic, showToast } from './utils.js';
 
-const GAME_VERSION = '20260930l';          // cache-busting for the game files
+const GAME_VERSION = '20260930m';          // cache-busting for the game files
 const BASE = 'fishing/';
 const SCRIPTS = ['fishing-engine.js', 'fishing-audio.js', 'fishing-view.js'];
 const SPLASH_MIN_MS = 1200;               // splash stays at least this long
@@ -339,6 +339,34 @@ export function isFishingOpen() {
   return isOpen;
 }
 
+// ---- Catch badge on the FAB (game minimised with fish in the bag) ----
+// The count comes from the saved session (fishing-view.js saves it on minimise),
+// so it also shows after a WebView reload in the same Telegram launch and is
+// gone after a new launch (resetOnNewLaunch wipes the session).
+function catchCount() {
+  try {
+    const bag = JSON.parse(ssGet(SESSION_KEY) || 'null')?.bag;
+    return Array.isArray(bag) ? bag.length : 0;
+  } catch (e) { return 0; }
+}
+
+function updateBadge() {
+  const badge = fab?.querySelector('.fab-fishing__badge');
+  if (!badge) return;
+  const n = isOpen || opening ? 0 : catchCount();
+  const text = n > 99 ? '99+' : String(n);
+  if (n > 0) {
+    if (badge.hidden || badge.textContent !== text) {
+      badge.textContent = text;
+      badge.hidden = false;
+    }
+    fab.setAttribute('aria-label', `Повернутись до гри «Рибалка» — в улові ${n}`);
+  } else {
+    badge.hidden = true;
+    fab.setAttribute('aria-label', 'Відкрити гру «Рибалка»');
+  }
+}
+
 // ---- FAB visibility: Fests tab only, hidden while the game is open ----
 function updateFab() {
   if (!fab) return;
@@ -346,6 +374,7 @@ function updateFab() {
   const show = !!festsActive && !isOpen && !opening;
   fab.classList.toggle('is-visible', show);
   document.body.classList.toggle('fishing-fab-visible', show);
+  updateBadge();
 }
 
 // ---- Init ----
@@ -362,6 +391,7 @@ export function initFishingLauncher() {
   updateFab();
 
   resetOnNewLaunch();
+  updateBadge();
   if (shouldResume()) {
     console.log('[Fishing] Page restarted mid-game → reopening');
     openFishingGame({ auto: true });
