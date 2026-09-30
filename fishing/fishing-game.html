@@ -38,9 +38,10 @@
       <div class="fg-target" aria-hidden="true"></div>
 
       <!-- HUD -->
-      <button id="fgExit" class="fg-glass fg-exit" type="button" aria-label="Вийти з гри">
-        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
-          <path d="M5 5 L19 19 M19 5 L5 19" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+      <!-- chevron-down: minimise the game (it keeps its state; «Рибалити!» brings it back) -->
+      <button id="fgExit" class="fg-glass fg-exit" type="button" aria-label="Згорнути гру">
+        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" aria-hidden="true">
+          <path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
       </button>
       <div id="fgStats" class="fg-glass fg-stats" role="button" aria-label="Мій улов" aria-live="polite">

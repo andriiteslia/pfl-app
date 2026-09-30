@@ -920,38 +920,54 @@
     engine.on('schoolMoved', saveSession);
     window.addEventListener('pagehide', saveSession);
 
+    // PFL app: the chevron (was X) MINIMISES the game — pause() keeps everything
+    // exactly where it was (catch, cast, even a fish on the hook) and start()
+    // continues from there. The catch is only restored from sessionStorage on
+    // the first start of a page (e.g. after iOS reloaded the WebView); a new
+    // Telegram launch wipes it (js/fishing-launcher.js).
+    let sessionLoaded = false;
     function start() {
       if (running) return;
       running = true;
       measure();
-      const saved = loadSession();                     // read BEFORE reset (reset saves an empty session)
-      engine.reset();
-      if (saved) engine.importSession(saved);
+      if (!sessionLoaded) {
+        sessionLoaded = true;
+        const saved = loadSession();                   // read BEFORE reset (reset saves an empty session)
+        engine.reset();
+        if (saved) engine.importSession(saved);
+      }
       lockTelegramGestures(true);
       audio.resume();                                  // back on after stop(); no-op before the first tap
       lastTs = 0;
       if (!rafId) rafId = requestAnimationFrame(frame);
     }
 
-    function stop() {
+    // Minimise: freeze the game as it is. Animation, sound, vibration stop,
+    // Telegram swipes go back to the app's setting; the engine keeps its state.
+    function pause() {
       if (!running) return;
       running = false;
       cancelAnimationFrame(rafId);
       rafId = 0;
       audio.drag(0);
-      audio.suspend();                                 // nature + drag loops silent while closed
+      audio.suspend();                                 // nature + drag loops silent while minimised
       stopBiteVibration();
       releaseAllInputs();
       closeBag();
       lockTelegramGestures(false);
-      engine.reset(); // score lives only within the session
+      saveSession();                                   // the catch survives a WebView reload too
     }
 
-    function onExit() {
+    // Full stop + wipe (not used by the app UI any more; kept for completeness)
+    function stop() {
+      pause();
+      engine.reset();
+      clearSession();
+    }
+
+    function onExit() {                                // the chevron: minimise, keep the game
       haptic('light');
-      clearSession();                                  // closing = the session is over
-      stop();
-      clearSession();                                  // stop() saved; the X ends the session for good
+      pause();
       if (typeof opts.onExit === 'function') opts.onExit();
     }
 
@@ -1076,7 +1092,7 @@
     el.root.addEventListener('contextmenu', (e) => e.preventDefault());
 
     console.log('[Fishing] Initialized');
-    return { engine, start, stop, isRunning: () => running };
+    return { engine, start, pause, stop, isRunning: () => running };
   }
 
   // No auto-start in the app: fishing-launcher.js calls initFishingGame() on the first open.
