@@ -264,6 +264,22 @@
 .fg-stat__value.is-bump { animation: fg-bump .4s ease-out; }
 .fg-stats__divider { width: 2px; align-self: stretch; margin: 10px 0; border-radius: 1px; background: var(--hud-divider); }
 
+/* PFL app, Telegram fullscreen (iPhone / Android): the Улов/Вага pill moves up
+   into Telegram's own header row, centred between its «Close» and «⋯» buttons,
+   so it no longer covers the rod. #fishingRoot.is-tg-header is set by
+   js/fishing-launcher.js; the insets are the SDK's CSS variables. */
+.fishing-root.is-tg-header .fg-stats {
+  --pill-h: min(var(--hud-h), calc(var(--tg-content-safe-area-inset-top, 48px) - 6px));
+  top: calc(var(--tg-safe-area-inset-top, 0px)
+            + (var(--tg-content-safe-area-inset-top, 48px) - var(--pill-h)) / 2);
+  height: var(--pill-h);
+  border-radius: calc(var(--pill-h) / 2);
+  padding: 0 16px;
+  gap: 12px;
+}
+.fishing-root.is-tg-header .fg-stat__value { margin-top: 2px; font-size: 16px; }
+.fishing-root.is-tg-header .fg-stats__divider { margin: 8px 0; }
+
 .fg-hud-btn {
   position: absolute;
   top: calc(var(--fg-safe-top) + 14px);
