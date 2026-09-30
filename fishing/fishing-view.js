@@ -14,7 +14,7 @@
        --twitch-hold   0..1   left button hold strength while pressed
        --line-tension  0..1   line tension while fighting (indicator above the lever)
        --line-strain   0..1   time spent in the red zone; 1 = line snaps
-       data-tension    ok | warn | danger   (only while a fish is on)
+       data-tension    ok | warn | danger   (only while a fish is on; on .fg-tension)
        --cast-drag     0..1   cast power preview while swiping
        --cast-aim      -1..1  cast direction preview (left .. right)
        --cast-angle    deg    same as an angle, for rotating an aim arrow
@@ -730,11 +730,26 @@
       }
     }
 
+    // PFL app (performance): each per-frame variable is written on the element
+    // that uses it, not on the game root. A custom property changed on the root
+    // makes the browser restyle the whole screen every frame (10× the style work
+    // while fighting a fish); on the element itself only that small subtree is
+    // restyled. Same values, same look — only where they are stored changed.
+    const gauge = el.root.querySelector('.fg-tension');
+    const biteIndicator = el.root.querySelector('.fg-bite-indicator');
+    const VAR_TARGET = {
+      '--reel-speed': el.lever,          // lever fill + knob
+      '--twitch-hold': el.twitch,        // left button ring
+      '--line-tension': gauge,           // tension gauge fill
+      '--line-strain': gauge,            // red-zone glow
+      '--lure-x': el.splash, '--lure-y': el.splash,
+      '--tip-x': biteIndicator, '--tip-y': biteIndicator,
+    };
     const varCache = {};
     function setVar(name, value) {
       if (varCache[name] === value) return;
       varCache[name] = value;
-      el.root.style.setProperty(name, value);
+      (VAR_TARGET[name] || el.root).style.setProperty(name, value);
     }
 
     let lastFightTick = 0;
@@ -756,8 +771,8 @@
         lastFightTick = s.time;
         haptic('soft');
       }
-      if (el.root.dataset.tension !== zone) {
-        if (zone) el.root.dataset.tension = zone; else delete el.root.dataset.tension;
+      if (gauge.dataset.tension !== zone) {       // on the gauge only (see setVar)
+        if (zone) gauge.dataset.tension = zone; else delete gauge.dataset.tension;
       }
 
       const tip = tipPos();

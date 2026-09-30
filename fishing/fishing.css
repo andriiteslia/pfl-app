@@ -518,8 +518,8 @@
 }
 .fishing-game[data-state="hooked"] .fg-tension,
 .fishing-game[data-state="snagged"] .fg-tension { opacity: .75; transform: none; }
-.fishing-game[data-tension="warn"]   .fg-tension { --tension-color: #ffc93c; }
-.fishing-game[data-tension="danger"] .fg-tension { --tension-color: #ff4a3d; }
+.fg-tension[data-tension="warn"]   { --tension-color: #ffc93c; }
+.fg-tension[data-tension="danger"] { --tension-color: #ff4a3d; }
 
 .fg-tension__bar {
   position: relative;
@@ -532,7 +532,12 @@
 }
 .fg-tension__fill {
   position: absolute; left: 0; right: 0; bottom: 0;
-  height: calc(var(--line-tension, 0) * 100%);
+  height: 100%;
+  /* GPU transform instead of `height` → no layout every frame (same look:
+     the bar's rounded frame clips the fill) */
+  transform: scaleY(var(--line-tension, 0));
+  transform-origin: 50% 100%;
+  will-change: transform;
   background: var(--tension-color);
   transition: background-color .15s;
 }
@@ -543,9 +548,26 @@
 }
 .fg-tension__mark--warn   { bottom: calc(var(--tension-warn, .6) * 100%); }
 .fg-tension__mark--danger { bottom: calc(var(--tension-danger, .85) * 100%); }
-.fishing-game[data-tension="danger"] .fg-tension__bar {
+/* red zone: white outline + glow that grows with the strain. Was one shadow
+   whose blur changed every frame (a repaint each frame); now a fixed small glow
+   on the bar + a fixed big glow layer underneath whose opacity follows the
+   strain (opacity is cheap for the GPU). Looks the same. */
+.fg-tension::before {
+  content: '';
+  position: absolute; inset: 0;
+  border-radius: 10px;
+  box-shadow: 0 0 20px #ff4a3d;
+  opacity: 0;
+  will-change: opacity;
+  pointer-events: none;
+}
+.fg-tension[data-tension="danger"]::before {
+  opacity: var(--line-strain, 0);
   animation: fg-tension-shake .12s linear infinite;
-  box-shadow: inset 0 0 0 2px #fff, 0 0 calc(4px + var(--line-strain, 0) * 16px) #ff4a3d;
+}
+.fg-tension[data-tension="danger"] .fg-tension__bar {
+  animation: fg-tension-shake .12s linear infinite;
+  box-shadow: inset 0 0 0 2px #fff, 0 0 4px #ff4a3d;
 }
 @keyframes fg-tension-shake {
   25% { transform: translateX(-1.5px); }
