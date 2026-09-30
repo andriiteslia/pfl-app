@@ -57,6 +57,7 @@ body.fishing-fab-visible #app-content {
   position: fixed;
   inset: 0;
   z-index: 2000;
+  background: var(--bg);             /* same as the app (Fests tab), light/dark theme; seen around the game on wide screens */
   /* no double-tap / pinch zoom anywhere in the game (splash, HUD, catch sheet).
      The catch list keeps its own `touch-action: pan-y` so it still scrolls. */
   touch-action: none;
