@@ -6,14 +6,15 @@
      at least SPLASH_MIN_MS. On the first open the game is loaded lazily behind it:
      fishing/fishing.css, fishing-game.html, fishing-engine.js →
      fishing-audio.js → fishing-view.js, all artwork (fish too) and sounds.
-   - Full-screen view; closes only via the game's X icon.
+   - Full-screen view; closes only via the game's X icon. The same splash is
+     shown on exit too (SPLASH_MIN_MS), then the whole view fades back to the app.
    - start() on open / stop() on close: animation, sound, vibration and
      Telegram swipes are all stopped while the game is closed.
    ============================================ */
 
 import { haptic, showToast } from './utils.js';
 
-const GAME_VERSION = '20260930d';          // cache-busting for the game files
+const GAME_VERSION = '20260930f';          // cache-busting for the game files
 const BASE = 'fishing/';
 const SCRIPTS = ['fishing-engine.js', 'fishing-audio.js', 'fishing-view.js'];
 const SPLASH_MIN_MS = 1200;               // splash stays at least this long
@@ -30,6 +31,7 @@ let game = null;          // { start, stop, isRunning } from fishing-view.js
 let loading = null;       // Promise while the first load is in progress
 let isOpen = false;
 let opening = false;       // guards double taps while loading
+let closing = false;       // exit splash is on screen
 
 // ---- Lazy loading helpers ----
 const withVersion = (url) => `${url}?v=${GAME_VERSION}`;
@@ -142,6 +144,41 @@ function ensureLoaded() {
   return loading;
 }
 
+// ---- No zoom while the game is open ----
+// 1) touch-action: none on #fishingRoot (css/fishing-fab.css)
+// 2) viewport meta locked to scale 1 while open (restored on close)
+// 3) iOS: block double-tap outside buttons, dblclick and pinch "gesture*" events
+const VIEWPORT_LOCKED = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no';
+let viewportOriginal = null;
+
+function lockZoom(lock) {
+  const meta = document.querySelector('meta[name="viewport"]');
+  if (!meta) return;
+  if (lock) {
+    if (viewportOriginal === null) viewportOriginal = meta.getAttribute('content') || '';
+    meta.setAttribute('content', VIEWPORT_LOCKED);
+  } else if (viewportOriginal !== null) {
+    meta.setAttribute('content', viewportOriginal);
+    viewportOriginal = null;
+  }
+}
+
+function bindNoZoom() {
+  const DOUBLE_TAP_MS = 350;
+  let lastTouchEnd = 0;
+  root.addEventListener('touchend', (e) => {
+    const now = e.timeStamp || Date.now();
+    const onButton = e.target.closest('button, [role="button"], .fg-control, [data-close]');
+    // a quick second tap on the scene / splash / sheet: cancel the browser's zoom.
+    // Buttons are left alone so their clicks keep working.
+    if (!onButton && now - lastTouchEnd < DOUBLE_TAP_MS) e.preventDefault();
+    lastTouchEnd = now;
+  }, { passive: false });
+  root.addEventListener('dblclick', (e) => e.preventDefault());
+  ['gesturestart', 'gesturechange', 'gestureend'].forEach((ev) =>
+    root.addEventListener(ev, (e) => e.preventDefault(), { passive: false }));
+}
+
 // ---- Telegram fullscreen header ----
 // In fullscreen Telegram draws its «Close» / «⋯» buttons over the top of the
 // page (contentSafeAreaInset). The game puts its Улов/Вага pill in that row.
@@ -165,10 +202,11 @@ function bindTgHeader() {
 
 // ---- Open / close ----
 export async function openFishingGame() {
-  if (isOpen || opening) return;
+  if (isOpen || opening || closing) return;
   opening = true;
   haptic('light');
-  if (!root) { createRoot(); bindTgHeader(); }
+  if (!root) { createRoot(); bindTgHeader(); bindNoZoom(); }
+  lockZoom(true);
   updateTgHeader();
 
   // splash on every open; on the first one the game + all assets load behind it
@@ -180,6 +218,7 @@ export async function openFishingGame() {
     await Promise.all([ensureLoaded(), wait(SPLASH_MIN_MS)]);
   } catch (e) {
     console.warn('[Fishing] Failed to load:', e);
+    lockZoom(false);
     root.hidden = true;
     document.documentElement.classList.remove('fishing-open');
     opening = false;
@@ -198,11 +237,22 @@ export async function openFishingGame() {
   console.log('[Fishing] Opened');
 }
 
-export function closeFishingGame() {
-  if (!isOpen) return;
-  isOpen = false;
+export async function closeFishingGame() {
+  if (!isOpen || closing) return;
+  closing = true;
   if (game?.isRunning?.()) game.stop();     // X already stopped it; this covers other callers
+
+  // exit splash: same logo, then the whole view fades back to the app
+  showSplash();
+  await wait(SPLASH_MIN_MS);
+  root.classList.add('is-closing');
+  await wait(SPLASH_FADE_MS);
   root.hidden = true;
+  root.classList.remove('is-closing');
+
+  isOpen = false;
+  closing = false;
+  lockZoom(false);
   document.documentElement.classList.remove('fishing-open');
   updateFab();
   console.log('[Fishing] Closed');
