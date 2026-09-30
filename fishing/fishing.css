@@ -48,6 +48,23 @@
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
 }
+/* PFL app: on wide screens (Telegram Desktop / Web) the game is a card of
+   at most 720px, centred, 20px from the top and bottom, 24px corners; around
+   it the app background (#fishingRoot, var(--bg)). On phones it stays full
+   screen. The game measures its own box (#fgStage), so layout and input follow. */
+.fishing-game {
+  max-width: 720px;
+  margin: 0 auto;                    /* fixed + left/right 0 + max-width → centred */
+}
+@media (min-width: 760px) {
+  .fishing-root .fishing-game {      /* beats the later `.fishing-game { inset: 0 }` */
+    top: 20px;
+    bottom: 20px;
+    border-radius: 24px;
+    box-shadow: 0 12px 40px rgba(15, 23, 42, 0.18);
+  }
+}
+
 /* zero-specificity (same as the app's `img {}`) so every .fg-* rule still wins */
 :where(.fishing-game) img { max-width: none; display: inline; }
 :where(.fishing-game) img[hidden] { display: none; }
@@ -352,7 +369,7 @@
 /* two-line message (e.g. perch school found): smaller, wraps, stays on screen */
 .fg-toast[data-kind="school"] {
   font-size: 20px; line-height: 1.25; text-align: center;
-  white-space: pre-line; width: max-content; max-width: calc(100vw - 48px);
+  white-space: pre-line; width: max-content; max-width: calc(min(100vw, 720px) - 48px);
   color: #e9ffef;
 }
 .fg-toast[data-kind="school"].is-visible { animation-duration: 2.4s; }
