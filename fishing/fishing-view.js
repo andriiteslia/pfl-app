@@ -861,7 +861,14 @@
         `translate(${lure[0].toFixed(2)} ${lure[1].toFixed(2)}) rotate(${(-baitAng * 180 / Math.PI).toFixed(2)}) translate(${(-w / 2).toFixed(2)} ${(r * 0.6 - BAIT.padTop * len).toFixed(2)})`);
     }
 
+    // PFL app: draw at most ~60 frames/s. iPhones with ProMotion fire rAF at
+    // 120 Hz, which doubles the work (heat → iOS may kill the WebView). The
+    // engine is driven by real time (dt), so gameplay and balance don't change.
+    const FRAME_MS = 1000 / 60, FRAME_SLACK_MS = 2;
+    let nextFrameTs = 0;
     function frame(ts) {
+      if (lastTs && ts < nextFrameTs - FRAME_SLACK_MS) { rafId = requestAnimationFrame(frame); return; }
+      nextFrameTs = lastTs && nextFrameTs + FRAME_MS > ts ? nextFrameTs + FRAME_MS : ts + FRAME_MS;
       const dt = lastTs ? Math.min(0.05, (ts - lastTs) / 1000) : 0;
       lastTs = ts;
       if (!bagOpen) engine.update(dt);   // the game is paused while the catch summary is open
