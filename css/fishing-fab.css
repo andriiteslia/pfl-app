@@ -57,10 +57,22 @@ body.fishing-fab-visible #app-content {
   position: fixed;
   inset: 0;
   z-index: 2000;
+  /* no double-tap / pinch zoom anywhere in the game (splash, HUD, catch sheet).
+     The catch list keeps its own `touch-action: pan-y` so it still scrolls. */
+  touch-action: none;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-text-size-adjust: 100%;
 }
 
 .fishing-root[hidden] {
   display: none;
+}
+
+/* exit: after the splash the whole view fades back to the app */
+.fishing-root.is-closing {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;     /* SPLASH_FADE_MS in fishing-launcher.js */
 }
 
 /* ---- Splash while the game loads (first open) ---- */
