@@ -646,7 +646,7 @@
 }
 .fg-bag__head {
   display: flex; align-items: center; justify-content: space-between; gap: 12px;
-  padding: 18px 16px 12px 20px;
+  padding: 18px 20px 12px 20px;            /* PFL app: 20px on both sides, like the list */
   border-bottom: 1px solid #d5ddf0;
 }
 .fg-bag__title { font-size: 20px; font-weight: 800; line-height: 1.1; }
@@ -666,7 +666,7 @@
 .fg-bag__close:active { transform: scale(.92); }
 .fg-bag__list {
   list-style: none; margin: 0;
-  padding: 6px 12px 12px;
+  padding: 6px 20px 12px;                   /* PFL app: rows on the same 20px edges as the header */
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
@@ -674,13 +674,13 @@
 }
 .fg-bag__item {
   display: flex; align-items: center; gap: 12px;
-  padding: 8px 8px;
+  padding: 8px 0;
 }
 .fg-bag__item + .fg-bag__item { border-top: 1px solid #dfe6f4; }
 .fg-bag__num {
-  flex: none; width: 22px;
+  flex: none; min-width: 18px;              /* PFL app: number starts on the title's left edge */
   font-size: 13px; font-weight: 800; color: var(--hud-label);
-  text-align: right; font-variant-numeric: tabular-nums;
+  text-align: left; font-variant-numeric: tabular-nums;
 }
 .fg-bag__pic {
   position: relative;
