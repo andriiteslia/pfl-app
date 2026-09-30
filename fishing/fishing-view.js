@@ -29,6 +29,9 @@
 
   const { createFishingEngine, FISHING_CONFIG } = window.PFLFishing;
   const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+  // PFL app: bump when a species picture is replaced (cache-busting; the launcher preloads the same URLs)
+  const FISH_ART_V = '2';
+  const fishPic = (sp) => `./assets/fishing/${sp}.webp?v=${FISH_ART_V}`;
   const lerp = (a, b, t) => a + (b - a) * t;
 
   // ---- Telegram helpers (same pattern as utils.js haptic) ------------------
@@ -421,7 +424,7 @@
       im.dataset.sp = sp;
       im.decoding = 'sync';
       im.onerror = () => catchPicFailed.add(sp);
-      im.src = `./assets/fishing/${sp}.webp`;  // 540px copies of the PNGs (light on memory)
+      im.src = fishPic(sp);  // 540px copies of the PNGs (light on memory)
       el.catchImg.parentNode.insertBefore(im, el.catchImg);
       catchPics[sp] = im;
     });
@@ -999,7 +1002,7 @@
         const name = FISHING_CONFIG.species[f.species]?.name || 'Риба';
         li.innerHTML =
           `<span class="fg-bag__num">${i + 1}</span>` +
-          `<span class="fg-bag__pic"><img src="./assets/fishing/${f.species}.webp" alt="" draggable="false" loading="lazy"></span>` +
+          `<span class="fg-bag__pic"><img src="${fishPic(f.species)}" alt="" draggable="false" loading="lazy"></span>` +
           `<span class="fg-bag__name"></span>` +
           `<span class="fg-bag__kg">${formatWeight(f.kg)}</span>`;
         li.querySelector('.fg-bag__name').textContent = name;
