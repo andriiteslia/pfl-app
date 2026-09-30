@@ -2,8 +2,8 @@
    PFL App — Fishing mini-game launcher
    --------------------------------------------
    - FAB «Рибалити!» above the tab bar, only on the Fests tab.
-   - First tap shows a splash (assets/fishing/game-logo.png, levitating) for
-     at least SPLASH_MIN_MS while the game is loaded lazily in the background:
+   - Every open shows a splash (assets/fishing/game-logo.png, levitating) for
+     at least SPLASH_MIN_MS. On the first open the game is loaded lazily behind it:
      fishing/fishing.css, fishing-game.html, fishing-engine.js →
      fishing-audio.js → fishing-view.js, all artwork (fish too) and sounds.
    - Full-screen view; closes only via the game's X icon.
@@ -13,7 +13,7 @@
 
 import { haptic, showToast } from './utils.js';
 
-const GAME_VERSION = '20260930b';          // cache-busting for the game files
+const GAME_VERSION = '20260930d';          // cache-busting for the game files
 const BASE = 'fishing/';
 const SCRIPTS = ['fishing-engine.js', 'fishing-audio.js', 'fishing-view.js'];
 const SPLASH_MIN_MS = 1200;               // splash stays at least this long
@@ -142,31 +142,50 @@ function ensureLoaded() {
   return loading;
 }
 
+// ---- Telegram fullscreen header ----
+// In fullscreen Telegram draws its «Close» / «⋯» buttons over the top of the
+// page (contentSafeAreaInset). The game puts its Улов/Вага pill in that row.
+const tg = window.Telegram?.WebApp;
+
+function updateTgHeader() {
+  if (!root) return;
+  let inHeader = false;
+  try {
+    inHeader = !!tg?.isFullscreen && (tg.contentSafeAreaInset?.top || 0) > 0;
+  } catch (e) { /* older clients */ }
+  root.classList.toggle('is-tg-header', inHeader);
+}
+
+function bindTgHeader() {
+  try {
+    ['fullscreenChanged', 'safeAreaChanged', 'contentSafeAreaChanged', 'viewportChanged']
+      .forEach((ev) => tg?.onEvent?.(ev, updateTgHeader));
+  } catch (e) { /* older clients */ }
+}
+
 // ---- Open / close ----
 export async function openFishingGame() {
   if (isOpen || opening) return;
   opening = true;
   haptic('light');
-  const firstOpen = !game;
-  if (!root) createRoot();
+  if (!root) { createRoot(); bindTgHeader(); }
+  updateTgHeader();
 
-  if (firstOpen) {
-    // splash right away; game + all assets load behind it
-    showSplash();
-    root.hidden = false;
-    document.documentElement.classList.add('fishing-open');
+  // splash on every open; on the first one the game + all assets load behind it
+  showSplash();
+  root.hidden = false;
+  document.documentElement.classList.add('fishing-open');
+  updateFab();
+  try {
+    await Promise.all([ensureLoaded(), wait(SPLASH_MIN_MS)]);
+  } catch (e) {
+    console.warn('[Fishing] Failed to load:', e);
+    root.hidden = true;
+    document.documentElement.classList.remove('fishing-open');
+    opening = false;
     updateFab();
-    try {
-      await Promise.all([ensureLoaded(), wait(SPLASH_MIN_MS)]);
-    } catch (e) {
-      console.warn('[Fishing] Failed to load:', e);
-      root.hidden = true;
-      document.documentElement.classList.remove('fishing-open');
-      opening = false;
-      updateFab();
-      showToast('Не вдалося завантажити гру', 2500);
-      return;
-    }
+    showToast('Не вдалося завантажити гру', 2500);
+    return;
   }
 
   opening = false;
@@ -175,7 +194,7 @@ export async function openFishingGame() {
   document.documentElement.classList.add('fishing-open');
   updateFab();
   game.start();
-  if (firstOpen) hideSplash();               // game is already drawing under the fading splash
+  hideSplash();                              // game is already drawing under the fading splash
   console.log('[Fishing] Opened');
 }
 
