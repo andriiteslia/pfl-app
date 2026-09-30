@@ -13,7 +13,7 @@ import { initPartners } from './partners.js';
 import { fetchAppStyles } from './api.js';
 import { $ } from './utils.js';
 import { initPullToRefresh } from './pull-to-refresh.js';
-import { initFishingLauncher } from './fishing-launcher.js';
+import { initFishingLauncher } from './fishing-launcher.js?v=20260930d';
 
 // ---- Theme Management ----
 function updateMetaThemeColor(color) {
