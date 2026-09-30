@@ -14,7 +14,7 @@
 
 import { haptic, showToast } from './utils.js';
 
-const GAME_VERSION = '20260930g';          // cache-busting for the game files
+const GAME_VERSION = '20260930h';          // cache-busting for the game files
 const BASE = 'fishing/';
 const SCRIPTS = ['fishing-engine.js', 'fishing-audio.js', 'fishing-view.js'];
 const SPLASH_MIN_MS = 1200;               // splash stays at least this long
@@ -200,11 +200,55 @@ function bindTgHeader() {
   } catch (e) { /* older clients */ }
 }
 
+// ---- Auto-resume after a page restart ----
+// iOS can kill Telegram's WebView mid-game (memory / heat); Telegram then
+// reloads the mini app from scratch on the Fests tab. While the game is open
+// we keep a heartbeat in sessionStorage (it survives that reload, and the
+// catch is already kept there by the game). On start, a fresh heartbeat means
+// the page died while playing → open the game again right away.
+const ALIVE_KEY = 'pfl.fishing.alive';        // last heartbeat, ms
+const RESUMES_KEY = 'pfl.fishing.resumes';    // recent auto-resume times (crash-loop guard)
+const HEARTBEAT_MS = 3000;
+const RESUME_WINDOW_MS = 60000;               // heartbeat older than this → don't resume
+const MAX_RESUMES = 3;                        // …within RESUME_LOOP_MS, then give up
+const RESUME_LOOP_MS = 120000;
+let heartbeatTimer = 0;
+
+function ssGet(k) { try { return sessionStorage.getItem(k); } catch (e) { return null; } }
+function ssSet(k, v) { try { sessionStorage.setItem(k, v); } catch (e) { /* private mode / full */ } }
+function ssDel(k) { try { sessionStorage.removeItem(k); } catch (e) { /* n/a */ } }
+
+function startHeartbeat() {
+  const beat = () => ssSet(ALIVE_KEY, String(Date.now()));
+  beat();
+  clearInterval(heartbeatTimer);
+  heartbeatTimer = setInterval(beat, HEARTBEAT_MS);
+}
+
+function stopHeartbeat() {
+  clearInterval(heartbeatTimer);
+  heartbeatTimer = 0;
+  ssDel(ALIVE_KEY);
+}
+
+function shouldResume() {
+  const last = Number(ssGet(ALIVE_KEY)) || 0;
+  ssDel(ALIVE_KEY);
+  if (!last || Date.now() - last > RESUME_WINDOW_MS) return false;
+  let recent = [];
+  try { recent = JSON.parse(ssGet(RESUMES_KEY) || '[]'); } catch (e) { recent = []; }
+  recent = recent.filter((t) => Date.now() - t < RESUME_LOOP_MS);
+  if (recent.length >= MAX_RESUMES) return false;   // keeps dying → stay in the app
+  recent.push(Date.now());
+  ssSet(RESUMES_KEY, JSON.stringify(recent));
+  return true;
+}
+
 // ---- Open / close ----
-export async function openFishingGame() {
+export async function openFishingGame({ auto = false } = {}) {
   if (isOpen || opening || closing) return;
   opening = true;
-  haptic('light');
+  if (!auto) haptic('light');
   if (!root) { createRoot(); bindTgHeader(); bindNoZoom(); }
   lockZoom(true);
   updateTgHeader();
@@ -233,6 +277,7 @@ export async function openFishingGame() {
   document.documentElement.classList.add('fishing-open');
   updateFab();
   game.start();
+  startHeartbeat();
   hideSplash();                              // game is already drawing under the fading splash
   console.log('[Fishing] Opened');
 }
@@ -241,6 +286,7 @@ export async function closeFishingGame() {
   if (!isOpen || closing) return;
   closing = true;
   if (game?.isRunning?.()) game.stop();     // X already stopped it; this covers other callers
+  stopHeartbeat();                           // closed on purpose → no auto-resume
 
   // exit splash: same logo, then the whole view fades back to the app
   showSplash();
@@ -276,12 +322,17 @@ export function initFishingLauncher() {
   fab = document.getElementById('fabFishing');
   if (!fab) return;
 
-  fab.addEventListener('click', openFishingGame);
+  fab.addEventListener('click', () => openFishingGame());
 
   const festsTab = document.getElementById('tab-fests');
   if (festsTab) {
     new MutationObserver(updateFab).observe(festsTab, { attributes: true, attributeFilter: ['class'] });
   }
   updateFab();
+
+  if (shouldResume()) {
+    console.log('[Fishing] Page restarted mid-game → reopening');
+    openFishingGame({ auto: true });
+  }
   console.log('[Fishing] Launcher ready');
 }
