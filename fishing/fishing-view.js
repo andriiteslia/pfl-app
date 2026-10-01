@@ -793,7 +793,7 @@
     function lurePos(tip) {
       const cfg = FISHING_CONFIG.cast;
       const landP = s.castDistance / cfg.maxDistanceM;
-      const hang = [tip[0], tip[1] + H * 0.045];
+      const hang = [tip[0], tip[1] + H * 0.185];   // PFL app: line from the tip to the jig head while waiting to cast (was 0.045)
       if (s.state === 'idle' || s.state === 'broken') return hang; // hanging from the tip
       if (s.state === 'casting') {
         const k = clamp(s.stateTime / s.flightDuration);
