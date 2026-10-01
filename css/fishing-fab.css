@@ -171,3 +171,20 @@ body.fishing-fab-visible #app-content {
 @media (prefers-reduced-motion: reduce) {
   .fishing-splash__logo { animation: none; }
 }
+
+/* small version label at the bottom of the splash (js: GAME_RELEASE) */
+.fishing-splash__version {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: calc(max(env(safe-area-inset-bottom, 0px),
+    var(--tg-safe-area-inset-bottom, 0px) + var(--tg-content-safe-area-inset-bottom, 0px)) + 24px);
+  text-align: center;
+  font-family: 'Manrope', var(--font-ui);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: #1e2a4f;
+  opacity: 0.45;
+  pointer-events: none;
+}
