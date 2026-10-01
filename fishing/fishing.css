@@ -19,7 +19,7 @@
   --glass-blur: 14px;
   --hud-ink: #1e2a4f;       /* values, icon */
   --hud-label: #56679f;     /* labels */
-  --hud-divider: rgba(255, 255, 255, .95);
+  --hud-divider: rgba(30, 42, 79, .12);   /* on the white pill (was white on glass) */
   --hud-h: 48px;
   /* Safe areas. The app page has no viewport-fit=cover, so env() is 0 there;
      in Telegram fullscreen the SDK's --tg-* insets keep the HUD clear of the
@@ -230,13 +230,13 @@
 }
 .fishing-game.is-aiming .fg-aim { opacity: 1; }
 
-/* ---- HUD (glass) ------------------------------------------------------- */
+/* ---- HUD: chevron, Улов/Вага pill, sound --------------------------------- */
+/* PFL app (v1.12): plain white instead of glass — white 80%, 2px white border,
+   Figma drop shadow X0 Y4 Blur8 Spread0 #0C1F2B 20%. No backdrop blur (also lighter for the GPU). */
 .fg-glass {
-  background: var(--glass-bg);
-  border: 1.5px solid var(--glass-border);
-  box-shadow: var(--glass-shadow), inset 0 1px 0 rgba(255,255,255,.7);
-  backdrop-filter: blur(var(--glass-blur)) saturate(1.3);
-  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.3);
+  background: rgba(255, 255, 255, .8);
+  border: 2px solid #fff;
+  box-shadow: 0 4px 8px 0 rgba(12, 31, 43, .2);
 }
 .fg-exit {
   position: absolute;
@@ -268,7 +268,7 @@
   transition: transform .12s;
 }
 .fg-stats:active { transform: translateX(-50%) scale(.95); }
-.fg-stat { min-width: 44px; }
+.fg-stat { min-width: 0; }               /* width follows the text: «Улов» stays narrow, «Вага» grows with the number */
 .fg-stat__label {
   font-size: 10px; font-weight: 800; line-height: 1;
   letter-spacing: .02em; text-transform: uppercase;
