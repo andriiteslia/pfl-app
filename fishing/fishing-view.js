@@ -106,7 +106,7 @@
     playBite(kind, sp);
   }
 
-  let lastBite = null;                         // for the haptics test panel: what the last real bite sent
+  let lastBite = null;                         // what the last bite sent (handy when debugging)
   function playBite(kind, sp) {
     stopBiteVibration();
     const v = BITE_VIBRATION[kind];
@@ -340,8 +340,7 @@
       el.root.style.setProperty('--cast-drag', '0');
       const power = sw?.power;
       if (sw && engine.cast(sw.power, sw.aim)) {
-        haptic(power > 0.66 ? 'heavy' : power > 0.33 ? 'medium' : 'light');
-        bendV += 14; // rod whips forward
+        bendV += 14; // rod whips forward (PFL app: no vibration on the cast)
       }
     }
 
@@ -537,8 +536,7 @@
     });
 
     engine.on('splash', ({ distance }) => {
-      haptic('light');
-      audio.splash(distance);
+      audio.splash(distance);                         // PFL app: no vibration when the lure lands
       el.splash.classList.remove('is-on');
       void el.splash.getBoundingClientRect();
       el.splash.classList.add('is-on');
@@ -880,6 +878,15 @@
     }
 
     let lastFightTick = 0;
+    // PFL app: tension-zone vibration.
+    //   yellow: one 'warning' when the gauge enters it (from green), then a reminder every 1.5 s;
+    //   red: much more often — every 0.25 s on iPhone (warning only works there), heavy impacts every 0.15 s on Android.
+    const ZONE_VIB = { yellowRepeatS: 1.5, redEveryIOS: 0.25, redEveryAndroid: 0.15 };
+    let lastZone = '', lastYellowAt = -10;
+    function zoneWarn() {
+      if (IOS_HAPTICS) rawWarn();
+      else { try { tg?.HapticFeedback?.notificationOccurred('warning'); } catch (e) { /* n/a */ } }
+    }
     function render(dt) {
       updateSpring(dt);
 
@@ -892,13 +899,20 @@
       // fight feedback: warning pulses in the red zone, soft pulses while the fish pulls
       const tc = FISHING_CONFIG.tension;
       const zone = s.state !== 'hooked' && s.state !== 'snagged' ? '' : s.tension >= tc.danger ? 'danger' : s.tension >= tc.warn ? 'warn' : 'ok';
-      if (zone === 'danger' && s.time - lastFightTick > 0.15) {
+      if (zone === 'warn' && lastZone === 'danger') lastYellowAt = s.time;   // back from red: no instant yellow buzz
+      if (zone === 'warn' && (lastZone === 'ok' || lastZone === '')) {          // entered yellow
+        zoneWarn(); lastYellowAt = s.time;
+      } else if (zone === 'warn' && s.time - lastYellowAt >= ZONE_VIB.yellowRepeatS) {
+        zoneWarn(); lastYellowAt = s.time;
+      }
+      if (zone === 'danger' && s.time - lastFightTick > (IOS_HAPTICS ? ZONE_VIB.redEveryIOS : ZONE_VIB.redEveryAndroid)) {
         lastFightTick = s.time;
-        haptic('heavy');
-      } else if (s.state === 'hooked' && s.fishPull > 0.5 && s.time - lastFightTick > 0.22) {
+        if (IOS_HAPTICS) rawWarn(); else haptic('heavy');
+      } else if (zone !== 'danger' && s.state === 'hooked' && s.fishPull > 0.5 && s.time - lastFightTick > 0.22) {
         lastFightTick = s.time;
         haptic('soft');
       }
+      lastZone = zone;
       if (gauge.dataset.tension !== zone) {       // on the gauge only (see setVar)
         if (zone) gauge.dataset.tension = zone; else delete gauge.dataset.tension;
       }
@@ -1158,71 +1172,7 @@
       el.bag.hidden = true;
       lastTs = 0;                         // no time jump after the pause
     }
-    // Short tap on the Улов/Вага pill = catch summary; HOLD it 1 s = hidden haptics test (PFL app).
-    let statsPressTimer = 0, statsLongPress = false;
-    el.stats.addEventListener('pointerdown', () => {
-      statsLongPress = false;
-      clearTimeout(statsPressTimer);
-      statsPressTimer = setTimeout(() => { statsLongPress = true; openHapticTest(); }, 1000);
-    });
-    ['pointerup', 'pointercancel', 'pointerleave'].forEach((ev) =>
-      el.stats.addEventListener(ev, () => clearTimeout(statsPressTimer)));
-    el.stats.addEventListener('click', () => {
-      if (statsLongPress) { statsLongPress = false; return; }
-      openBag();
-    });
-
-    // ---- Hidden haptics test panel (to see what this phone actually feels) ----
-    let htest = null;
-    function openHapticTest() {
-      if (bagOpen) return;
-      releaseAllInputs();
-      bagOpen = true;                                 // pauses the game like the catch summary
-      if (!htest) {
-        htest = document.createElement('div');
-        htest.className = 'fg-htest';
-        const B = (label, fn) => ({ label, fn });
-        const groups = [
-          ['Удар (impact)', ['light', 'medium', 'heavy', 'rigid', 'soft'].map((t) => B(t, () => { try { tg?.HapticFeedback?.impactOccurred(t); } catch (e) {} return 'impact ' + t; }))],
-          ['Сповіщення (notification)', ['success', 'warning', 'error'].map((t) => B(t, () => { try { tg?.HapticFeedback?.notificationOccurred(t); } catch (e) {} return 'notification ' + t; }))],
-          ['Інше', [B('selection', () => { try { tg?.HapticFeedback?.selectionChanged(); } catch (e) {} return 'selection'; })]],
-          ['Клювання (як у грі)', [
-            B('одинарне', () => { playBite('strong'); return 'bite single'; }),
-            B('подвійне', () => { playBite('double'); return 'bite double'; }),
-            B('потрійне', () => { playBite('triple'); return 'bite triple'; }),
-          ]],
-        ];
-        htest.innerHTML = `<div class="fg-htest__sheet" role="dialog" aria-label="Тест вібро">
-          <div class="fg-htest__head"><b>Тест вібро</b><button type="button" class="fg-htest__close" aria-label="Закрити">✕</button></div>
-          <div class="fg-htest__info"></div><div class="fg-htest__groups"></div><div class="fg-htest__log">Натисни кнопку — відчуваєш?</div></div>`;
-        const box = htest.querySelector('.fg-htest__groups');
-        groups.forEach(([title, btns]) => {
-          const g = document.createElement('div');
-          g.className = 'fg-htest__group';
-          g.innerHTML = `<div class="fg-htest__gtitle">${title}</div>`;
-          btns.forEach(({ label, fn }) => {
-            const b = document.createElement('button');
-            b.type = 'button'; b.textContent = label;
-            b.addEventListener('click', () => { htest.querySelector('.fg-htest__log').textContent = 'надіслано: ' + fn(); });
-            g.appendChild(b);
-          });
-          box.appendChild(g);
-        });
-        htest.querySelector('.fg-htest__close').addEventListener('click', closeHapticTest);
-        el.root.appendChild(htest);
-      }
-      const lb = lastBite
-        ? `Останнє клювання: ${lastBite.species}, ${lastBite.kind}, ${lastBite.n} поштовх(ів), ${lastBite.at.toLocaleTimeString()}${lastBite.tg ? '' : ' (без Telegram)'}`
-        : 'Клювань ще не було';
-      htest.querySelector('.fg-htest__info').textContent =
-        `Telegram ${tg?.version || '—'} · ${tg?.platform || 'browser'} · HapticFeedback: ${tg?.HapticFeedback ? 'є' : 'нема'}\n${lb}`;
-      htest.hidden = false;
-    }
-    function closeHapticTest() {
-      if (htest) htest.hidden = true;
-      bagOpen = false;
-      lastTs = 0;                                     // no time jump after the pause
-    }
+    el.stats.addEventListener('click', openBag);
     el.bag.addEventListener('click', (e) => { if (e.target.closest('[data-close]')) closeBag(); });
 
     // ---- Bind ---------------------------------------------------------------
