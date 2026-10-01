@@ -321,6 +321,7 @@
       inSchool: false,     // the lure is in the school spot right now
       biteInSchool: false, // the current bite happened in the spot
       catchFromSchool: false,
+      biteReady: false,        // PFL app: species already picked at the bite (see prepareBite)
       weightKg: 0,
       fishPower: 1,
       onBottom: false,     // the lure lies on the bottom
@@ -394,6 +395,7 @@
       s.stats.casts++;
       s.castNo = s.stats.casts;
       s.firstFishPending = false;
+      s.biteReady = false;
       liftFromBottom();
       s.biteOnPause = false;
       s.species = null;
@@ -700,10 +702,23 @@
       return st;
     }
 
-    function hook() {
-      const f = config.fight;
+    // PFL app: the fish is chosen at the BITE (was: at the hookset), so the bite
+    // vibration can differ per species. Same rules and odds — the lure moves
+    // less than a second between the two moments. A missed bite already lost
+    // the fish (firstFishPending is cleared on miss), so nothing else changes.
+    function prepareBite() {
       s.catchType = rng() < config.bite.fishChance ? 'fish' : 'crab';
       pickSpecies();
+      s.biteReady = true;
+    }
+
+    function hook() {
+      const f = config.fight;
+      if (!s.biteReady) {                          // safety: bite without prepareBite()
+        s.catchType = rng() < config.bite.fishChance ? 'fish' : 'crab';
+        pickSpecies();
+      }
+      s.biteReady = false;
       s.style = fightStyle();
       s.fishRunning = true;
       s.fishEffort = s.style.start > 1 ? 0.8 : 0;   // pike: explodes right away
@@ -1037,8 +1052,9 @@
               s.biteInSchool = false;
               liftFromBottom();
               s.stats.bites++;
+              prepareBite();
               setState('bite');
-              emit('bite');
+              emit('bite', { species: s.species, type: s.catchType });
             }
             break;
           }
@@ -1048,8 +1064,9 @@
             s.biteInSchool = s.inSchool;
             liftFromBottom();
             s.stats.bites++;
+            prepareBite();
             setState('bite');
-            emit('bite');
+            emit('bite', { species: s.species, type: s.catchType });
           }
           break;
 
@@ -1057,6 +1074,7 @@
           // Lure is held by the fish — no movement. Waiting for the hookset.
           if (s.stateTime >= b.hookWindowS) {
             s.firstFishPending = false;
+            s.biteReady = false;
             s.stats.missed++;
             setState('missed');
             emit('miss');
