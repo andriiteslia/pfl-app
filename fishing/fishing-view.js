@@ -570,11 +570,16 @@
       const t = s.time;
       switch (s.state) {
         case 'bite':   return 0.55 + 0.4 * Math.abs(Math.sin(t * 22));   // nervous pecks
-        case 'hooked':
+        case 'hooked': {
           // Fish on: the rod is loaded; when the fish runs away it bends much harder.
-          // Bigger fish (pike) bend it more, a perch only a little.
-          return 0.3 + 0.15 * s.fishPower + 0.6 * s.fishPull * s.fishPower + s.reelSpeed * 0.15
+          // Bigger fish (pike) bend it more, a perch only a little. PFL app: heavier
+          // fish (by weight, up to ~5 kg) load the rod deeper — a big pike on a run
+          // arcs the whole upper half. Visual only, the fight itself is unchanged.
+          const heavy = clamp(s.weightKg / 5);
+          return 0.3 + 0.2 * s.fishPower + 0.7 * s.fishPull * s.fishPower + s.reelSpeed * 0.2
+               + heavy * (0.35 + 0.5 * s.fishPull)
                + 0.08 * s.fishPower * Math.sin(t * 9) + 0.12 * s.fishPull * Math.sin(t * 17);
+        }
         case 'snagged':
           // Snag: dead, steady load — the harder you reel, the more it bends; no wobble.
           return 0.15 + s.reelSpeed * 0.95;
@@ -590,7 +595,7 @@
       const K = 170, C = 13;
       const target = rodBendTarget();
       bendV += (K * (target - bend) - C * bendV) * dt;
-      bend = clamp(bend + bendV * dt, -1.2, 1.5);
+      bend = clamp(bend + bendV * dt, -1.2, 2.3);   // PFL app: deeper max bend (was 1.5)
     }
 
     // All positions below are in screen px (layout L from measure()).
@@ -603,7 +608,8 @@
       let px = -ay, py = ax;               // perpendicular…
       if (py < 0) { px = -px; py = -py; }  // …the one pointing down (outer side)
       const back = bend * L.tipDroopBack;
-      const side = bend * L.tipDroopSide;
+      // PFL app: past bend 1 the tip goes more down than sideways (keeps it on screen at max load)
+      const side = bend * L.tipDroopSide * (1 - 0.18 * Math.max(0, bend - 1));
       return [
         L.rodTip[0] - ax * back + px * side,
         L.rodTip[1] - ay * back + py * side,
@@ -621,7 +627,7 @@
       return [
         [bx, by],
         [bx + dx * 0.45, by + dy * 0.45],
-        [bx + dx * 0.85 + ox * 0.1, by + dy * 0.85 + oy * 0.1],
+        [bx + dx * 0.85 + ox * 0.35, by + dy * 0.85 + oy * 0.35],   // 0.35 (was 0.1): a deep bend arcs smoothly instead of hooking at the tip
         tip,
       ];
     }
@@ -658,14 +664,18 @@
     // The last stretch to the reel moves left/right like line laid onto the
     // spool: driven by the reel handle (lever) rotation, so it stands still when
     // the fish takes drag and you don't reel, and moves whenever you reel.
-    const GUIDES = [                     // t: 0 butt … 1 tip; h: ring height (rod.svg units)
-      { t: 0.40,  h: 4 },                // stripping guide (the lowest, biggest)
-      { t: 0.585, h: 3.2 },
-      { t: 0.745, h: 2.6 },
-      { t: 0.86,  h: 2.1 },
-      { t: 0.925, h: 1.8 },
-      { t: 0.965, h: 1.6 },
-      { t: 1,     h: 1.4 },              // tip-top ring on the very tip
+    // 7 guides + tip-top, spaced like a real 7' spinning rod (rodbuilding chart:
+    // 4, 8.5, 13.75, 20, 27.5, 36, 48.5 in from the tip; reel ≈ 64 in from the tip,
+    // at the bottom of the screen). Sizes shrink from the stripping guide up.
+    const GUIDES = [                     // t: 0 butt (reel) … 1 tip; h: ring height (rod.svg units)
+      { t: 0.242, h: 4 },                // stripping guide (the lowest, biggest)
+      { t: 0.438, h: 3.3 },
+      { t: 0.570, h: 2.7 },
+      { t: 0.688, h: 2.1 },
+      { t: 0.785, h: 1.7 },
+      { t: 0.867, h: 1.4 },
+      { t: 0.938, h: 1.25 },
+      { t: 1,     h: 1.2 },              // tip-top ring on the very tip
     ];
     const SPOOL = {
       mid: 20,        // reel line point: px (rod.svg units) left of the rod butt …
