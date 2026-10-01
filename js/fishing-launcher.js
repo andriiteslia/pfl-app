@@ -14,9 +14,9 @@
 
 import { haptic, showToast } from './utils.js';
 
-const GAME_VERSION = '20261001p';          // cache-busting for the game files (technical, bump on every change)
+const GAME_VERSION = '20261001r';          // cache-busting for the game files (technical, bump on every change)
 // Human version shown on the splash. Bump: small changes 1.1 → 1.2, big ones → 2.0.
-const GAME_RELEASE = { version: '1.6', date: '01.10.2026' };
+const GAME_RELEASE = { version: '1.8', date: '01.10.2026' };
 const BASE = 'fishing/';
 const SCRIPTS = ['fishing-engine.js', 'fishing-audio.js', 'fishing-view.js'];
 const SPLASH_MIN_MS = 1200;               // splash stays at least this long
@@ -25,7 +25,7 @@ const SPLASH_FADE_MS = 300;               // keep in sync with .fishing-splash t
 const FISH_ART_V = '2';                   // same as in fishing-view.js — bump when a fish picture changes
 const IMAGES = ['sky', 'water', 'land', 'bait']
   .map((n) => `./assets/fishing/${n}.webp`)
-  .concat(['perch', 'pike', 'zander', 'crab'].map((n) => `./assets/fishing/${n}.webp?v=${FISH_ART_V}`));
+  .concat(['perch', 'pike', 'zander', 'catfish', 'crab'].map((n) => `./assets/fishing/${n}.webp?v=${FISH_ART_V}`));
 const SOUNDS = ['cast', 'splash', 'nature', 'drag']
   .map((n) => `./assets/fishing/sfx/${n}.mp3`);   // same URLs the game fetches → served from cache
 
