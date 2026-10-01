@@ -188,3 +188,50 @@ body.fishing-fab-visible #app-content {
   opacity: 0.45;
   pointer-events: none;
 }
+
+/* ---- Phone turned sideways: the game is portrait only (js: PHONE_LANDSCAPE) ---- */
+.fishing-rotate {
+  display: none;
+  position: absolute;
+  inset: 0;
+  z-index: 20;                       /* above the splash and the game */
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 24px;
+  text-align: center;
+  color: #1e2a4f;
+  background: #F6FAFE linear-gradient(155deg, #B1E3FF 0%, #F6FAFE 81%, #F6FAFE 100%);   /* same as the splash */
+  font-family: 'Manrope', var(--font-ui);
+}
+
+@media (orientation: landscape) and (max-height: 540px) and (pointer: coarse) {
+  .fishing-rotate { display: flex; }
+}
+
+.fishing-rotate__phone {
+  margin-bottom: 8px;
+  animation: fishingRotatePhone 2.4s ease-in-out infinite;
+}
+
+.fishing-rotate__title {
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.fishing-rotate__text {
+  font-size: 14px;
+  font-weight: 500;
+  opacity: 0.6;
+}
+
+/* the phone turns from sideways to upright */
+@keyframes fishingRotatePhone {
+  0%, 20%   { transform: rotate(-90deg); }
+  50%, 100% { transform: rotate(0deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fishing-rotate__phone { animation: none; }
+}
