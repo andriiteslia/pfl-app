@@ -43,30 +43,47 @@
     try { tg?.HapticFeedback?.notificationOccurred(type); } catch (e) { /* n/a */ }
   }
   function hapticTick() {
+    if (performance.now() < hapticQuietUntil) return;   // let the bite be felt (see vibrateBite)
     try { tg?.HapticFeedback?.selectionChanged(); } catch (e) { /* n/a */ }
   }
 
-  // ---- Bite vibration: a series of "pecks" for the whole hook window --------
+  // ---- Bite vibration: depends on the fish (PFL app) -------------------------
+  //   zander — always one strong knock;  pike — single, sometimes a double;
+  //   perch / crab — the same single knock, a double "tap-tap" or a triple.
+  //   So a single knock can be anything (maybe a zander!), a double is never a
+  //   zander, a triple never a zander or pike. The engine picks the fish at the bite.
   // Telegram HapticFeedback works in the Telegram app (iOS + Android).
   // Outside Telegram, navigator.vibrate() works on Android browsers only
   // (iOS Safari has no vibration API at all).
   const BITE_VIBRATION = {
-    pecks: [                  // [delay ms from bite start, strength]
-      [0, 'heavy'], [110, 'heavy'],
-      [300, 'medium'], [390, 'heavy'],
-      [520, 'medium'], [640, 'heavy'],
-      [780, 'medium'], [890, 'heavy'], // pecks cover the whole hook window (1 s)
-    ],
-    androidPattern: [45, 65, 45, 190, 35, 55, 45, 85, 35, 85, 45, 95, 35], // vibrate / pause / vibrate ...
+    strong: { pecks: [[0, 'heavy'], [30, 'rigid']], android: [130] },   // two impacts 30 ms apart = one hard thump
+    double: { pecks: [[0, 'heavy'], [150, 'heavy']], android: [55, 110, 55] },
+    triple: { pecks: [[0, 'heavy'], [150, 'heavy'], [300, 'heavy']], android: [55, 110, 55, 110, 55] },
+    small: {                  // odds of single / double / triple (zander: always single)
+      pike:  { strong: 0.75, double: 0.25, triple: 0 },
+      perch: { strong: 0.35, double: 0.40, triple: 0.25 },
+      crab:  { strong: 0.50, double: 0.35, triple: 0.15 },
+    },
+    quietMs: 500,             // no reel-tick haptics right after the bite (they masked it)
   };
   let biteTimers = [];
+  let hapticQuietUntil = 0;
 
-  function vibrateBite() {
+  function vibrateBite(info) {
     stopBiteVibration();
+    const sp = info && info.species;
+    let kind = 'strong';                                   // zander: always single
+    const odds = BITE_VIBRATION.small[sp === 'crab' || info?.type === 'crab' ? 'crab' : sp];
+    if (odds) {
+      const r = Math.random();
+      kind = r < odds.strong ? 'strong' : r < odds.strong + odds.double ? 'double' : 'triple';
+    }
+    const v = BITE_VIBRATION[kind];
+    hapticQuietUntil = performance.now() + BITE_VIBRATION.quietMs;
     if (tg?.HapticFeedback) {
-      biteTimers = BITE_VIBRATION.pecks.map(([delay, type]) => setTimeout(() => haptic(type), delay));
+      biteTimers = v.pecks.map(([delay, type]) => setTimeout(() => haptic(type), delay));
     } else {
-      try { navigator.vibrate?.(BITE_VIBRATION.androidPattern); } catch (e) { /* n/a */ }
+      try { navigator.vibrate?.(v.android); } catch (e) { /* n/a */ }
     }
   }
 
