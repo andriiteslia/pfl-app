@@ -1251,7 +1251,19 @@
       b.addEventListener('mousedown', (ev) => ev.preventDefault());
     });
     document.addEventListener('visibilitychange', onVisibility);
-    window.addEventListener('resize', () => { if (running) measure(); });
+    // Re-measure whenever the stage size changes. On iPhone the size right after a
+    // rotation is not final yet, and a stale viewBox on the stretched SVG squashed
+    // the rod and the lure — so also once more a moment later, and via ResizeObserver.
+    let remeasureTimer = 0;
+    function onResize() {
+      if (!running) return;
+      measure();
+      clearTimeout(remeasureTimer);
+      remeasureTimer = setTimeout(() => { if (running) measure(); }, 300);
+    }
+    window.addEventListener('resize', onResize);
+    window.addEventListener('orientationchange', onResize);
+    if (window.ResizeObserver) new ResizeObserver(onResize).observe(el.stage);
     el.root.addEventListener('contextmenu', (e) => e.preventDefault());
 
     console.log('[Fishing] Initialized');
