@@ -14,7 +14,9 @@
 
 import { haptic, showToast } from './utils.js';
 
-const GAME_VERSION = '20261001j';          // cache-busting for the game files
+const GAME_VERSION = '20261001k';          // cache-busting for the game files (technical, bump on every change)
+// Human version shown on the splash. Bump: small changes 1.1 → 1.2, big ones → 2.0.
+const GAME_RELEASE = { version: '1.1', date: '01.10.2026' };
 const BASE = 'fishing/';
 const SCRIPTS = ['fishing-engine.js', 'fishing-audio.js', 'fishing-view.js'];
 const SPLASH_MIN_MS = 1200;               // splash stays at least this long
@@ -91,6 +93,7 @@ function createRoot() {
         <img src="./assets/fishing/game-logo.png" alt="Рибалка" draggable="false">
         <span class="fishing-splash__fallback">Рибалка</span>
       </div>
+      <div class="fishing-splash__version">v${GAME_RELEASE.version} · ${GAME_RELEASE.date}</div>
     </div>`;
   splash = root.querySelector('.fishing-splash');
   const logo = splash.querySelector('img');
