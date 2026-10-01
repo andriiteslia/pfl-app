@@ -56,9 +56,12 @@
   // Outside Telegram, navigator.vibrate() works on Android browsers only
   // (iOS Safari has no vibration API at all).
   const BITE_VIBRATION = {
-    strong: { pecks: [[0, 'heavy']], android: [130] },                  // one hard knock (a 2nd impact 30 ms later could cut it on iOS)
-    double: { pecks: [[0, 'heavy'], [150, 'heavy']], android: [55, 110, 55] },
-    triple: { pecks: [[0, 'heavy'], [150, 'heavy'], [300, 'heavy']], android: [55, 110, 55, 110, 55] },
+    // One "knock" = a tight burst of 3 heavy impacts over ~0.1 s: a single impact
+    // got lost on iOS (finger moving on the lever), the fight's repeated heavy
+    // impacts are felt — so each knock is made the same way.
+    strong: { pecks: knocks(1), android: [140] },
+    double: { pecks: knocks(2), android: [110, 160, 110] },
+    triple: { pecks: knocks(3), android: [110, 160, 110, 160, 110] },
     small: {                  // odds of single / double / triple (zander: always single)
       pike:  { strong: 0.75, double: 0.25, triple: 0 },
       perch: { strong: 0.35, double: 0.40, triple: 0.25 },
@@ -66,6 +69,11 @@
     },
     quietMs: 500,             // no reel-tick haptics right after the bite (they masked it)
   };
+  function knocks(n) {                       // [delay ms, type] — n knocks 300 ms apart
+    const out = [];
+    for (let k = 0; k < n; k++) [0, 45, 90].forEach((d) => out.push([k * 300 + d, 'heavy']));
+    return out;
+  }
   let biteTimers = [];
   let hapticQuietUntil = 0;
 
