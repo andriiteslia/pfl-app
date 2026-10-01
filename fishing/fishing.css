@@ -140,7 +140,9 @@
 /* ---- Rod / line / lure (drawn in design coordinates) ------------------- */
 .fg-scene-svg { overflow: visible; }
 .fg-rod  { fill: #000; }
-.fg-line { fill: none; stroke: rgba(255,255,255,.8); stroke-width: .8; }
+.fg-line { fill: none; stroke: rgba(255,255,255,.9); stroke-width: .8; }   /* line to the water: white 90% */
+/* line along the rod (tip → guides → reel): white at 70% so it reads apart from the line to the water */
+.fg-line.fg-line--rod { stroke: rgba(255,255,255,.7); }
 /* guides (rings) on the blank: thin dark legs, drawn under the blank */
 .fg-guides { fill: none; stroke: #111; stroke-width: 1; stroke-linecap: round; }
 .fg-ripples ellipse { fill: none; stroke: #fff; }
