@@ -14,9 +14,9 @@
 
 import { haptic, showToast } from './utils.js';
 
-const GAME_VERSION = '20261001s';          // cache-busting for the game files (technical, bump on every change)
+const GAME_VERSION = '20261001t';          // cache-busting for the game files (technical, bump on every change)
 // Human version shown on the splash. Bump: small changes 1.1 → 1.2, big ones → 2.0.
-const GAME_RELEASE = { version: '1.9', date: '01.10.2026' };
+const GAME_RELEASE = { version: '1.10', date: '01.10.2026' };
 const BASE = 'fishing/';
 const SCRIPTS = ['fishing-engine.js', 'fishing-audio.js', 'fishing-view.js'];
 const SPLASH_MIN_MS = 1200;               // splash stays at least this long
@@ -94,6 +94,14 @@ function createRoot() {
         <span class="fishing-splash__fallback">Рибалка</span>
       </div>
       <div class="fishing-splash__version">v${GAME_RELEASE.version} · ${GAME_RELEASE.date}</div>
+    </div>
+    <div class="fishing-rotate" aria-live="polite">
+      <svg class="fishing-rotate__phone" viewBox="0 0 48 48" width="64" height="64" fill="none" aria-hidden="true">
+        <rect x="14" y="4" width="20" height="40" rx="4" stroke="currentColor" stroke-width="3"/>
+        <path d="M21 38h6" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+      </svg>
+      <div class="fishing-rotate__title">Поверни телефон вертикально</div>
+      <div class="fishing-rotate__text">Гра працює лише у вертикальному режимі</div>
     </div>`;
   splash = root.querySelector('.fishing-splash');
   const logo = splash.querySelector('img');
@@ -205,6 +213,57 @@ function bindTgHeader() {
   } catch (e) { /* older clients */ }
 }
 
+// ---- Portrait only on phones ----
+// Landscape on a phone breaks the game layout, so:
+//  • Telegram 8.0+: lockOrientation() while the game is open (it locks the
+//    CURRENT orientation → only called in portrait; opened in landscape → locked
+//    as soon as the phone is turned upright). Unlocked again on close.
+//  • older clients / opened sideways: a "turn the phone" screen covers the game
+//    (CSS, same media query) and the game is paused until it is upright again.
+// Tablets and desktop are not affected (height > 540 px or a mouse).
+const PHONE_LANDSCAPE = '(orientation: landscape) and (max-height: 540px) and (pointer: coarse)';
+let landscapeMq = null;
+let orientLockedByUs = false;
+let rotatePaused = false;      // the game was paused by turning the phone sideways
+
+const isPhoneLandscape = () => !!landscapeMq && landscapeMq.matches;
+
+function lockPortrait() {
+  if (orientLockedByUs || isPhoneLandscape()) return;
+  try {
+    if (!tg?.lockOrientation || !tg.isVersionAtLeast?.('8.0')) return;
+    if (!window.matchMedia('(pointer: coarse)').matches) return;          // desktop
+    if (Math.min(screen.width, screen.height) >= 600) return;             // tablet
+    if (tg.isOrientationLocked) return;                                   // someone else's lock
+    tg.lockOrientation();
+    orientLockedByUs = true;
+  } catch (e) { /* older clients */ }
+}
+
+function unlockOrientation() {
+  if (!orientLockedByUs) return;
+  orientLockedByUs = false;
+  try { tg?.unlockOrientation?.(); } catch (e) { /* n/a */ }
+}
+
+function onOrientationChange() {
+  if (!isOpen || closing) return;
+  if (isPhoneLandscape()) {
+    if (game?.isRunning?.()) { game.pause(); rotatePaused = true; }
+  } else {
+    lockPortrait();
+    if (rotatePaused) { rotatePaused = false; game?.start?.(); }
+  }
+}
+
+function bindOrientation() {
+  try {
+    landscapeMq = window.matchMedia(PHONE_LANDSCAPE);
+    if (landscapeMq.addEventListener) landscapeMq.addEventListener('change', onOrientationChange);
+    else landscapeMq.addListener?.(onOrientationChange);                  // old iOS Safari
+  } catch (e) { /* n/a */ }
+}
+
 // ---- One catch per Telegram launch ----
 // Minimising keeps the game (and the catch) while the user stays in PFL App.
 // Leaving the bot / closing Telegram ends it: every Telegram launch gets a new
@@ -285,7 +344,8 @@ export async function openFishingGame({ auto = false } = {}) {
   if (isOpen || opening || closing) return;
   opening = true;
   if (!auto) haptic('light');
-  if (!root) { createRoot(); bindTgHeader(); bindNoZoom(); }
+  if (!root) { createRoot(); bindTgHeader(); bindNoZoom(); bindOrientation(); }
+  lockPortrait();
   lockZoom(true);
   updateTgHeader();
 
@@ -314,6 +374,8 @@ export async function openFishingGame({ auto = false } = {}) {
   updateFab();
   game.start();
   startHeartbeat();
+  rotatePaused = false;
+  onOrientationChange();                     // opened sideways → paused behind the "turn the phone" screen
   hideSplash();                              // game is already drawing under the fading splash
   console.log('[Fishing] Opened');
 }
@@ -322,6 +384,7 @@ export async function closeFishingGame() {
   if (!isOpen || closing) return;
   closing = true;
   if (game?.isRunning?.()) game.pause();    // the chevron already paused it; this covers other callers
+  rotatePaused = false;
   stopHeartbeat();                           // minimised on purpose → a reload won't reopen the game
 
   // exit splash: same logo, then the whole view fades back to the app
@@ -334,6 +397,7 @@ export async function closeFishingGame() {
 
   isOpen = false;
   closing = false;
+  unlockOrientation();                       // the app itself may rotate again
   lockZoom(false);
   document.documentElement.classList.remove('fishing-open');
   updateFab();
