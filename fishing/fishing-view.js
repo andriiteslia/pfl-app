@@ -56,7 +56,7 @@
   // Outside Telegram, navigator.vibrate() works on Android browsers only
   // (iOS Safari has no vibration API at all).
   const BITE_VIBRATION = {
-    strong: { pecks: [[0, 'heavy'], [30, 'rigid']], android: [130] },   // two impacts 30 ms apart = one hard thump
+    strong: { pecks: [[0, 'heavy']], android: [130] },                  // one hard knock (a 2nd impact 30 ms later could cut it on iOS)
     double: { pecks: [[0, 'heavy'], [150, 'heavy']], android: [55, 110, 55] },
     triple: { pecks: [[0, 'heavy'], [150, 'heavy'], [300, 'heavy']], android: [55, 110, 55, 110, 55] },
     small: {                  // odds of single / double / triple (zander: always single)
@@ -81,7 +81,11 @@
     const v = BITE_VIBRATION[kind];
     hapticQuietUntil = performance.now() + BITE_VIBRATION.quietMs;
     if (tg?.HapticFeedback) {
-      biteTimers = v.pecks.map(([delay, type]) => setTimeout(() => haptic(type), delay));
+      // the first knock right now (not via a timer), the rest on timers
+      v.pecks.forEach(([delay, type]) => {
+        if (delay === 0) haptic(type);
+        else biteTimers.push(setTimeout(() => haptic(type), delay));
+      });
     } else {
       try { navigator.vibrate?.(v.android); } catch (e) { /* n/a */ }
     }
@@ -364,8 +368,7 @@
       const dt = last.t - first.t;
       const downSpeed = dt > 0 ? (last.y - first.y) / dt : 0;
       const stop = downSpeed > FISHING_CONFIG.reel.stopSwipePxPerMs;
-      releaseLever(stop);
-      if (stop) haptic('rigid');
+      releaseLever(stop);                  // PFL app: no reel haptic on the stop swipe
     }
 
     // Single place that lets go of the lever. Also called from safety nets
@@ -844,7 +847,8 @@
       // reel handle rotation + selection haptics every half turn
       const reelRpsMax = 2.2;
       reelAngle += s.reelSpeed * reelRpsMax * 360 * dt;
-      if (reelAngle - lastTickAngle >= 180) { lastTickAngle = reelAngle; hapticTick(); }
+      // PFL app: no haptic "clicks" while reeling any more (weren't felt and could mask the bite)
+      if (reelAngle - lastTickAngle >= 180) { lastTickAngle = reelAngle; }
 
       // fight feedback: warning pulses in the red zone, soft pulses while the fish pulls
       const tc = FISHING_CONFIG.tension;
