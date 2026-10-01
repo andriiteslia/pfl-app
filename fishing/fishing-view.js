@@ -6,7 +6,7 @@
      artwork can be animated with plain CSS:
 
        data-state      idle | casting | retrieving | bite | hooked | missed | caught | empty | broken | snagged | freed
-       data-species    perch | zander | pike | crab   (while hooked / caught)
+       data-species    perch | zander | pike | catfish | crab   (while hooked / caught)
        data-catch      fish | crab            (while hooked / caught)
        --reel-speed    0..1   actual reel speed (lever knob follows this)
        --lure-x/--lure-y px   lure position on screen
@@ -470,7 +470,7 @@
     }
 
     // Catch card: picture + name + weight. PNGs: assets/fishing/<species>.png
-    const CATCH_EMOJI = { perch: '🐟', zander: '🐟', pike: '🐟', crab: '🦀' };
+    const CATCH_EMOJI = { perch: '🐟', zander: '🐟', pike: '🐟', catfish: '🐟', crab: '🦀' };   // emoji = fallback until the picture exists
     // One <img> per species, created once and fully loaded up front. On a catch
     // we only switch which one is visible, so the right picture shows at once
     // (swapping one <img>'s src briefly showed the previous fish).
@@ -560,14 +560,18 @@
       }
     });
     engine.on('bite', vibrateBite);
-    engine.on('hook', () => { stopBiteVibration(); hapticNotify('success'); });
+    engine.on('hook', () => {
+      stopBiteVibration(); hapticNotify('success');
+      if (s.species === 'catfish') showToast('Щось велике! 😱\nТягни повільно, не поспішай', 'school', 2600);
+    });
     engine.on('miss', () => { stopBiteVibration(); hapticNotify('warning'); showToast('Зійшла…', 'miss'); });
     engine.on('empty', () => showToast('Пусто', 'empty'));
     engine.on('slackWarn', () => hapticNotify('warning'));
-    engine.on('escape', () => {
+    engine.on('escape', ({ reason } = {}) => {
       hapticNotify('error');
       bendV -= 12; // rod straightens
-      showToast('Ой, зійшла', 'miss');
+      // catfish: reeled too long in the yellow zone → the hook tore out
+      showToast(reason === 'tore' ? 'Гачок вирвало 😬\nТягни повільніше' : 'Ой, зійшла', 'miss');
     });
     engine.on('lineBreak', ({ reason }) => {
       hapticNotify('error');
@@ -1146,6 +1150,8 @@
           `<span class="fg-bag__name"></span>` +
           `<span class="fg-bag__kg">${formatWeight(f.kg)}</span>`;
         li.querySelector('.fg-bag__name').textContent = name;
+        const img = li.querySelector('.fg-bag__pic img');   // no picture yet (catfish) → emoji
+        img.onerror = () => { const em = document.createElement('span'); em.className = 'fg-bag__emoji'; em.textContent = CATCH_EMOJI[f.species] || '🐟'; img.replaceWith(em); };
         if (i === maxI) {
           const b = document.createElement('span');
           b.className = 'fg-bag__badge';

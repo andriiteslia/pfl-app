@@ -120,6 +120,13 @@
         tiers: [[0.82, 0.4, 2.0], [0.15, 2.0, 4.2], [0.03, 4.2, 7.2]],
       },
       crab: { name: 'Краб', power: 0.5, kg: [0.05, 0.3], tiers: [[1, 0.05, 0.3]] },
+      // PFL app: catfish — rare trophy. Bites only FAR out and NEAR THE BOTTOM
+      // (lure lying on the bottom, or a slow retrieve), see `catfishBite`.
+      // chance: 0 here = never picked by the normal perch/zander/pike roll.
+      catfish: {
+        name: 'Сом', nameAcc: 'сома', chance: 0, power: 1.5, kg: [5, 35],
+        tiers: [[0.70, 5, 12], [0.25, 12, 22], [0.05, 22, 35]],
+      },
       // How each species fights (multipliers on the base `fight` settings).
       //   turn   – how much it wanders / turns      dart  – sudden direction changes
       //   side   – lateral speed                   sideBias – likes to run sideways
@@ -137,7 +144,21 @@
         zander: { turn: 0.35, dart: 0.25, side: 0.35, sideBias: 0, away: 0.6, swim: 0.35, press: 0.9, start: 0.9,
                   forceMul: 1.25 },
         crab:   { turn: 0.6, dart: 0.4, side: 0.6, sideBias: 0.6, away: 0.4, swim: 0.7, press: 0.3, start: 0.6 },
+        // catfish: heavy and stubborn — slow, long, straight runs away from the shore,
+        // leans on the line hard even standing still. Takes a lot of line. Reel slowly:
+        //   extraLineM     – line it can take beyond the cast (others: fight.maxExtraLineM)
+        //   yellowEscapeS  – reeling in the YELLOW zone this long (faster than yellowSafeReel)
+        //                    tears the hook out ("сом зійшов"); easing off lets it recover
+        //   tensionMul     – scales the fish's share of the line tension (keeps a 35 kg
+        //                    monster playable: red only when you reel against its run)
+        catfish: { turn: 0.3, dart: 0.15, side: 0.35, sideBias: 0, away: 1.6, swim: 0.5, press: 1.2, start: 1.1,
+                   forceMul: 1.5, extraLineM: 60, yellowEscapeS: 4, yellowSafeReel: 0.2, yellowRecoverPerS: 1.5,
+                   tensionMul: 0.75,
+                   // stamina: full strength at the hookset, tires over the fight down to `minStamina`;
+                   // the heavier, the longer it lasts: tireS = tireBaseS + tirePerKgS × kg
+                   tireBaseS: 40, tirePerKgS: 4, minStamina: 0.3 },
       },
+      catfishBite: { minDistM: 35, slowReel: 0.3, chance: 0.08 }, // far + bottom/slow → this share of fish bites is a catfish
       // bigger fish within a species fights harder: power × (from…to) lightest → heaviest
       weightPower: [0.75, 1.55],
       // Perch is a schooling fish: each session has one school of about the
@@ -355,6 +376,7 @@
       lineOutMps: 0,       // m/s of line going OUT from the reel right now (drag sound)
       strain: 0,           // seconds accumulated in the red zone
       slackTime: 0,        // seconds without reeling while a fish is on
+      yellowTime: 0,       // PFL app: catfish — seconds reeling in the yellow zone (tears the hook out)
     };
 
     function emit(name, payload = {}) {
@@ -599,6 +621,10 @@
         s.catchType = 'fish';
         key = sp.firstFish.species;
         kg = sp.firstFish.kg + (rng() * 2 - 1) * sp.firstFish.spread;
+      } else if (s.catchType === 'fish' && s.lureDistance >= sp.catfishBite.minDistM
+                 && (s.biteOnPause || s.reelSpeed <= sp.catfishBite.slowReel)
+                 && rng() < sp.catfishBite.chance) {
+        key = 'catfish';                  // far out, near the bottom → now and then a catfish
       } else if (s.catchType === 'fish' && s.biteInSchool && rng() < sp.school.perchChance) {
         key = 'perch';                    // in the school spot → a school perch
         kg = s.perchSchoolKg * (1 + (rng() * 2 - 1) * sp.perchSchoolSpread);
@@ -731,6 +757,9 @@
       s.fishPull = 0;
       s.fishSide = 0;
       s.fightTimer = rand(f.firstRunS) * s.style.start;
+      s.fightTime = 0;
+      s.stamina = 1;
+      s.yellowTime = 0;
       s.tension = 0;
       s.strain = 0;
       setState('hooked', { type: s.catchType });
@@ -741,8 +770,13 @@
       const f = config.fight;
       const r = config.reel;
       const tc = config.tension;
-      const k = s.fishPower;                     // species × weight
       const st = s.style || config.species.styles.perch;
+      // PFL app: catfish tires over the fight (style.tireBaseS); other fish: always 1
+      s.fightTime = (s.fightTime || 0) + dt;
+      s.stamina = st.tireBaseS
+        ? Math.max(st.minStamina, 1 - s.fightTime / (st.tireBaseS + st.tirePerKgS * s.weightKg))
+        : 1;
+      const k = s.fishPower * s.stamina;         // species × weight (× stamina)
 
       // runs / rests
       s.fightTimer -= dt;
@@ -813,7 +847,7 @@
       // line tension (before the drag)
       let target = clamp(
         tc.base + tc.reelWeight * s.reelSpeed +
-        tc.pullWeight * s.fishPull * k * st.forceMul * (tc.pullReelBase + s.reelSpeed) - (away < 0 ? 0.1 : 0),
+        tc.pullWeight * s.fishPull * k * st.forceMul * (st.tensionMul || 1) * (tc.pullReelBase + s.reelSpeed) - (away < 0 ? 0.1 : 0),
       );
       // the drag slips above dragAt: gives line, and absorbs part of the tension
       let slip = 0;
@@ -826,7 +860,7 @@
       s.dragSlip = slip;
       s.tension += (target - s.tension) * Math.min(1, tc.follow * dt);
 
-      const maxLine = s.castDistance + f.maxExtraLineM;
+      const maxLine = s.castDistance + (st.extraLineM ?? f.maxExtraLineM);
       s.lineOutMps = s.lureDistance < maxLine ? Math.max(0, swimOut + slip - reelIn) : 0;
       s.lureDistance = clamp(
         s.lureDistance - (reelIn - swimOut - slip) * dt,
@@ -841,6 +875,14 @@
       else if (!reelingHard) s.strain = Math.max(0, s.strain - tc.recoverPerS * dt);
 
       if (s.strain >= tc.breakAfterS) { breakLine(); return; }
+
+      // Catfish (style.yellowEscapeS): reeling in the yellow zone for too long
+      // tears the hook out. Easing off (slow reel / let the drag work) recovers.
+      if (st.yellowEscapeS) {
+        if (s.tension >= tc.warn && s.reelSpeed > st.yellowSafeReel) s.yellowTime += dt;
+        else s.yellowTime = Math.max(0, s.yellowTime - st.yellowRecoverPerS * dt);
+        if (s.yellowTime >= st.yellowEscapeS) { escape('tore'); return; }
+      }
 
       // Slack line: stop reeling for too long → the fish shakes the hook off
       if (!s.reelHeld || s.reelInput < f.slackSpeed) { // finger off the lever (or lever at the bottom)
@@ -862,18 +904,19 @@
       s.tension = 0;
       s.strain = 0;
       s.slackTime = 0;
+      s.yellowTime = 0;
     }
 
     // Fish escaped because the line went slack: the lure stays in the water
     // and the retrieve simply continues (like after a missed hookset).
-    function escape() {
+    function escape(reason = 'slack') {
       s.stats.escaped++;
       const type = s.catchType;
       s.castAim = clamp(s.castAim + s.fishSide, -1.4, 1.4); // lure stays where the fish left it
       resetFight();
       s.catchType = null;
       setState('missed', { reason: 'escaped', type });
-      emit('escape', { type });
+      emit('escape', { type, reason, species: s.species });
     }
 
     function breakLine() {
