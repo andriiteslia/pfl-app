@@ -105,6 +105,8 @@
       rod: document.getElementById('fgRod'),
       grip: document.getElementById('fgGrip'),
       line: document.getElementById('fgLine'),
+      lineRod: document.getElementById('fgLineRod'),
+      guides: document.getElementById('fgGuides'),
       lure: document.getElementById('fgLure'),
       bait: document.getElementById('fgBait'),
       ripples: document.getElementById('fgRipples'),
@@ -610,25 +612,36 @@
 
     // Tapered, bendable rod blank — same shape/thickness as rod.svg when straight.
     // The bend is concentrated in the upper part, like a real spinning rod.
-    function rodPath(tip) {
+    // Centre line = cubic Bézier butt → tip (shared by the blank, guides and line).
+    function rodCtrl(tip) {
       const [bx, by] = L.rodButt;
       const [t0x, t0y] = L.rodTip;
       const dx = t0x - bx, dy = t0y - by;
       const ox = tip[0] - t0x, oy = tip[1] - t0y;
-      const P = [
+      return [
         [bx, by],
         [bx + dx * 0.45, by + dy * 0.45],
         [bx + dx * 0.85 + ox * 0.1, by + dy * 0.85 + oy * 0.1],
         tip,
       ];
+    }
+    // point + tangent on the centre line at t (0 butt … 1 tip)
+    function rodAt(P, t) {
+      const u = 1 - t;
+      return [
+        u*u*u*P[0][0] + 3*u*u*t*P[1][0] + 3*u*t*t*P[2][0] + t*t*t*P[3][0],
+        u*u*u*P[0][1] + 3*u*u*t*P[1][1] + 3*u*t*t*P[2][1] + t*t*t*P[3][1],
+        3*u*u*(P[1][0]-P[0][0]) + 6*u*t*(P[2][0]-P[1][0]) + 3*t*t*(P[3][0]-P[2][0]),
+        3*u*u*(P[1][1]-P[0][1]) + 6*u*t*(P[2][1]-P[1][1]) + 3*t*t*(P[3][1]-P[2][1]),
+      ];
+    }
+    function rodPath(tip) {
+      const P = rodCtrl(tip);
       const N = 28;
       const left = [], right = [];
       for (let i = 0; i <= N; i++) {
-        const t = i / N, u = 1 - t;
-        const x = u*u*u*P[0][0] + 3*u*u*t*P[1][0] + 3*u*t*t*P[2][0] + t*t*t*P[3][0];
-        const y = u*u*u*P[0][1] + 3*u*u*t*P[1][1] + 3*u*t*t*P[2][1] + t*t*t*P[3][1];
-        const tx = 3*u*u*(P[1][0]-P[0][0]) + 6*u*t*(P[2][0]-P[1][0]) + 3*t*t*(P[3][0]-P[2][0]);
-        const ty = 3*u*u*(P[1][1]-P[0][1]) + 6*u*t*(P[2][1]-P[1][1]) + 3*t*t*(P[3][1]-P[2][1]);
+        const t = i / N;
+        const [x, y, tx, ty] = rodAt(P, t);
         const len = Math.hypot(tx, ty) || 1;
         const w = lerp(L.rodButtWidth, L.rodTipWidth, Math.pow(t, 0.7)) / 2;
         const nx = -ty / len * w, ny = tx / len * w;
@@ -636,6 +649,48 @@
         right.push(`${(x - nx).toFixed(2)},${(y - ny).toFixed(2)}`);
       }
       return `M${left.join(' L')} L${right.reverse().join(' L')} Z`;
+    }
+
+    // ---- Guides + line along the rod ------------------------------------------
+    // Visual only. Guides sit under the blank (the lower-left side on screen),
+    // bigger at the butt, smaller towards the tip; they bend with the rod.
+    // The line runs tip → guides → stripping guide → reel (below the screen).
+    // The last stretch to the reel moves left/right like line laid onto the
+    // spool: driven by the reel handle (lever) rotation, so it stands still when
+    // the fish takes drag and you don't reel, and moves whenever you reel.
+    const GUIDES = [                     // t: 0 butt … 1 tip; h: ring height (rod.svg units)
+      { t: 0.40,  h: 4 },                // stripping guide (the lowest, biggest)
+      { t: 0.585, h: 3.2 },
+      { t: 0.745, h: 2.6 },
+      { t: 0.86,  h: 2.1 },
+      { t: 0.925, h: 1.8 },
+      { t: 0.965, h: 1.6 },
+      { t: 1,     h: 1.4 },              // tip-top ring on the very tip
+    ];
+    const SPOOL = {
+      mid: 20,        // reel line point: px (rod.svg units) left of the rod butt …
+      amp: 8,         // … ± this much while the line lays on the spool
+      turnsPerCycle: 2, // one left-right-left per 2 handle turns (full speed ≈ 1.1 per second)
+    };
+    function updateRodLine(tip) {
+      const P = rodCtrl(tip);
+      let guides = '', line = `M${tip[0].toFixed(1)},${tip[1].toFixed(1)}`;
+      for (let i = GUIDES.length - 1; i >= 0; i--) {   // tip → butt
+        const g = GUIDES[i];
+        const [x, y, tx, ty] = rodAt(P, g.t);
+        const len = Math.hypot(tx, ty) || 1;
+        const ox = ty / len, oy = -tx / len;              // outer side = lower-left on screen
+        const hw = lerp(L.rodButtWidth, L.rodTipWidth, Math.pow(g.t, 0.7)) / 2;
+        const r = hw + g.h * L.rodScale;
+        const gx = (x + ox * r).toFixed(1), gy = (y + oy * r).toFixed(1);
+        guides += `M${x.toFixed(1)},${y.toFixed(1)}L${gx},${gy}`;
+        line += `L${gx},${gy}`;
+      }
+      const phase = reelAngle / 360 / SPOOL.turnsPerCycle * Math.PI * 2;
+      const off = (SPOOL.mid + SPOOL.amp * Math.sin(phase)) * L.rodScale;
+      line += `L${(L.rodButt[0] - off).toFixed(1)},${(H + 6).toFixed(1)}`;
+      el.lineRod.setAttribute('d', line);
+      el.guides.setAttribute('d', guides);
     }
 
     // Point on the water for distance share p (0 shore .. 1 max) and aim -1..1.
@@ -782,6 +837,7 @@
       const lure = lurePos(tip);
 
       el.rod.setAttribute('d', rodPath(tip));
+      updateRodLine(tip);
 
       // Quadratic line; control point below the chord midpoint by 2×sag.
       const sag = lerp(L.sagMax, 0, lineTension());

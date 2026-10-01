@@ -141,6 +141,8 @@
 .fg-scene-svg { overflow: visible; }
 .fg-rod  { fill: #000; }
 .fg-line { fill: none; stroke: rgba(255,255,255,.8); stroke-width: .8; }
+/* guides (rings) on the blank: thin dark legs, drawn under the blank */
+.fg-guides { fill: none; stroke: #111; stroke-width: 1; stroke-linecap: round; }
 .fg-ripples ellipse { fill: none; stroke: #fff; }
 .fg-lure { fill: #ffd23f; stroke: #2b2f3a; stroke-width: 1; }
 .fg-bait { pointer-events: none; }

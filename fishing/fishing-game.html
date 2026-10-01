@@ -25,6 +25,9 @@
         <!-- soft bait under the jig head, only while it hangs from the rod tip (bait.png → bait.webp, head up) -->
         <image id="fgBait" class="fg-bait" href="./assets/fishing/bait.webp" x="0" y="0" width="7.4" height="40" preserveAspectRatio="none" />
         <circle id="fgLure" class="fg-lure" r="4" cx="0" cy="0" />
+        <!-- line along the rod: tip → guides → down to the reel (below the screen); guides' legs -->
+        <path id="fgLineRod" class="fg-line fg-line--rod" d="" />
+        <path id="fgGuides" class="fg-guides" d="" />
         <path id="fgRod" class="fg-rod" d="" />
         <!-- rod grip from rod.svg (transform set by JS: rod tip position + scale) -->
         <path id="fgGrip" fill="url(#fgGripGrad)"
