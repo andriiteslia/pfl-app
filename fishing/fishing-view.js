@@ -86,8 +86,15 @@
       const r = Math.random();
       kind = r < odds.strong ? 'strong' : r < odds.strong + odds.double ? 'double' : 'triple';
     }
+    playBite(kind, sp);
+  }
+
+  let lastBite = null;                         // for the haptics test panel: what the last real bite sent
+  function playBite(kind, sp) {
+    stopBiteVibration();
     const v = BITE_VIBRATION[kind];
     hapticQuietUntil = performance.now() + BITE_VIBRATION.quietMs;
+    lastBite = { kind, species: sp || '-', n: v.pecks.length, at: new Date(), tg: !!tg?.HapticFeedback };
     if (tg?.HapticFeedback) {
       // the first knock right now (not via a timer), the rest on timers
       v.pecks.forEach(([delay, type]) => {
@@ -1127,7 +1134,71 @@
       el.bag.hidden = true;
       lastTs = 0;                         // no time jump after the pause
     }
-    el.stats.addEventListener('click', openBag);
+    // Short tap on the Улов/Вага pill = catch summary; HOLD it 1 s = hidden haptics test (PFL app).
+    let statsPressTimer = 0, statsLongPress = false;
+    el.stats.addEventListener('pointerdown', () => {
+      statsLongPress = false;
+      clearTimeout(statsPressTimer);
+      statsPressTimer = setTimeout(() => { statsLongPress = true; openHapticTest(); }, 1000);
+    });
+    ['pointerup', 'pointercancel', 'pointerleave'].forEach((ev) =>
+      el.stats.addEventListener(ev, () => clearTimeout(statsPressTimer)));
+    el.stats.addEventListener('click', () => {
+      if (statsLongPress) { statsLongPress = false; return; }
+      openBag();
+    });
+
+    // ---- Hidden haptics test panel (to see what this phone actually feels) ----
+    let htest = null;
+    function openHapticTest() {
+      if (bagOpen) return;
+      releaseAllInputs();
+      bagOpen = true;                                 // pauses the game like the catch summary
+      if (!htest) {
+        htest = document.createElement('div');
+        htest.className = 'fg-htest';
+        const B = (label, fn) => ({ label, fn });
+        const groups = [
+          ['Удар (impact)', ['light', 'medium', 'heavy', 'rigid', 'soft'].map((t) => B(t, () => { haptic(t); return 'impact ' + t; }))],
+          ['Сповіщення (notification)', ['success', 'warning', 'error'].map((t) => B(t, () => { hapticNotify(t); return 'notification ' + t; }))],
+          ['Інше', [B('selection', () => { try { tg?.HapticFeedback?.selectionChanged(); } catch (e) {} return 'selection'; })]],
+          ['Клювання (як у грі)', [
+            B('одинарне', () => { playBite('strong'); return 'bite single'; }),
+            B('подвійне', () => { playBite('double'); return 'bite double'; }),
+            B('потрійне', () => { playBite('triple'); return 'bite triple'; }),
+          ]],
+        ];
+        htest.innerHTML = `<div class="fg-htest__sheet" role="dialog" aria-label="Тест вібро">
+          <div class="fg-htest__head"><b>Тест вібро</b><button type="button" class="fg-htest__close" aria-label="Закрити">✕</button></div>
+          <div class="fg-htest__info"></div><div class="fg-htest__groups"></div><div class="fg-htest__log">Натисни кнопку — відчуваєш?</div></div>`;
+        const box = htest.querySelector('.fg-htest__groups');
+        groups.forEach(([title, btns]) => {
+          const g = document.createElement('div');
+          g.className = 'fg-htest__group';
+          g.innerHTML = `<div class="fg-htest__gtitle">${title}</div>`;
+          btns.forEach(({ label, fn }) => {
+            const b = document.createElement('button');
+            b.type = 'button'; b.textContent = label;
+            b.addEventListener('click', () => { htest.querySelector('.fg-htest__log').textContent = 'надіслано: ' + fn(); });
+            g.appendChild(b);
+          });
+          box.appendChild(g);
+        });
+        htest.querySelector('.fg-htest__close').addEventListener('click', closeHapticTest);
+        el.root.appendChild(htest);
+      }
+      const lb = lastBite
+        ? `Останнє клювання: ${lastBite.species}, ${lastBite.kind}, ${lastBite.n} поштовх(ів), ${lastBite.at.toLocaleTimeString()}${lastBite.tg ? '' : ' (без Telegram)'}`
+        : 'Клювань ще не було';
+      htest.querySelector('.fg-htest__info').textContent =
+        `Telegram ${tg?.version || '—'} · ${tg?.platform || 'browser'} · HapticFeedback: ${tg?.HapticFeedback ? 'є' : 'нема'}\n${lb}`;
+      htest.hidden = false;
+    }
+    function closeHapticTest() {
+      if (htest) htest.hidden = true;
+      bagOpen = false;
+      lastTs = 0;                                     // no time jump after the pause
+    }
     el.bag.addEventListener('click', (e) => { if (e.target.closest('[data-close]')) closeBag(); });
 
     // ---- Bind ---------------------------------------------------------------

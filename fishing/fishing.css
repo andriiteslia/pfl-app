@@ -719,3 +719,35 @@
 .fg-bag__empty-icon { font-size: 36px; margin-bottom: 8px; }
 @keyframes fg-bag-fade { from { opacity: 0; } to { opacity: 1; } }
 @keyframes fg-bag-pop  { from { opacity: 0; transform: translateY(14px) scale(.96); } to { opacity: 1; transform: none; } }
+
+/* ---- Hidden haptics test (hold the Улов/Вага pill 1 s) ---- */
+.fg-htest {
+  position: absolute; inset: 0; z-index: 40;
+  display: flex; align-items: center; justify-content: center;
+  padding: 16px;
+  background: rgba(8, 18, 40, .5);
+  font-family: var(--fg-font);
+}
+.fg-htest[hidden] { display: none; }
+.fg-htest__sheet {
+  width: 100%; max-width: 360px;
+  max-height: 86%; overflow-y: auto; touch-action: pan-y;
+  padding: 14px 16px 16px;
+  border-radius: 20px;
+  background: #eef3fb; color: var(--hud-ink);
+  box-shadow: 0 18px 50px rgba(8, 18, 40, .35);
+}
+.fg-htest__head { display: flex; align-items: center; justify-content: space-between; font-size: 17px; }
+.fg-htest__close { width: 34px; height: 34px; border: 0; border-radius: 50%; background: #dde5f5; color: var(--hud-ink); font-size: 15px; }
+.fg-htest__info { margin-top: 6px; font-size: 11px; line-height: 1.4; color: var(--hud-label); white-space: pre-line; }
+.fg-htest__gtitle { margin: 12px 0 6px; font-size: 12px; font-weight: 800; color: var(--hud-label); }
+.fg-htest__group { display: flex; flex-wrap: wrap; gap: 6px; }
+.fg-htest__gtitle { flex-basis: 100%; }
+.fg-htest__group button {
+  padding: 9px 12px; border: 0; border-radius: 10px;
+  background: #fff; color: var(--hud-ink);
+  font: 700 13px var(--fg-font);
+  box-shadow: 0 1px 3px rgba(20, 45, 90, .15);
+}
+.fg-htest__group button:active { transform: scale(.95); background: #dde5f5; }
+.fg-htest__log { margin-top: 12px; font-size: 12px; font-weight: 700; color: var(--hud-ink); }
