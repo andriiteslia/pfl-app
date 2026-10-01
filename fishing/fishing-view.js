@@ -36,10 +36,27 @@
 
   // ---- Telegram helpers (same pattern as utils.js haptic) ------------------
   const tg = window.Telegram?.WebApp;
+  // PFL app: on iPhone (tested 01.10.2026) only notificationOccurred('warning')
+  // is felt from the mini app — impacts, success, error, selection are not.
+  // So on iOS every meaningful haptic is played as 'warning': strong impacts
+  // (heavy/medium/rigid) throttled to one per WARN_GAP_MS, light/soft ones
+  // (buttons, gentle taps) are skipped. Android keeps the original types.
+  const IOS_HAPTICS = /ios|macos/.test(String(tg?.platform || '').toLowerCase());
+  const WARN_GAP_MS = 500;
+  let lastWarnAt = 0;
+  function rawWarn() {
+    lastWarnAt = performance.now();
+    try { tg?.HapticFeedback?.notificationOccurred('warning'); } catch (e) { /* n/a */ }
+  }
   function haptic(type = 'light') {
+    if (IOS_HAPTICS) {
+      if ((type === 'heavy' || type === 'medium' || type === 'rigid') && performance.now() - lastWarnAt >= WARN_GAP_MS) rawWarn();
+      return;
+    }
     try { tg?.HapticFeedback?.impactOccurred(type); } catch (e) { /* n/a */ }
   }
   function hapticNotify(type = 'success') {
+    if (IOS_HAPTICS) { if (performance.now() - lastWarnAt >= 250) rawWarn(); return; }
     try { tg?.HapticFeedback?.notificationOccurred(type); } catch (e) { /* n/a */ }
   }
   function hapticTick() {
@@ -95,7 +112,14 @@
     const v = BITE_VIBRATION[kind];
     hapticQuietUntil = performance.now() + BITE_VIBRATION.quietMs;
     lastBite = { kind, species: sp || '-', n: v.pecks.length, at: new Date(), tg: !!tg?.HapticFeedback };
-    if (tg?.HapticFeedback) {
+    if (tg?.HapticFeedback && IOS_HAPTICS) {
+      // iPhone: one 'warning' per knock (1 / 2 / 3), 450 ms apart so they can be counted
+      const n = kind === 'triple' ? 3 : kind === 'double' ? 2 : 1;
+      for (let k = 0; k < n; k++) {
+        if (k === 0) rawWarn();
+        else biteTimers.push(setTimeout(rawWarn, k * 450));
+      }
+    } else if (tg?.HapticFeedback) {
       // the first knock right now (not via a timer), the rest on timers
       v.pecks.forEach(([delay, type]) => {
         if (delay === 0) haptic(type);
@@ -1159,8 +1183,8 @@
         htest.className = 'fg-htest';
         const B = (label, fn) => ({ label, fn });
         const groups = [
-          ['Удар (impact)', ['light', 'medium', 'heavy', 'rigid', 'soft'].map((t) => B(t, () => { haptic(t); return 'impact ' + t; }))],
-          ['Сповіщення (notification)', ['success', 'warning', 'error'].map((t) => B(t, () => { hapticNotify(t); return 'notification ' + t; }))],
+          ['Удар (impact)', ['light', 'medium', 'heavy', 'rigid', 'soft'].map((t) => B(t, () => { try { tg?.HapticFeedback?.impactOccurred(t); } catch (e) {} return 'impact ' + t; }))],
+          ['Сповіщення (notification)', ['success', 'warning', 'error'].map((t) => B(t, () => { try { tg?.HapticFeedback?.notificationOccurred(t); } catch (e) {} return 'notification ' + t; }))],
           ['Інше', [B('selection', () => { try { tg?.HapticFeedback?.selectionChanged(); } catch (e) {} return 'selection'; })]],
           ['Клювання (як у грі)', [
             B('одинарне', () => { playBite('strong'); return 'bite single'; }),
