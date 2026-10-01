@@ -59,9 +59,19 @@
     if (IOS_HAPTICS) { if (performance.now() - lastWarnAt >= 250) rawWarn(); return; }
     try { tg?.HapticFeedback?.notificationOccurred(type); } catch (e) { /* n/a */ }
   }
+  // Small "feel" haptics: reel clicks and the lure touching the bottom.
+  // Played with their original types on every platform (Android and many iPhones
+  // feel them; on some iPhones they are simply silent). They never cover the bite:
+  // skipped while a bite is on and for a moment after its last knock (hapticQuietUntil).
+  let biteActive = false;
+  const quiet = () => biteActive || performance.now() < hapticQuietUntil;
   function hapticTick() {
-    if (performance.now() < hapticQuietUntil) return;   // let the bite be felt (see vibrateBite)
+    if (quiet()) return;
     try { tg?.HapticFeedback?.selectionChanged(); } catch (e) { /* n/a */ }
+  }
+  function hapticSoft(type = 'soft') {
+    if (quiet()) return;
+    try { tg?.HapticFeedback?.impactOccurred(type); } catch (e) { /* n/a */ }
   }
 
   // ---- Bite vibration: depends on the fish (PFL app) -------------------------
@@ -84,7 +94,7 @@
       perch: { strong: 0.35, double: 0.40, triple: 0.25 },
       crab:  { strong: 0.50, double: 0.35, triple: 0.15 },
     },
-    quietMs: 500,             // no reel-tick haptics right after the bite (they masked it)
+    quietMs: 600,             // no reel clicks / bottom taps until this long after the bite's last knock
   };
   function knocks(n) {                       // [delay ms, type] — n knocks 300 ms apart
     const out = [];
@@ -110,11 +120,14 @@
   function playBite(kind, sp) {
     stopBiteVibration();
     const v = BITE_VIBRATION[kind];
-    hapticQuietUntil = performance.now() + BITE_VIBRATION.quietMs;
+    // quiet until the last knock has played (iOS: 450 ms apart; Android: the pecks list) + quietMs
+    const n = kind === 'triple' ? 3 : kind === 'double' ? 2 : 1;
+    const lastKnockMs = IOS_HAPTICS ? (n - 1) * 450 : v.pecks[v.pecks.length - 1][0];
+    hapticQuietUntil = performance.now() + lastKnockMs + BITE_VIBRATION.quietMs;
+    biteActive = true;                         // render() keeps it in sync with the state
     lastBite = { kind, species: sp || '-', n: v.pecks.length, at: new Date(), tg: !!tg?.HapticFeedback };
     if (tg?.HapticFeedback && IOS_HAPTICS) {
       // iPhone: one 'warning' per knock (1 / 2 / 3), 450 ms apart so they can be counted
-      const n = kind === 'triple' ? 3 : kind === 'double' ? 2 : 1;
       for (let k = 0; k < n; k++) {
         if (k === 0) rawWarn();
         else biteTimers.push(setTimeout(rawWarn, k * 450));
@@ -579,8 +592,8 @@
       showToast(reason === 'snag' ? 'Обрив на зачепі 💥' : 'Обрив! Зійшла 💥', 'miss');
     });
     // bottom: a soft tap when the lure touches it, a double tap after ~4 s ("time to move it")
-    engine.on('bottomTouch', () => haptic('soft'));
-    engine.on('bottomWarn', () => { haptic('light'); setTimeout(() => haptic('light'), 140); });
+    engine.on('bottomTouch', () => hapticSoft('soft'));
+    engine.on('bottomWarn', () => { hapticSoft('light'); setTimeout(() => hapticSoft('light'), 140); });
     // "School found" comes together with the catch — show it only after the
     // catch card has gone, so they don't overlap.
     let schoolToastTimer = 0;
@@ -897,8 +910,9 @@
       // reel handle rotation + selection haptics every half turn
       const reelRpsMax = 2.2;
       reelAngle += s.reelSpeed * reelRpsMax * 360 * dt;
-      // PFL app: no haptic "clicks" while reeling any more (weren't felt and could mask the bite)
-      if (reelAngle - lastTickAngle >= 180) { lastTickAngle = reelAngle; }
+      // selection "click" every half turn (never during a bite — see hapticTick)
+      biteActive = s.state === 'bite';
+      if (reelAngle - lastTickAngle >= 180) { lastTickAngle = reelAngle; hapticTick(); }
 
       // fight feedback: warning pulses in the red zone, soft pulses while the fish pulls
       const tc = FISHING_CONFIG.tension;
