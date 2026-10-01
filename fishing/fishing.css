@@ -231,12 +231,12 @@
 .fishing-game.is-aiming .fg-aim { opacity: 1; }
 
 /* ---- HUD: chevron, Улов/Вага pill, sound --------------------------------- */
-/* PFL app (v1.12): plain white instead of glass — white 80%, 2px white border,
-   Figma drop shadow X0 Y4 Blur8 Spread0 #0C1F2B 20%. No backdrop blur (also lighter for the GPU). */
+/* PFL app (v1.14): plain white instead of glass — white 80%, 2px white border,
+   Figma drop shadow X0 Y4 Blur8 Spread0 #0C1F2B 16%. No backdrop blur (also lighter for the GPU). */
 .fg-glass {
   background: rgba(255, 255, 255, .8);
   border: 2px solid #fff;
-  box-shadow: 0 4px 8px 0 rgba(12, 31, 43, .2);
+  box-shadow: 0 4px 8px 0 rgba(12, 31, 43, .16);
 }
 .fg-exit {
   position: absolute;
