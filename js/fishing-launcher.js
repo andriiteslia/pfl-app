@@ -14,7 +14,7 @@
 
 import { haptic, showToast } from './utils.js';
 
-const GAME_VERSION = '20261001b';          // cache-busting for the game files
+const GAME_VERSION = '20261001c';          // cache-busting for the game files
 const BASE = 'fishing/';
 const SCRIPTS = ['fishing-engine.js', 'fishing-audio.js', 'fishing-view.js'];
 const SPLASH_MIN_MS = 1200;               // splash stays at least this long
