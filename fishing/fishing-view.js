@@ -670,7 +670,7 @@
     const SPOOL = {
       mid: 20,        // reel line point: px (rod.svg units) left of the rod butt …
       amp: 8,         // … ± this much while the line lays on the spool
-      turnsPerCycle: 2, // one left-right-left per 2 handle turns (full speed ≈ 1.1 per second)
+      turnsPerCycle: 0.6, // one left-right-left per 0.6 handle turns (full speed ≈ 3.7 per second)
     };
     function updateRodLine(tip) {
       const P = rodCtrl(tip);
