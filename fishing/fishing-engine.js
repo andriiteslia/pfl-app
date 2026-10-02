@@ -33,8 +33,9 @@
       jitterM: 1,              // ± random metres, so a max cast is ~72–74 m
       flightBaseS: 0.45,       // lure flight time = base + distance * perM
       flightPerM: 0.018,
-      directions: 9,           // number of distinct cast directions (odd → one is straight ahead)
-      maxAimDeg: 45,           // swipe angle from vertical that reaches the outermost direction
+      directions: 0,           // PFL app: 0 = any direction (no snapping); N > 1 = snap to N fixed directions (was 9)
+      deadZoneDeg: 4,          // swipes within ± this of vertical cast dead straight (a thumb is never exactly vertical)
+      maxAimDeg: 45,           // swipe angle from vertical that reaches the outermost direction (20 px from the screen edge)
       maxSwipeAngleDeg: 80,    // swipes flatter than this (almost sideways) are not casts
     },
     reel: {
@@ -174,7 +175,7 @@
       school: {
         distM: [15, 55],       // spot distance range
         aimRange: 0.9,         // spot direction range (-0.9 … 0.9)
-        aimTol: 0.2,           // lure counts as "in the spot" within ± this direction…
+        aimTol: 0.224,         // lure counts as "in the spot" within ± this direction… (PFL app: +12%, was 0.2)
         distTol: 8,            // …and ± this many metres
         perchChance: 0.85,     // a bite in the spot is a school perch with this chance
         driftEveryS: 12,       // slow drift: every N seconds…
@@ -455,9 +456,13 @@
       if (dy <= 0) return null;
       const deg = Math.atan2(dx, dy) * 180 / Math.PI; // 0 = straight up
       if (Math.abs(deg) > c.maxSwipeAngleDeg) return null;
-      const raw = clamp(deg / c.maxAimDeg, -1, 1);
+      // dead zone around vertical, then a smooth -1..1 up to ±maxAimDeg
+      const dz = c.deadZoneDeg || 0;
+      const a = Math.max(0, Math.abs(deg) - dz) / Math.max(1, c.maxAimDeg - dz);
+      const raw = clamp(Math.sign(deg) * a, -1, 1);
+      if (!(c.directions > 1)) return raw;             // PFL app: free direction
       // snap to one of N fixed directions: -1, -0.75 … 0 … 0.75, 1 (for N = 9)
-      const steps = Math.max(1, c.directions - 1);
+      const steps = c.directions - 1;
       return Math.round(((raw + 1) / 2) * steps) / steps * 2 - 1;
     }
 
