@@ -738,9 +738,47 @@
     // less than a second between the two moments. A missed bite already lost
     // the fish (firstFishPending is cleared on miss), so nothing else changes.
     function prepareBite() {
+      if (speciesFilter) return prepareBiteFiltered();
       s.catchType = rng() < config.bite.fishChance ? 'fish' : 'crab';
       pickSpecies();
       s.biteReady = true;
+      return true;
+    }
+
+    // ---- TEST (PFL app): only some species can bite ----------------------------
+    // setSpeciesFilter(['catfish']) → only catfish bite; null → normal game.
+    // The usual rules pick the fish; a pick that isn't enabled is re-rolled within
+    // the same bite, so the bite rate stays normal. Catfish keep their conditions
+    // (far + bottom / slow reel); if catfish is the only fish enabled it is a
+    // catfish every time those conditions are met — otherwise no bite at all.
+    // While testing, the 1st-cast "no bite" and 2nd-cast "nice perch" rules are off.
+    const TEST_SPECIES = ['perch', 'pike', 'zander', 'catfish', 'crab'];
+    let speciesFilter = null;
+    function setSpeciesFilter(list) {
+      const on = Array.isArray(list) ? TEST_SPECIES.filter((k) => list.includes(k)) : TEST_SPECIES;
+      speciesFilter = on.length === TEST_SPECIES.length ? null : new Set(on);
+      if (speciesFilter) { s.forcedBite = null; s.firstFishPending = false; }
+    }
+    const getSpeciesFilter = () => (speciesFilter ? [...speciesFilter] : null);
+
+    function prepareBiteFiltered() {
+      const E = speciesFilter;
+      const fishOn = ['perch', 'pike', 'zander', 'catfish'].filter((k) => E.has(k));
+      if (!fishOn.length && !E.has('crab')) return false;          // everything off → no bites
+      const cb = config.species.catfishBite;
+      const keepChance = cb.chance;
+      if (fishOn.length === 1 && fishOn[0] === 'catfish') cb.chance = 1;   // catfish-only test
+      let ok = false;
+      for (let i = 0; i < 60 && !ok; i++) {
+        s.catchType = !fishOn.length ? 'crab' : !E.has('crab') ? 'fish'
+          : (rng() < config.bite.fishChance ? 'fish' : 'crab');
+        pickSpecies();
+        ok = E.has(s.species);
+      }
+      cb.chance = keepChance;
+      if (!ok) { s.species = null; s.catchFromSchool = false; return false; }
+      s.biteReady = true;
+      return true;
     }
 
     function hook() {
@@ -1090,8 +1128,8 @@
             if (s.stateTime >= b.missPauseS) setState('retrieving');
             break;
           }
-          if (b.noBiteCasts.includes(s.castNo)) break;   // 1st cast: never
-          if (s.forcedBite) {                              // 2nd cast: always
+          if (!speciesFilter && b.noBiteCasts.includes(s.castNo)) break;   // 1st cast: never (not while testing)
+          if (s.forcedBite && !speciesFilter) {            // 2nd cast: always
             const fb = s.forcedBite;
             if ((s.waterTime >= 0.6 && s.lureDistance <= fb.dist) || s.waterTime >= fb.time) {
               s.forcedBite = null;
@@ -1110,9 +1148,9 @@
           if (s.biteRate > 0 && rng() < 1 - Math.exp(-s.biteRate * dt)) {
             s.biteOnPause = s.onBottom;
             s.biteInSchool = s.inSchool;
+            if (!prepareBite()) break;                     // TEST filter: nothing enabled bites here
             liftFromBottom();
             s.stats.bites++;
-            prepareBite();
             setState('bite');
             emit('bite', { species: s.species, type: s.catchType });
           }
@@ -1227,6 +1265,8 @@
       twitchEnd,
       twitchHoldStrength,
       setBiteRateFn(fn) { biteRateFn = typeof fn === 'function' ? fn : defaultBiteRate; },
+      setSpeciesFilter,               // TEST (PFL app): only these species bite; null = all
+      getSpeciesFilter,
       exportSession,
       importSession,
     };

@@ -720,3 +720,62 @@
 .fg-bag__empty-icon { font-size: 36px; margin-bottom: 8px; }
 @keyframes fg-bag-fade { from { opacity: 0; } to { opacity: 1; } }
 @keyframes fg-bag-pop  { from { opacity: 0; transform: translateY(14px) scale(.96); } to { opacity: 1; transform: none; } }
+
+/* ---- TEST (PFL app): fish on/off panel + "test on" badge ------------------- */
+.fg-test__list { padding: 4px 20px 0; }
+.fg-test__row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 0;
+  font-size: 16px; font-weight: 700;
+  cursor: pointer;
+}
+.fg-test__row + .fg-test__row { border-top: 1px solid #dfe6f4; }
+.fg-test__pic { width: 44px; height: 30px; flex: none; position: relative; }
+.fg-test__pic img { width: 100%; height: 100%; object-fit: contain; }
+.fg-test__name { flex: 1; }
+.fg-test__row input { position: absolute; opacity: 0; pointer-events: none; }
+.fg-test__switch {
+  width: 46px; height: 28px; flex: none;
+  border-radius: 14px;
+  background: #c9d3e6;
+  position: relative;
+  transition: background .15s;
+}
+.fg-test__switch::after {
+  content: ''; position: absolute; top: 3px; left: 3px;
+  width: 22px; height: 22px; border-radius: 50%;
+  background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.25);
+  transition: transform .15s;
+}
+.fg-test__row input:checked + .fg-test__switch { background: #2f9e5b; }
+.fg-test__row input:checked + .fg-test__switch::after { transform: translateX(18px); }
+.fg-test__hint {
+  margin: 6px 20px 0;
+  font-size: 12px; font-weight: 600; line-height: 1.35;
+  color: var(--hud-label);
+}
+.fg-test__actions { display: flex; gap: 10px; padding: 14px 20px 20px; }
+.fg-test__btn {
+  flex: 1; height: 44px; border-radius: 22px;
+  border: 0; background: #dde5f5; color: var(--hud-ink);
+  font: 800 15px/1 var(--fg-font);
+  cursor: pointer;
+}
+.fg-test__btn--primary { background: var(--hud-ink); color: #fff; }
+.fg-test__btn:active { transform: scale(.97); }
+
+.fg-test-badge {
+  position: absolute; z-index: 6;
+  left: 50%; transform: translateX(-50%);
+  bottom: calc(var(--fg-safe-bottom) + 20px);
+  height: 30px; padding: 0 12px;
+  border: 0; border-radius: 15px;
+  background: rgba(255, 196, 0, .92); color: #1e2a4f;
+  font: 800 12px/30px var(--fg-font);
+  white-space: nowrap;
+  box-shadow: 0 2px 6px rgba(12, 31, 43, .2);
+  cursor: pointer;
+}
+.fg-test-badge[hidden] { display: none; }
+/* the 5 s hold on the pill must not bring up iOS's callout / text selection */
+.fg-stats { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }

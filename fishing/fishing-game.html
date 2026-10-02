@@ -174,4 +174,31 @@
         </div>
       </div>
     </div>
+
+    <!-- TEST (PFL app): hold the Улов/Вага pill for 5 s → choose which fish can bite.
+         Turned off entirely with TEST_PANEL = false in fishing-view.js. -->
+    <div id="fgTest" class="fg-bag fg-test" hidden>
+      <div class="fg-bag__backdrop" data-close></div>
+      <div class="fg-bag__sheet fg-test__sheet" role="dialog" aria-modal="true" aria-labelledby="fgTestTitle">
+        <div class="fg-bag__head">
+          <div>
+            <div id="fgTestTitle" class="fg-bag__title">🧪 Тест риб</div>
+            <div class="fg-bag__sub">Клюють лише увімкнені</div>
+          </div>
+          <button class="fg-bag__close" type="button" aria-label="Закрити" data-close>
+            <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+              <path d="M6 6 L18 18 M18 6 L6 18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+            </svg>
+          </button>
+        </div>
+        <div id="fgTestList" class="fg-test__list"></div>
+        <div class="fg-test__hint">Сом клює лише далі 35 м — коли приманка лежить на дні або на повільній проводці (важіль до 30%).</div>
+        <div class="fg-test__actions">
+          <button type="button" class="fg-test__btn" data-all>Увімкнути всіх</button>
+          <button type="button" class="fg-test__btn fg-test__btn--primary" data-close>Готово</button>
+        </div>
+      </div>
+    </div>
+    <!-- shown while some fish are switched off (tap → the test panel) -->
+    <button id="fgTestBadge" class="fg-test-badge" type="button" hidden></button>
   </section>

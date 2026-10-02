@@ -452,8 +452,8 @@
     // Works exactly like pressing the button: hold longer = stronger twitch.
     function onKey(e) {
       if (!running) return;                 // game closed: keys belong to the app
-      if (bagOpen) {                        // summary open: Esc/Space close it, no game input
-        if (e.type === 'keydown' && (e.key === 'Escape' || e.code === 'Space')) { e.preventDefault(); closeBag(); }
+      if (bagOpen || testOpen) {            // summary / test panel open: Esc/Space close it, no game input
+        if (e.type === 'keydown' && (e.key === 'Escape' || e.code === 'Space')) { e.preventDefault(); closeBag(); closeTest(); }
         return;
       }
       if (e.code !== 'Space' && e.key !== ' ') return;
@@ -1047,8 +1047,9 @@
       nextFrameTs = lastTs && nextFrameTs + FRAME_MS > ts ? nextFrameTs + FRAME_MS : ts + FRAME_MS;
       const dt = lastTs ? Math.min(0.05, (ts - lastTs) / 1000) : 0;
       lastTs = ts;
-      if (!bagOpen) engine.update(dt);   // the game is paused while the catch summary is open
-      audio.drag(!bagOpen && s.state === 'hooked' ? dragIntensity(dt) : 0);
+      const paused = bagOpen || testOpen;
+      if (!paused) engine.update(dt);    // the game is paused while the catch summary / test panel is open
+      audio.drag(!paused && s.state === 'hooked' ? dragIntensity(dt) : 0);
       render(dt);
       rafId = requestAnimationFrame(frame);
     }
@@ -1115,6 +1116,7 @@
       stopBiteVibration();
       releaseAllInputs();
       closeBag();
+      closeTest();
       lockTelegramGestures(false);
       saveSession();                                   // the catch survives a WebView reload too
     }
@@ -1192,8 +1194,100 @@
       el.bag.hidden = true;
       lastTs = 0;                         // no time jump after the pause
     }
-    el.stats.addEventListener('click', openBag);
+    el.stats.addEventListener('click', () => { if (statsHoldFired) return; openBag(); });   // a 5 s hold is not a tap
     el.bag.addEventListener('click', (e) => { if (e.target.closest('[data-close]')) closeBag(); });
+
+    // ---- TEST (PFL app): which fish can bite ------------------------------------
+    // Hold the Улов/Вага pill for 5 s → panel with an on/off switch per fish.
+    // The choice is remembered on this device (localStorage) until switched back;
+    // a yellow badge at the bottom shows that a test is on (tap it → the panel).
+    // TEST_PANEL = false turns the whole thing off (and ignores a saved choice).
+    const TEST_PANEL = true;
+    const TEST_HOLD_MS = 5000;
+    const TEST_KEY = 'pfl.fishing.testFish';
+    const TEST_FISH = [['perch', 'Окунь'], ['pike', 'Щука'], ['zander', 'Судак'], ['catfish', 'Сом'], ['crab', 'Краб']];
+    const testEl = {
+      panel: document.getElementById('fgTest'),
+      list: document.getElementById('fgTestList'),
+      badge: document.getElementById('fgTestBadge'),
+    };
+    let testOpen = false, statsHoldTimer = 0, statsHoldFired = false, statsHoldStart = null;
+    let testGuard = false;   // the finger that opened the panel is still down: its release must not "tap" the panel
+    function loadTestFilter() {
+      try { const v = JSON.parse(localStorage.getItem(TEST_KEY)); return Array.isArray(v) ? v : null; } catch (e) { return null; }
+    }
+    function applyTestFilter(list, save = true) {
+      engine.setSpeciesFilter(list);
+      const on = engine.getSpeciesFilter();                 // null = all fish
+      if (save) {
+        try { on ? localStorage.setItem(TEST_KEY, JSON.stringify(on)) : localStorage.removeItem(TEST_KEY); } catch (e) { /* n/a */ }
+      }
+      testEl.badge.hidden = !on;
+      if (on) {
+        const names = TEST_FISH.filter(([k]) => on.includes(k)).map(([, n]) => n);
+        testEl.badge.textContent = '🧪 Тест: ' + (names.length ? names.join(', ') : 'ніхто не клює');
+      }
+    }
+    function renderTest() {
+      const on = engine.getSpeciesFilter();
+      testEl.list.replaceChildren(...TEST_FISH.map(([key, name]) => {
+        const row = document.createElement('label');
+        row.className = 'fg-test__row';
+        row.innerHTML =
+          `<span class="fg-test__pic"><img src="${fishPic(key)}" alt="" draggable="false"></span>` +
+          `<span class="fg-test__name">${name}</span>` +
+          `<input type="checkbox" data-fish="${key}"${!on || on.includes(key) ? ' checked' : ''}>` +
+          '<span class="fg-test__switch"></span>';
+        return row;
+      }));
+    }
+    function openTest() {
+      if (testOpen || !TEST_PANEL) return;
+      closeBag();
+      releaseAllInputs();
+      stopBiteVibration();
+      renderTest();
+      testOpen = true;
+      testEl.panel.hidden = false;
+      rawWarn();                                            // felt on iPhone too
+    }
+    function closeTest() {
+      if (!testOpen) return;
+      testOpen = false;
+      testEl.panel.hidden = true;
+      lastTs = 0;
+    }
+    if (TEST_PANEL) {
+      el.stats.addEventListener('pointerdown', (e) => {
+        clearTimeout(statsHoldTimer);
+        statsHoldFired = false;
+        statsHoldStart = { x: e.clientX, y: e.clientY };
+        statsHoldTimer = setTimeout(() => { statsHoldFired = true; testGuard = true; statsHoldStart = null; openTest(); }, TEST_HOLD_MS);
+      });
+      el.stats.addEventListener('pointermove', (e) => {
+        if (statsHoldStart && Math.hypot(e.clientX - statsHoldStart.x, e.clientY - statsHoldStart.y) > 20) {
+          clearTimeout(statsHoldTimer); statsHoldStart = null;
+        }
+      });
+      ['pointerup', 'pointercancel'].forEach((ev) => el.stats.addEventListener(ev, () => {
+        clearTimeout(statsHoldTimer); statsHoldStart = null;
+        if (testGuard) setTimeout(() => { testGuard = false; }, 400);
+      }));
+      el.stats.addEventListener('contextmenu', (e) => e.preventDefault());
+      testEl.list.addEventListener('change', () => {
+        const on = [...testEl.list.querySelectorAll('input[data-fish]')].filter((i) => i.checked).map((i) => i.dataset.fish);
+        applyTestFilter(on);
+      });
+      testEl.panel.addEventListener('click', (e) => {
+        if (testGuard) { e.preventDefault(); return; }
+        if (e.target.closest('[data-all]')) { applyTestFilter(null); renderTest(); }
+        else if (e.target.closest('[data-close]')) closeTest();
+      });
+      testEl.badge.addEventListener('click', openTest);
+      applyTestFilter(loadTestFilter(), false);             // a test chosen earlier on this device
+    } else {
+      try { localStorage.removeItem(TEST_KEY); } catch (e) { /* n/a */ }
+    }
 
     // ---- Bind ---------------------------------------------------------------
     el.stage.addEventListener('pointerdown', onStageDown);
