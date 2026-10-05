@@ -856,6 +856,7 @@
 .fg-lures__item:active { transform: scale(.95); }
 .fg-lures__item img {
   display: block; max-width: 100%; max-height: 52px; height: auto;
+  object-fit: contain;                       /* a tall picture (Little Spider) keeps its shape */
   pointer-events: none;
 }
 .fg-lures__item[aria-checked="true"] { background: #dde5f5; }

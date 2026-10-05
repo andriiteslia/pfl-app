@@ -78,15 +78,15 @@
       defaultSize: 3.3,
     },
     {
-      id: 'cheater', brand: 'M5 Craft', name: 'Cheater', art: 0.7, unit: 'in',
-      // mostly perch (on 1.5" up to a trophy one), small pike and zander, no catfish
+      id: 'little-spider', brand: 'Keitech', name: 'Little Spider', art: 0.64, unit: 'in',
+      // mostly pike, very rarely perch; mostly small pike, but on 3.5" a trophy one;
+      // swims above the bottom on its legs → crabs notice it less
       sizes: {
-        1.2: S(0.4, { perch: 1.9, pike: 0.35, zander: 0.35, catfish: 0, crab: 1 },
-                    { perch: 0.7, pike: 0.4, zander: 0.4 }, { pike: 1.4, zander: 1.2 }),
-        1.5: S(0.7, { perch: 1.7, pike: 0.35, zander: 0.35, catfish: 0, crab: 1 },
-                    { perch: 1.6, pike: 0.5, zander: 0.5 }, { pike: 1.8, zander: 1.5 }),
+        2:   S(1.2, { perch: 0.12, pike: 1.65, zander: 0.15, catfish: 0.15, crab: 0.7 }, { pike: 0.55 }),
+        3:   S(3.0, { perch: 0.08, pike: 1.6,  zander: 0.15, catfish: 0.2,  crab: 0.7 }, { pike: 0.8 }),
+        3.5: S(4.5, { perch: 0.05, pike: 1.5,  zander: 0.15, catfish: 0.25, crab: 0.7 }, { pike: 2.2, catfish: 1.3 }),
       },
-      defaultSize: 1.5,
+      defaultSize: 3,
     },
     {
       id: 'fusion', brand: 'Upstream', name: 'Fusion', art: 0.97, unit: 'in',
@@ -100,6 +100,17 @@
                     { perch: 1.6, pike: 2.0, zander: 1.5, catfish: 1.5 }),
       },
       defaultSize: 2.5,
+    },
+    {
+      id: 'cheater', brand: 'M5 Craft', name: 'Cheater', art: 0.7, unit: 'in',
+      // mostly perch (on 1.5" up to a trophy one), small pike and zander, no catfish
+      sizes: {
+        1.2: S(0.4, { perch: 1.9, pike: 0.35, zander: 0.35, catfish: 0, crab: 1 },
+                    { perch: 0.7, pike: 0.4, zander: 0.4 }, { pike: 1.4, zander: 1.2 }),
+        1.5: S(0.7, { perch: 1.7, pike: 0.35, zander: 0.35, catfish: 0, crab: 1 },
+                    { perch: 1.6, pike: 0.5, zander: 0.5 }, { pike: 1.8, zander: 1.5 }),
+      },
+      defaultSize: 1.5,
     },
     {
       id: 'orbit', brand: 'Jackall', name: 'Orbit', art: 1.0, unit: 'mm', wobbler: true,

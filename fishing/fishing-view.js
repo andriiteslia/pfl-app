@@ -1229,7 +1229,8 @@
     // once (engine.setLure + the picture on the rod tip). Only while the lure is
     // out of the water; the game is paused while the box is open.
     const LURE_KEY = 'pfl.fishing.lure';
-    const LURE_TIP_ASPECT = { 'easy-shiner': 36 / 200, 'swing-impact-fat': 48 / 200, cheater: 59 / 200, fusion: 42 / 200, orbit: 63 / 200 };
+    // width / height of <id>-tip.webp — read from the picture itself once it loads (a new lure needs no code)
+    const LURE_TIP_ASPECT = {};
     const lurePic = (id, tip) => `./assets/fishing/lures/${id}${tip ? '-tip' : ''}.webp`;
     const HAS_LURES = !!(P.LURES && P.lureProfile);
     let lureChoice = null;          // { lure, size, weight }
@@ -1250,8 +1251,17 @@
       const prof = P.lureProfile(lureChoice, FISHING_CONFIG.cast.maxDistanceM);
       engine.setLure(prof);
       // the picture on the rod tip
-      el.bait.setAttribute('href', lurePic(lureChoice.lure, true));
-      BAIT.aspect = LURE_TIP_ASPECT[lureChoice.lure] || BAIT.aspect;
+      const id = lureChoice.lure;
+      el.bait.setAttribute('href', lurePic(id, true));
+      if (LURE_TIP_ASPECT[id]) BAIT.aspect = LURE_TIP_ASPECT[id];
+      else {
+        const im = new Image();
+        im.onload = () => {
+          LURE_TIP_ASPECT[id] = im.naturalWidth / im.naturalHeight;
+          if (lureChoice.lure === id) BAIT.aspect = LURE_TIP_ASPECT[id];
+        };
+        im.src = lurePic(id, true);
+      }
       baitLenMul = Math.pow(prof.lengthIn / 3, 0.8);
       baitNoHead = prof.wobbler;
       el.root.dataset.lure = lureChoice.lure;
