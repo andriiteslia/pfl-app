@@ -791,6 +791,7 @@
   padding: 0; border: 0; background: none;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
+  opacity: 1;                                /* full colour while it can be opened */
   transition: transform .12s, opacity .2s;
 }
 .fg-lure-btn img {
@@ -800,7 +801,7 @@
 }
 .fg-lure-btn:active { transform: scale(.92); }
 /* the lure is in the water: the box can't be opened (a tap only shows a hint) */
-.fishing-game:not([data-state="idle"]):not([data-state="caught"]):not([data-state="empty"]):not([data-state="broken"]) .fg-lure-btn { opacity: .55; }
+.fishing-game:not([data-state="idle"]):not([data-state="caught"]):not([data-state="empty"]):not([data-state="broken"]) .fg-lure-btn { opacity: .45; }
 
 .fg-lures__sheet { max-height: min(88vh, 720px); }
 .fg-lures__title { font-size: 24px; }

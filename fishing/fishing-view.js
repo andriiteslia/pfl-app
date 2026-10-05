@@ -247,7 +247,7 @@
     // sounds (fishing-audio.js); no-op stub if the file isn't loaded
     const audio = window.PFLFishing.createFishingAudio
       ? window.PFLFishing.createFishingAudio()
-      : { unlock() {}, setEnabled() {}, suspend() {}, resume() {}, cast() {}, splash() {}, drag() {}, hookBurst() {} };
+      : { unlock() {}, setEnabled() {}, suspend() {}, resume() {}, cast() {}, splash() {}, drag() {}, hookBurst() {}, boxOpen() {}, boxClose() {} };
 
     let W = 0, H = 0;
     let rafId = 0, lastTs = 0;
@@ -1143,7 +1143,7 @@
       releaseAllInputs();
       closeBag();
       closeTest();
-      closeLures();
+      closeLures(true);                                // minimised: no "close box" sound
       lockTelegramGestures(false);
       saveSession();                                   // the catch survives a WebView reload too
     }
@@ -1317,11 +1317,14 @@
       renderLures();
       luresOpen = true;
       el.lures.hidden = false;
+      audio.unlock();                     // this tap is a user gesture
+      audio.boxOpen?.();
       haptic('light');
     }
-    function closeLures() {
+    function closeLures(silent = false) {
       if (!luresOpen) return;
       luresOpen = false;
+      if (!silent) audio.boxClose?.();
       el.lures.hidden = true;
       lastTs = 0;                         // no time jump after the pause
     }
