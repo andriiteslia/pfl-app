@@ -30,7 +30,7 @@
   const { createFishingEngine, FISHING_CONFIG } = window.PFLFishing;
   const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
   // PFL app: bump when a species picture is replaced (cache-busting; the launcher preloads the same URLs)
-  const FISH_ART_V = '3';
+  const FISH_ART_V = '4';
   const fishPic = (sp) => `./assets/fishing/${sp}.webp?v=${FISH_ART_V}`;
   const lerp = (a, b, t) => a + (b - a) * t;
 
