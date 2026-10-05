@@ -14,15 +14,15 @@
 
 import { haptic, showToast } from './utils.js';
 
-const GAME_VERSION = '20261002d';          // cache-busting for the game files (technical, bump on every change)
+const GAME_VERSION = '20261005a';          // cache-busting for the game files (technical, bump on every change)
 // Human version shown on the splash. Bump: small changes 1.1 → 1.2, big ones → 2.0.
-const GAME_RELEASE = { version: '1.19', date: '02.10.2026' };
+const GAME_RELEASE = { version: '1.20', date: '05.10.2026' };
 const BASE = 'fishing/';
 const SCRIPTS = ['fishing-engine.js', 'fishing-audio.js', 'fishing-view.js'];
 const SPLASH_MIN_MS = 1200;               // splash stays at least this long
 const ASSETS_TIMEOUT_MS = 8000;           // don't wait forever on a slow network
 const SPLASH_FADE_MS = 300;               // keep in sync with .fishing-splash transition
-const FISH_ART_V = '2';                   // same as in fishing-view.js — bump when a fish picture changes
+const FISH_ART_V = '3';                   // same as in fishing-view.js — bump when a fish picture changes
 const IMAGES = ['sky', 'water', 'land', 'bait']
   .map((n) => `./assets/fishing/${n}.webp`)
   .concat(['perch', 'pike', 'zander', 'catfish', 'crab'].map((n) => `./assets/fishing/${n}.webp?v=${FISH_ART_V}`));
