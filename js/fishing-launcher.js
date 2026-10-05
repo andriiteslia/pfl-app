@@ -14,11 +14,11 @@
 
 import { haptic, showToast } from './utils.js';
 
-const GAME_VERSION = '20261005b';          // cache-busting for the game files (technical, bump on every change)
+const GAME_VERSION = '20261005c';          // cache-busting for the game files (technical, bump on every change)
 // Human version shown on the splash. Bump: small changes 1.1 → 1.2, big ones → 2.0.
-const GAME_RELEASE = { version: '1.21', date: '05.10.2026' };
+const GAME_RELEASE = { version: '1.22', date: '05.10.2026' };
 const BASE = 'fishing/';
-const SCRIPTS = ['fishing-engine.js', 'fishing-audio.js', 'fishing-view.js'];
+const SCRIPTS = ['fishing-engine.js', 'fishing-lakes.js', 'fishing-audio.js', 'fishing-view.js'];   // in this order
 const SPLASH_MIN_MS = 1200;               // splash stays at least this long
 const ASSETS_TIMEOUT_MS = 8000;           // don't wait forever on a slow network
 const SPLASH_FADE_MS = 300;               // keep in sync with .fishing-splash transition
