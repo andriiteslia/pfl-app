@@ -27,7 +27,7 @@
 (function () {
   'use strict';
 
-  const { createFishingEngine, FISHING_CONFIG } = window.PFLFishing;
+  const { createFishingEngine } = window.PFLFishing;   // the config comes from the lake (fishing-lakes.js)
   const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
   // PFL app: bump when a species picture is replaced (cache-busting; the launcher preloads the same URLs)
   const FISH_ART_V = '4';
@@ -218,6 +218,22 @@
   function initFishingGame(opts = {}) {
     const el = getElements();
     if (!el.root) return null;
+
+    // ---- Lake (водойма): its fish (engine config) and artwork ---------------
+    // opts.lake = lake id; without it the default lake (Прилбичі). If
+    // fishing-lakes.js isn't loaded, the engine's base config is used as is.
+    const P = window.PFLFishing;
+    const LAKE = P.getLake ? P.getLake(opts.lake || P.DEFAULT_LAKE) : null;
+    const FISHING_CONFIG = LAKE ? P.lakeConfig(LAKE.id) : P.FISHING_CONFIG;
+    if (LAKE?.art) {
+      const sky = el.root.querySelector('.fg-sky');
+      const water = el.root.querySelector('.fg-water');
+      const land = el.root.querySelector('.fg-land');
+      if (sky && LAKE.art.sky) sky.style.backgroundImage = `url('${LAKE.art.sky}')`;
+      if (water && LAKE.art.water && water.getAttribute('src') !== LAKE.art.water) water.src = LAKE.art.water;
+      if (land && LAKE.art.land && land.getAttribute('src') !== LAKE.art.land) land.src = LAKE.art.land;
+    }
+    el.root.dataset.lake = LAKE ? LAKE.id : '';
 
     const engine = createFishingEngine(FISHING_CONFIG);
     const s = engine.state;
@@ -1361,7 +1377,7 @@
     el.root.addEventListener('contextmenu', (e) => e.preventDefault());
 
     console.log('[Fishing] Initialized');
-    return { engine, start, pause, stop, isRunning: () => running };
+    return { engine, lake: LAKE, start, pause, stop, isRunning: () => running };
   }
 
   // No auto-start in the app: fishing-launcher.js calls initFishingGame() on the first open.

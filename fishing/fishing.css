@@ -139,7 +139,7 @@
 
 /* ---- Rod / line / lure (drawn in design coordinates) ------------------- */
 .fg-scene-svg { overflow: visible; }
-.fg-rod  { fill: #000; }
+.fg-rod  { fill: #201E1E; }   /* PFL app: rod blank (was #000) */
 .fg-line { fill: none; stroke: rgba(255,255,255,.9); stroke-width: .8; }   /* line to the water: white 90% */
 /* line along the rod (tip → guides → reel): white at 70% so it reads apart from the line to the water */
 .fg-line.fg-line--rod { stroke: rgba(255,255,255,.7); }
