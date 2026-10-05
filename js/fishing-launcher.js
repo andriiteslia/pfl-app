@@ -14,7 +14,7 @@
 
 import { haptic, showToast } from './utils.js';
 
-const GAME_VERSION = '20261005h';          // cache-busting for the game files (technical, bump on every change)
+const GAME_VERSION = '20261005i';          // cache-busting for the game files (technical, bump on every change)
 // Human version shown on the splash. Bump: small changes 1.1 → 1.2, big ones → 2.0.
 const GAME_RELEASE = { version: '1.24', date: '05.10.2026' };
 const BASE = 'fishing/';
@@ -24,8 +24,10 @@ const ASSETS_TIMEOUT_MS = 8000;           // don't wait forever on a slow networ
 const SPLASH_FADE_MS = 300;               // keep in sync with .fishing-splash transition
 const FISH_ART_V = '5';                   // same as in fishing-view.js — bump when a fish picture changes
 const LURE_IDS = ['easy-shiner', 'swing-impact-fat', 'little-spider', 'fusion', 'cheater', 'orbit'];   // fishing-lures.js (v1.24)
-const IMAGES = ['sky', 'water', 'land', 'lure-box']
+const LURE_BOX_V = '2';                   // same as in fishing-game.html — bump when lure-box.webp changes
+const IMAGES = ['sky', 'water', 'land']
   .map((n) => `./assets/fishing/${n}.webp`)
+  .concat([`./assets/fishing/lure-box.webp?v=${LURE_BOX_V}`])
   .concat(LURE_IDS.flatMap((n) => [`./assets/fishing/lures/${n}.webp`, `./assets/fishing/lures/${n}-tip.webp`]))
   .concat(['perch', 'pike', 'zander', 'catfish', 'crab'].map((n) => `./assets/fishing/${n}.webp?v=${FISH_ART_V}`));
 const SOUNDS = ['cast', 'splash', 'nature', 'drag', 'box-open', 'box-close']
