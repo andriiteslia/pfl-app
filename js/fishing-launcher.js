@@ -14,7 +14,7 @@
 
 import { haptic, showToast } from './utils.js';
 
-const GAME_VERSION = '20261005i';          // cache-busting for the game files (technical, bump on every change)
+const GAME_VERSION = '20261006a';          // cache-busting for the game files (technical, bump on every change)
 // Human version shown on the splash. Bump: small changes 1.1 → 1.2, big ones → 2.0.
 const GAME_RELEASE = { version: '1.24', date: '05.10.2026' };
 const BASE = 'fishing/';
