@@ -785,18 +785,19 @@
    on the sound button's edge, below it */
 .fg-lure-btn {
   position: absolute;
-  right: 14px;
-  top: calc(var(--fg-safe-top) + 16px + var(--hud-h) + 12px + 58px + 12px);   /* v1.25: under the records button */
-  width: 62px; height: 44px;                 /* v1.25: the new (wider) box picture */
+  right: 16px;                               /* v1.25: 48×48 tap area (like the sound button), picture ≤ 40×40 */
+  top: calc(var(--fg-safe-top) + 16px + var(--hud-h) + 10px + 48px + 6px);   /* under the records button */
+  width: 48px; height: 48px;
   padding: 0; border: 0; background: none;
+  display: grid; place-items: center;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   opacity: 1;                                /* full colour while it can be opened */
   transition: transform .12s, opacity .2s;
 }
 .fg-lure-btn img {
-  display: block; width: 100%; height: auto;
-  filter: drop-shadow(0 4px 6px rgba(12, 31, 43, .28));
+  display: block; max-width: 40px; max-height: 40px; width: auto; height: auto;
+  filter: drop-shadow(0 3px 4px rgba(12, 31, 43, .28));
   pointer-events: none;
 }
 .fg-lure-btn:active { transform: scale(.92); }
@@ -882,10 +883,9 @@
 /* ---- Records (v1.25): HUD button + «Мої рекорди»; «Відпустити весь улов» ------ */
 .fg-records-btn {
   position: absolute;
-  right: 14px;
-  top: calc(var(--fg-safe-top) + 16px + var(--hud-h) + 12px);
-  width: 48px; height: 58px;                 /* the cup on the podium, centred under the sound button */
-  right: 16px;
+  right: 16px;                               /* 48×48 tap area under the sound button, picture ≤ 40×40 */
+  top: calc(var(--fg-safe-top) + 16px + var(--hud-h) + 10px);
+  width: 48px; height: 48px;
   padding: 0; border: 0; background: none;
   display: grid; place-items: center;
   cursor: pointer;
@@ -893,7 +893,7 @@
   transition: transform .12s;
 }
 .fg-records-btn:active { transform: scale(.92); }
-.fg-records-btn img { display: block; width: 100%; height: auto; filter: drop-shadow(0 4px 6px rgba(12, 31, 43, .28)); pointer-events: none; }
+.fg-records-btn img { display: block; max-width: 40px; max-height: 40px; width: auto; height: auto; filter: drop-shadow(0 3px 4px rgba(12, 31, 43, .28)); pointer-events: none; }
 
 .fg-records__list { padding-bottom: 16px; }
 .fg-records__item { display: flex; align-items: center; gap: 12px; padding: 10px 0; }
