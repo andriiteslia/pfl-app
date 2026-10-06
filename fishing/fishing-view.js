@@ -1316,6 +1316,7 @@
         const r = records[sp];
         const li = document.createElement('li');
         li.className = 'fg-records__item' + (r?.kg ? '' : ' is-empty');
+        li.dataset.species = sp;
         li.innerHTML =
           `<span class="fg-bag__pic"><img src="${fishPic(sp)}" alt="" draggable="false"></span>` +
           '<span class="fg-records__info"><span class="fg-records__name"></span><span class="fg-records__meta"></span><span class="fg-records__count"></span></span>' +
