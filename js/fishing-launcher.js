@@ -14,7 +14,7 @@
 
 import { haptic, showToast } from './utils.js';
 
-const GAME_VERSION = '20261006c';          // cache-busting for the game files (technical, bump on every change)
+const GAME_VERSION = '20261006d';          // cache-busting for the game files (technical, bump on every change)
 // Human version shown on the splash. Bump: small changes 1.1 → 1.2, big ones → 2.0.
 const GAME_RELEASE = { version: '1.25', date: '06.10.2026' };
 const BASE = 'fishing/';
@@ -30,7 +30,7 @@ const IMAGES = ['sky', 'water', 'land']
   .concat([`./assets/fishing/lure-box.webp?v=${LURE_BOX_V}`, './assets/fishing/records.webp?v=1'])
   .concat(LURE_IDS.flatMap((n) => [`./assets/fishing/lures/${n}.webp`, `./assets/fishing/lures/${n}-tip.webp`]))
   .concat(['perch', 'pike', 'zander', 'catfish', 'crab'].map((n) => `./assets/fishing/${n}.webp?v=${FISH_ART_V}`));
-const SOUNDS = ['cast', 'splash', 'nature', 'drag', 'box-open', 'box-close']
+const SOUNDS = ['cast', 'splash', 'nature', 'drag', 'box-open', 'box-close', 'release']
   .map((n) => `./assets/fishing/sfx/${n}.mp3`);   // same URLs the game fetches → served from cache
 
 let fab = null;
