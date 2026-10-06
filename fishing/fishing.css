@@ -786,8 +786,8 @@
 .fg-lure-btn {
   position: absolute;
   right: 14px;
-  top: calc(var(--fg-safe-top) + 16px + var(--hud-h) + 22px);
-  width: 56px; height: 54px;
+  top: calc(var(--fg-safe-top) + 16px + var(--hud-h) + 12px + 58px + 12px);   /* v1.25: under the records button */
+  width: 62px; height: 44px;                 /* v1.25: the new (wider) box picture */
   padding: 0; border: 0; background: none;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
@@ -878,3 +878,43 @@
   cursor: pointer;
 }
 .fg-lures__done:active { transform: scale(.98); }
+
+/* ---- Records (v1.25): HUD button + «Мої рекорди»; «Відпустити весь улов» ------ */
+.fg-records-btn {
+  position: absolute;
+  right: 14px;
+  top: calc(var(--fg-safe-top) + 16px + var(--hud-h) + 12px);
+  width: 48px; height: 58px;                 /* the cup on the podium, centred under the sound button */
+  right: 16px;
+  padding: 0; border: 0; background: none;
+  display: grid; place-items: center;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform .12s;
+}
+.fg-records-btn:active { transform: scale(.92); }
+.fg-records-btn img { display: block; width: 100%; height: auto; filter: drop-shadow(0 4px 6px rgba(12, 31, 43, .28)); pointer-events: none; }
+
+.fg-records__list { padding-bottom: 16px; }
+.fg-records__item { display: flex; align-items: center; gap: 12px; padding: 10px 0; }
+.fg-records__item + .fg-records__item { border-top: 1px solid #dfe6f4; }
+.fg-records__info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.fg-records__name { font-size: 15px; font-weight: 800; }
+.fg-records__meta, .fg-records__count { font-size: 12px; font-weight: 600; color: var(--hud-label); line-height: 1.3; }
+.fg-records__count:empty { display: none; }
+.fg-records__kg { flex: none; font-size: 17px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.fg-records__item.is-empty .fg-bag__pic { opacity: .3; filter: grayscale(1); }
+.fg-records__item.is-empty .fg-records__kg { color: var(--hud-label); }
+
+.fg-bag__foot { padding: 4px 20px 18px; }
+.fg-bag__foot:has(> [hidden]) { display: none; }
+.fg-release {
+  width: 100%; height: 44px;
+  border: 0; border-radius: 22px;
+  background: var(--hud-ink); color: #fff;    /* active blue, like «Готово» */
+  font: 800 15px/44px var(--fg-font);
+  cursor: pointer;
+  transition: transform .12s;
+}
+.fg-release[hidden] { display: none; }
+.fg-release:active { transform: scale(.98); }

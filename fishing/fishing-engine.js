@@ -1245,6 +1245,16 @@
       return true;
     }
 
+    /** PFL app (v1.25): put a saved bag (from fishing-store.js) into the game. */
+    function setBag(list) {
+      s.bag = (Array.isArray(list) ? list : [])
+        .filter((f) => f && config.species[f.species] && f.kg > 0)
+        .map((f) => ({ species: f.species, kg: +f.kg }));
+      s.score = s.bag.length;
+      s.totalKg = s.bag.reduce((a, f) => a + f.kg, 0);
+      emit('score', { score: s.score, delta: 0, totalKg: s.totalKg, restore: true });
+    }
+
     function reset() {
       s.state = 'idle';
       s.stateTime = 0;
@@ -1293,6 +1303,7 @@
       getSpeciesFilter,
       exportSession,
       importSession,
+      setBag,                         // PFL app (v1.25): saved bag
     };
   }
 

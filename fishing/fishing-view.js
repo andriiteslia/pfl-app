@@ -216,6 +216,10 @@
       luresSizes: document.getElementById('fgLuresSizes'),
       luresName: document.getElementById('fgLuresName'),
       luresCast: document.getElementById('fgLuresCast'),
+      release: document.getElementById('fgRelease'),
+      recordsBtn: document.getElementById('fgRecordsBtn'),
+      records: document.getElementById('fgRecords'),
+      recordsList: document.getElementById('fgRecordsList'),
     };
   }
 
@@ -475,8 +479,8 @@
     // Works exactly like pressing the button: hold longer = stronger twitch.
     function onKey(e) {
       if (!running) return;                 // game closed: keys belong to the app
-      if (bagOpen || testOpen || luresOpen) { // summary / test panel / lure box open: Esc/Space close it, no game input
-        if (e.type === 'keydown' && (e.key === 'Escape' || e.code === 'Space')) { e.preventDefault(); closeBag(); closeTest(); closeLures(); }
+      if (bagOpen || testOpen || luresOpen || recordsOpen) { // a sheet is open: Esc/Space close it, no game input
+        if (e.type === 'keydown' && (e.key === 'Escape' || e.code === 'Space')) { e.preventDefault(); closeBag(); closeTest(); closeLures(); closeRecords(); }
         return;
       }
       if (e.code !== 'Space' && e.key !== ' ') return;
@@ -1073,7 +1077,7 @@
       nextFrameTs = lastTs && nextFrameTs + FRAME_MS > ts ? nextFrameTs + FRAME_MS : ts + FRAME_MS;
       const dt = lastTs ? Math.min(0.05, (ts - lastTs) / 1000) : 0;
       lastTs = ts;
-      const paused = bagOpen || testOpen || luresOpen;
+      const paused = bagOpen || testOpen || luresOpen || recordsOpen;
       if (!paused) engine.update(dt);    // the game is paused while the catch summary / test panel is open
       audio.drag(!paused && s.state === 'hooked' ? dragIntensity(dt) : 0);
       render(dt);
@@ -1123,6 +1127,7 @@
         const saved = loadSession();                   // read BEFORE reset (reset saves an empty session)
         engine.reset();
         if (saved) engine.importSession(saved);
+        loadProgress(saved);                           // v1.25: the saved bag + records (this device, then the cloud)
       }
       lockTelegramGestures(true);
       audio.resume();                                  // back on after stop(); no-op before the first tap
@@ -1144,8 +1149,10 @@
       closeBag();
       closeTest();
       closeLures(true);                                // minimised: no "close box" sound
+      closeRecords();
       lockTelegramGestures(false);
       saveSession();                                   // the catch survives a WebView reload too
+      store?.flush();                                  // v1.25: push the progress to Telegram now
     }
 
     // Full stop + wipe (not used by the app UI any more; kept for completeness)
@@ -1179,6 +1186,8 @@
         : '0 риб';
       el.bagEmpty.hidden = bag.length > 0;
       el.bagList.hidden = bag.length === 0;
+      resetRelease();
+      el.release.hidden = bag.length === 0;
       let maxI = -1;
       if (bag.length > 1) bag.forEach((f, i) => { if (maxI < 0 || f.kg > bag[maxI].kg) maxI = i; });
       const frag = document.createDocumentFragment();
@@ -1208,6 +1217,7 @@
     }
     function openBag() {
       if (bagOpen) return;
+      closeRecords();
       releaseAllInputs();                 // let go of the lever / button before pausing
       stopBiteVibration();
       renderBag();
@@ -1222,7 +1232,123 @@
       lastTs = 0;                         // no time jump after the pause
     }
     el.stats.addEventListener('click', () => { if (statsHoldFired) return; openBag(); });   // a 5 s hold is not a tap
-    el.bag.addEventListener('click', (e) => { if (e.target.closest('[data-close]')) closeBag(); });
+    el.bag.addEventListener('click', (e) => {
+      if (e.target.closest('[data-close]')) { closeBag(); return; }
+      if (e.target.closest('#fgRelease')) onRelease();
+    });
+
+    // «Відпустити весь улов» (v1.25): one tap, no question. Records stay.
+    function resetRelease() {}
+    function onRelease() {
+      if (!s.bag.length) return;
+      engine.setBag([]);                  // → 'score' → saved
+      hapticNotify('success');
+      closeBag();
+      showToast('Улов відпущено 🐟\nХай ростуть!', 'school', 2200);
+    }
+
+    // ---- Saved progress (v1.25): bag + records, fishing-store.js ------------------
+    // The bag lives in Telegram CloudStorage (+ a copy on this device) and comes
+    // back on every launch. Records: heaviest fish per species (kg, date, lure) and
+    // how many were caught in total; «Відпустити весь улов» doesn't touch them.
+    const store = P.createFishingStore ? P.createFishingStore() : null;
+    let records = store ? store.local().records : {};
+    let applyingStore = false;            // setBag() from the store must not save itself back
+    const BAG_COUNT_KEY = 'pfl.fishing.bagCount';   // the launcher's FAB badge reads it
+    function setBagCount(n) { try { localStorage.setItem(BAG_COUNT_KEY, String(n)); } catch (e) { /* n/a */ } }
+    function applyBag(bag) {
+      applyingStore = true;
+      try { engine.setBag(bag); } finally { applyingStore = false; }
+      setBagCount(s.bag.length);
+    }
+    function loadProgress(session) {
+      if (!store) return;
+      const loc = store.local();
+      // first run of v1.25 on this device: keep what this launch already caught
+      if (!loc.bagUpd && session?.bag?.length) store.saveBag(session.bag);
+      else applyBag(loc.bag);
+      store.sync().then(({ snap, changed }) => {
+        if (!changed) return;
+        records = snap.records;
+        applyBag(snap.bag);               // a fish on the hook simply lands into the newer bag
+        if (snap.lure && !luresOpen && ['idle', 'caught', 'empty', 'broken'].includes(s.state)) applyLure(snap.lure, false);
+        if (recordsOpen) renderRecords();
+      });
+    }
+    engine.on('score', () => {
+      if (!store || applyingStore) return;
+      store.saveBag(s.bag);
+      setBagCount(s.bag.length);
+    });
+    // a record per species (fish and crab), with the lure it was caught on
+    let recordToastTimer = 0;
+    engine.on('catch', (info) => {
+      const sp = info.species;
+      if (!sp || !(info.weightKg > 0)) return;
+      const prev = records[sp];
+      const rec = { ...(prev || {}), n: (prev?.n || 0) + 1 };
+      const isRecord = !prev || !(prev.kg >= info.weightKg);
+      if (isRecord) Object.assign(rec, { kg: info.weightKg, at: Date.now(), lure: lureChoice ? { ...lureChoice } : null });
+      records = { ...records, [sp]: rec };
+      store?.saveRecords(records);
+      if (isRecord && prev?.kg) {           // the first fish of a species is a record anyway — no toast for that
+        clearTimeout(recordToastTimer);
+        recordToastTimer = setTimeout(() => showToast(`Новий рекорд! 🏆\n${FISHING_CONFIG.species[sp]?.name || ''} ${formatWeight(info.weightKg)}`, 'school', 2600), CATCH_CARD_MS + 150);
+      }
+    });
+
+    // ---- Records sheet «Мої рекорди» ------------------------------------------------
+    const RECORD_SPECIES = ['perch', 'pike', 'zander', 'catfish', 'crab'];
+    let recordsOpen = false;
+    const pad2 = (n) => String(n).padStart(2, '0');
+    function fmtLure(c) {
+      if (!c || !P.getLure) return '';
+      const l = P.getLure(c.lure);
+      if (!l) return '';
+      const size = P.lureSizeLabel(l, c.size).replace('.', ',');
+      return `${l.name} ${size}${l.wobbler ? '' : ` · ${c.weight} г`}`;
+    }
+    function renderRecords() {
+      const frag = document.createDocumentFragment();
+      RECORD_SPECIES.forEach((sp) => {
+        const r = records[sp];
+        const li = document.createElement('li');
+        li.className = 'fg-records__item' + (r?.kg ? '' : ' is-empty');
+        li.innerHTML =
+          `<span class="fg-bag__pic"><img src="${fishPic(sp)}" alt="" draggable="false"></span>` +
+          '<span class="fg-records__info"><span class="fg-records__name"></span><span class="fg-records__meta"></span><span class="fg-records__count"></span></span>' +
+          '<span class="fg-records__kg"></span>';
+        li.querySelector('.fg-records__name').textContent = FISHING_CONFIG.species[sp]?.name || sp;
+        if (r?.kg) {
+          li.querySelector('.fg-records__meta').textContent = fmtLure(r.lure) || '—';
+          li.querySelector('.fg-records__count').textContent = `Всього піймано: ${r.n || 1}`;   // no date (Андрій, 06.10)
+          li.querySelector('.fg-records__kg').textContent = formatWeight(r.kg);
+        } else {
+          li.querySelector('.fg-records__meta').textContent = 'ще не піймано';
+          li.querySelector('.fg-records__kg').textContent = '—';
+        }
+        frag.appendChild(li);
+      });
+      el.recordsList.replaceChildren(frag);
+    }
+    function openRecords() {
+      if (recordsOpen) return;
+      closeBag(); closeTest(); closeLures(true);
+      releaseAllInputs();
+      stopBiteVibration();
+      renderRecords();
+      recordsOpen = true;
+      el.records.hidden = false;
+      haptic('light');
+    }
+    function closeRecords() {
+      if (!recordsOpen) return;
+      recordsOpen = false;
+      el.records.hidden = true;
+      lastTs = 0;
+    }
+    el.recordsBtn.addEventListener('click', openRecords);
+    el.records.addEventListener('click', (e) => { if (e.target.closest('[data-close]')) closeRecords(); });
 
     // ---- Lure box «Мої приманки» (v1.24) ------------------------------------------
     // Jig weight / lure / size, remembered on this device. Every tap applies at
@@ -1238,11 +1364,14 @@
     let luresOpen = false;
     const fmtSize = (lure, sz) => P.lureSizeLabel(lure, sz).replace('.', ',');
 
-    function loadLure() {
+    function loadLure() {                 // v1.25: from the saved progress; v1.24 kept it in localStorage
+      const fromStore = store?.local().lure;
+      if (fromStore) return fromStore;
       try { return JSON.parse(localStorage.getItem(LURE_KEY)); } catch (e) { return null; }
     }
     function saveLure() {
-      try { localStorage.setItem(LURE_KEY, JSON.stringify(lureChoice)); } catch (e) { /* n/a */ }
+      if (store) store.saveLure(lureChoice);
+      else { try { localStorage.setItem(LURE_KEY, JSON.stringify(lureChoice)); } catch (e) { /* n/a */ } }
     }
     function applyLure(choice, save = true) {
       if (!HAS_LURES) return;
@@ -1312,6 +1441,7 @@
       if (!lureBoxAvailable()) { haptic('light'); showToast('Приманку зміниш,\nколи витягнеш її з води 🎣', 'school', 2400); return; }
       closeBag();
       closeTest();
+      closeRecords();
       releaseAllInputs();
       stopBiteVibration();
       renderLures();
@@ -1492,7 +1622,7 @@
     window.addEventListener('keydown', onKey, true);
     window.addEventListener('keyup', onKey, true);
     // buttons must not keep keyboard focus (Space would "click" the exit button)
-    [el.exit, el.sound, el.twitch, el.debugToggle, el.lureBtn].forEach((b) => {
+    [el.exit, el.sound, el.twitch, el.debugToggle, el.lureBtn, el.recordsBtn].forEach((b) => {
       b.setAttribute('tabindex', '-1');
       b.addEventListener('mousedown', (ev) => ev.preventDefault());
     });

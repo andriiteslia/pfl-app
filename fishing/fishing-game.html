@@ -111,9 +111,13 @@
           <path d="M16.5 14.5L21.5 9.5M16.5 9.5L21.5 14.5M11 4.7C11 4.56 10.96 4.42 10.89 4.31C10.81 4.19 10.7 4.1 10.57 4.04C10.44 3.99 10.3 3.98 10.16 4.01C10.02 4.03 9.89 4.1 9.8 4.2L6.41 7.59C6.28 7.72 6.13 7.82 5.96 7.89C5.78 7.96 5.6 8 5.42 8H3C2.73 8 2.48 8.11 2.29 8.29C2.11 8.48 2 8.73 2 9V15C2 15.27 2.11 15.52 2.29 15.71C2.48 15.89 2.73 16 3 16H5.42C5.6 16 5.78 16.04 5.96 16.11C6.13 16.18 6.28 16.28 6.41 16.41L9.8 19.8C9.89 19.9 10.02 19.97 10.16 20C10.3 20.03 10.44 20.01 10.57 19.96C10.7 19.9 10.81 19.81 10.89 19.69C10.96 19.58 11 19.44 11 19.3V4.7Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
       </button>
-      <!-- Lure box (v1.24): under the sound button; opens «Мої приманки» -->
+      <!-- Records (v1.25): between the sound button and the lure box; opens «Мої рекорди» -->
+      <button id="fgRecordsBtn" class="fg-records-btn" type="button" aria-label="Мої рекорди">
+        <img src="./assets/fishing/records.webp?v=1" alt="" draggable="false">
+      </button>
+      <!-- Lure box (v1.24): under the records button; opens «Мої приманки» -->
       <button id="fgLureBtn" class="fg-lure-btn" type="button" aria-label="Мої приманки">
-        <img src="./assets/fishing/lure-box.webp?v=2" alt="" draggable="false">
+        <img src="./assets/fishing/lure-box.webp?v=3" alt="" draggable="false">
       </button>
       <button id="fgDebugToggle" class="fg-hud-btn fg-debug-toggle" type="button">dbg</button>
       <pre id="fgDebug" class="fg-debug" hidden></pre>
@@ -176,6 +180,29 @@
           <div class="fg-bag__empty-icon">🎣</div>
           Поки порожньо — закидай і лови!
         </div>
+        <!-- v1.25: the bag is kept between launches; this empties it (records stay) -->
+        <div class="fg-bag__foot">
+          <button id="fgRelease" class="fg-release" type="button" hidden>Відпустити весь улов</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Records «Мої рекорди» (v1.25): heaviest fish per species + total caught. Game paused. -->
+    <div id="fgRecords" class="fg-bag fg-records" hidden>
+      <div class="fg-bag__backdrop" data-close></div>
+      <div class="fg-bag__sheet" role="dialog" aria-modal="true" aria-labelledby="fgRecordsTitle">
+        <div class="fg-bag__head">
+          <div>
+            <div id="fgRecordsTitle" class="fg-bag__title">Мої рекорди</div>
+            <div class="fg-bag__sub">Найбільша риба кожного виду</div>
+          </div>
+          <button class="fg-bag__close" type="button" aria-label="Закрити" data-close>
+            <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+              <path d="M6 6 L18 18 M18 6 L6 18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+            </svg>
+          </button>
+        </div>
+        <ul id="fgRecordsList" class="fg-bag__list fg-records__list"></ul>
       </div>
     </div>
 
