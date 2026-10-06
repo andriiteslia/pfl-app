@@ -113,7 +113,7 @@
       defaultSize: 1.5,
     },
     {
-      id: 'orbit', brand: 'Jackall', name: 'Orbit', art: 1.0, unit: 'mm', wobbler: true,
+      id: 'orbit', brand: 'ZipBaits', name: 'Orbit', art: 1.0, unit: 'mm', wobbler: true,
       // suspending wobbler (own weight, no jig): pike of all sizes, very rarely
       // perch or zander, never catfish; never touches the bottom → no snags,
       // no bottom pauses, crabs hardly notice it
