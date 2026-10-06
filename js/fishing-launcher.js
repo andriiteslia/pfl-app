@@ -14,20 +14,20 @@
 
 import { haptic, showToast } from './utils.js';
 
-const GAME_VERSION = '20261006a';          // cache-busting for the game files (technical, bump on every change)
+const GAME_VERSION = '20261006c';          // cache-busting for the game files (technical, bump on every change)
 // Human version shown on the splash. Bump: small changes 1.1 → 1.2, big ones → 2.0.
-const GAME_RELEASE = { version: '1.24', date: '05.10.2026' };
+const GAME_RELEASE = { version: '1.25', date: '06.10.2026' };
 const BASE = 'fishing/';
-const SCRIPTS = ['fishing-engine.js', 'fishing-lakes.js', 'fishing-lures.js', 'fishing-audio.js', 'fishing-view.js'];   // in this order
+const SCRIPTS = ['fishing-engine.js', 'fishing-lakes.js', 'fishing-lures.js', 'fishing-store.js', 'fishing-audio.js', 'fishing-view.js'];   // in this order
 const SPLASH_MIN_MS = 1200;               // splash stays at least this long
 const ASSETS_TIMEOUT_MS = 8000;           // don't wait forever on a slow network
 const SPLASH_FADE_MS = 300;               // keep in sync with .fishing-splash transition
 const FISH_ART_V = '5';                   // same as in fishing-view.js — bump when a fish picture changes
 const LURE_IDS = ['easy-shiner', 'swing-impact-fat', 'little-spider', 'fusion', 'cheater', 'orbit'];   // fishing-lures.js (v1.24)
-const LURE_BOX_V = '2';                   // same as in fishing-game.html — bump when lure-box.webp changes
+const LURE_BOX_V = '3';                   // same as in fishing-game.html — bump when lure-box.webp changes
 const IMAGES = ['sky', 'water', 'land']
   .map((n) => `./assets/fishing/${n}.webp`)
-  .concat([`./assets/fishing/lure-box.webp?v=${LURE_BOX_V}`])
+  .concat([`./assets/fishing/lure-box.webp?v=${LURE_BOX_V}`, './assets/fishing/records.webp?v=1'])
   .concat(LURE_IDS.flatMap((n) => [`./assets/fishing/lures/${n}.webp`, `./assets/fishing/lures/${n}-tip.webp`]))
   .concat(['perch', 'pike', 'zander', 'catfish', 'crab'].map((n) => `./assets/fishing/${n}.webp?v=${FISH_ART_V}`));
 const SOUNDS = ['cast', 'splash', 'nature', 'drag', 'box-open', 'box-close']
@@ -268,8 +268,11 @@ function bindOrientation() {
   } catch (e) { /* n/a */ }
 }
 
-// ---- One catch per Telegram launch ----
-// Minimising keeps the game (and the catch) while the user stays in PFL App.
+// ---- One game session per Telegram launch ----
+// v1.25: the BAG is no longer wiped — it is kept for the player (fishing-store.js,
+// Telegram CloudStorage). What a new launch resets is the session around it:
+// cast number (1st cast / 2nd-cast perch), stats, the perch school.
+// Minimising keeps the game while the user stays in PFL App.
 // Leaving the bot / closing Telegram ends it: every Telegram launch gets a new
 // initData (auth_date + hash), so a different launch id than the saved one
 // means a fresh start → wipe the saved catch. A WebView reload (iOS killed it)
@@ -412,15 +415,12 @@ export function isFishingOpen() {
   return isOpen;
 }
 
-// ---- Catch badge on the FAB (game minimised with fish in the bag) ----
-// The count comes from the saved session (fishing-view.js saves it on minimise),
-// so it also shows after a WebView reload in the same Telegram launch and is
-// gone after a new launch (resetOnNewLaunch wipes the session).
+// ---- Catch badge on the FAB: fish in the player's bag ----
+// v1.25: the bag is kept between launches; fishing-view.js writes its size to
+// localStorage on every change (and after loading it from Telegram's cloud).
+const BAG_COUNT_KEY = 'pfl.fishing.bagCount';
 function catchCount() {
-  try {
-    const bag = JSON.parse(ssGet(SESSION_KEY) || 'null')?.bag;
-    return Array.isArray(bag) ? bag.length : 0;
-  } catch (e) { return 0; }
+  try { return Math.max(0, Number(localStorage.getItem(BAG_COUNT_KEY)) || 0); } catch (e) { return 0; }
 }
 
 function updateBadge() {
