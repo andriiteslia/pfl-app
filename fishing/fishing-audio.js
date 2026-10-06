@@ -6,6 +6,7 @@
  *   drag.mp3    — reel drag ratchet (LOOP, 15 s); plays when the fish pulls
  *                 hard: sharp side dash, run away, yellow/red tension
  *   box-open.mp3 / box-close.mp3 — the lure box opens / closes (v1.24)
+ *   release.mp3 — «Відпустити весь улов» (v1.25)
  * A missing file is simply silent — nothing breaks.
  *
  * Files are prepared: loops at the same loudness (-18 LUFS), one-shots
@@ -22,12 +23,12 @@
   const SFX = {
     path: './assets/fishing/sfx/',
     files: { cast: 'cast.mp3', splash: 'splash.mp3', nature: 'nature.mp3', drag: 'drag.mp3',
-             boxOpen: 'box-open.mp3', boxClose: 'box-close.mp3' },
+             boxOpen: 'box-open.mp3', boxClose: 'box-close.mp3', release: 'release.mp3' },
     master: 1,
     fadeS: 0.25,                      // mute / unmute fade
     // nature ≈ 50% of the other sounds
     // drag.mp3 is mastered hot (~-15 LUFS) and plays at full volume; nature is a quiet bed
-    volume: { cast: 1.0, splashNear: 1.0, splashFar: 0.55, nature: 0.2, drag: 1.0, box: 0.8 },
+    volume: { cast: 1.0, splashNear: 1.0, splashFar: 0.55, nature: 0.2, drag: 1.0, box: 0.8, release: 0.9 },
     loops: { nature: { start: 0.25, length: 90 }, drag: { start: 0.25, length: 15 } },
     natureFadeInS: 2,
     drag: {
@@ -126,6 +127,7 @@
     // lure box (v1.24)
     function boxOpen() { play('boxOpen', SFX.volume.box); }
     function boxClose() { play('boxClose', SFX.volume.box); }
+    function release() { play('release', SFX.volume.release); }   // v1.25: the bag is released
 
     // ---- loops ------------------------------------------------------------------
     function loopSource(name) {
@@ -195,7 +197,7 @@
       dragSrc.playbackRate.setValueAtTime(SFX.drag.rate[1], t);
     }
 
-    return { unlock, setEnabled, suspend, resume, cast, splash, drag, hookBurst, boxOpen, boxClose, config: SFX };
+    return { unlock, setEnabled, suspend, resume, cast, splash, drag, hookBurst, boxOpen, boxClose, release, config: SFX };
   }
 
   window.PFLFishing = window.PFLFishing || {};

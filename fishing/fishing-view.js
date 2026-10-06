@@ -251,7 +251,7 @@
     // sounds (fishing-audio.js); no-op stub if the file isn't loaded
     const audio = window.PFLFishing.createFishingAudio
       ? window.PFLFishing.createFishingAudio()
-      : { unlock() {}, setEnabled() {}, suspend() {}, resume() {}, cast() {}, splash() {}, drag() {}, hookBurst() {}, boxOpen() {}, boxClose() {} };
+      : { unlock() {}, setEnabled() {}, suspend() {}, resume() {}, cast() {}, splash() {}, drag() {}, hookBurst() {}, boxOpen() {}, boxClose() {}, release() {} };
 
     let W = 0, H = 0;
     let rafId = 0, lastTs = 0;
@@ -1241,6 +1241,8 @@
     function resetRelease() {}
     function onRelease() {
       if (!s.bag.length) return;
+      audio.unlock();                     // this tap is a user gesture
+      audio.release?.();
       engine.setBag([]);                  // → 'score' → saved
       hapticNotify('success');
       closeBag();
