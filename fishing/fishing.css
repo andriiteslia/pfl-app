@@ -785,7 +785,7 @@
    on the sound button's edge, below it */
 .fg-lure-btn {
   position: absolute;
-  right: 16px;                               /* v1.25: 48×48 tap area (like the sound button), picture ≤ 40×40 */
+  right: 16px;                               /* v1.25: 48×48 tap area (like the sound button), picture ≤ 44×44 */
   top: calc(var(--fg-safe-top) + 16px + var(--hud-h) + 10px + 48px + 6px);   /* under the records button */
   width: 48px; height: 48px;
   padding: 0; border: 0; background: none;
@@ -796,7 +796,7 @@
   transition: transform .12s, opacity .2s;
 }
 .fg-lure-btn img {
-  display: block; max-width: 40px; max-height: 40px; width: auto; height: auto;
+  display: block; max-width: 44px; max-height: 44px; width: auto; height: auto;
   filter: drop-shadow(0 3px 4px rgba(12, 31, 43, .28));
   pointer-events: none;
 }
@@ -883,7 +883,7 @@
 /* ---- Records (v1.25): HUD button + «Мої рекорди»; «Відпустити весь улов» ------ */
 .fg-records-btn {
   position: absolute;
-  right: 16px;                               /* 48×48 tap area under the sound button, picture ≤ 40×40 */
+  right: 16px;                               /* 48×48 tap area under the sound button, picture ≤ 44×44 */
   top: calc(var(--fg-safe-top) + 16px + var(--hud-h) + 10px);
   width: 48px; height: 48px;
   padding: 0; border: 0; background: none;
@@ -893,7 +893,7 @@
   transition: transform .12s;
 }
 .fg-records-btn:active { transform: scale(.92); }
-.fg-records-btn img { display: block; max-width: 40px; max-height: 40px; width: auto; height: auto; filter: drop-shadow(0 3px 4px rgba(12, 31, 43, .28)); pointer-events: none; }
+.fg-records-btn img { display: block; max-width: 44px; max-height: 44px; width: auto; height: auto; filter: drop-shadow(0 3px 4px rgba(12, 31, 43, .28)); pointer-events: none; }
 
 .fg-records__list { padding-bottom: 16px; }
 .fg-records__item { display: flex; align-items: center; gap: 12px; padding: 10px 0; }
