@@ -24,6 +24,7 @@ let isLoaded = false;
 let isLoading = false;
 let lbConfig = {};
 let isHistoryOpen = false;
+let activeHistoryMode = 'changes'; // 'changes' | 'points'
 
 // ---- DOM References ----
 const getElements = () => ({
@@ -61,6 +62,8 @@ export function initLeaderboard() {
 
   bindTelegramBackButtonForHistory();
   initFestivalHistorySegments();
+  initFestivalHistoryPointsSegments();
+  initFestivalHistoryModeTags();
   initHistoryEdgeSwipe();
 
   console.log('[Leaderboard] Initialized');
@@ -183,6 +186,143 @@ function buildFestDeltaBadge(name, position, prevPosByName) {
   return `<span class="lb-delta ${cls}"><span class="lb-delta-arrow"></span>${Math.abs(d)}</span>`;
 }
 
+// ---- Festival History — "Бали за фест" mode ----
+// Points earned AT a single fest (not cumulative). Derived from the same
+// cumulative snapshots used by the "Зміни лідерборду" tab: cumulative(N) -
+// cumulative(N-1) for a participant equals exactly the points they scored
+// at fest N (cumulative totals are a running sum of each fest's points),
+// so no extra data or network call is needed beyond what's already cached.
+function initFestivalHistoryPointsSegments() {
+  const seg = $('#lbHistoryPointsSeg');
+  if (!seg) return;
+
+  seg.querySelectorAll('.segment').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (btn.classList.contains('active')) return;
+      haptic('light');
+
+      seg.querySelectorAll('.segment').forEach(s => s.classList.toggle('active', s === btn));
+
+      const festNum = btn.dataset.fest;
+      for (let i = 1; i <= FEST_TAB_COUNT; i++) {
+        const out = $(`#lbHistoryPointsOut${i}`);
+        if (out) out.classList.toggle('table-collapsed', String(i) !== festNum);
+      }
+
+      loadFestPointsTab(Number(festNum));
+    });
+  });
+}
+
+async function loadFestPointsTab(festNum) {
+  const out = $(`#lbHistoryPointsOut${festNum}`);
+  if (!out) return;
+
+  if (out.dataset.loaded === '1') return;
+
+  const alreadyCached = festSnapshotCache[festNum] !== undefined;
+  if (!alreadyCached) out.innerHTML = FEST_LOADING_HTML;
+
+  const [current, previous] = await Promise.all([
+    getFestSnapshotCached(festNum),
+    festNum > 1 ? getFestSnapshotCached(festNum - 1) : Promise.resolve([]),
+  ]);
+
+  if (!current || current.length === 0) {
+    out.innerHTML = FEST_NO_DATA_HTML;
+    return;
+  }
+
+  out.innerHTML = buildFestPointsTable(current, previous, festNum);
+  out.dataset.loaded = '1';
+}
+
+// ---- Build fest-points table (points earned AT this specific fest only) ----
+function buildFestPointsTable(current, previous, festNum) {
+  const prevByName = {};
+  (previous || []).forEach(r => {
+    const name = String(r?.participant_name ?? '').trim();
+    if (name) prevByName[name] = { points: Number(r.points) || 0, weight: Number(r.weight) || 0 };
+  });
+
+  const rows = (current || [])
+    .map(row => {
+      const name = String(row?.participant_name ?? '').trim();
+      if (!name) return null;
+
+      const pointsNow = Number(row.points) || 0;
+      const weightNow = Number(row.weight) || 0;
+      const prev = prevByName[name];
+
+      const festPoints = festNum === 1 ? pointsNow : pointsNow - (prev ? prev.points : 0);
+      const festWeight = festNum === 1 ? weightNow : weightNow - (prev ? prev.weight : 0);
+
+      return { name, festPoints, festWeight };
+    })
+    // A zero-point delta for fest > 1 means the participant didn't take
+    // part in that specific fest (their cumulative total simply carried
+    // over unchanged) — leave them out of this fest's points table.
+    .filter(r => r && (festNum === 1 || r.festPoints > 0));
+
+  rows.sort((a, b) => (b.festPoints - a.festPoints) || (b.festWeight - a.festWeight));
+
+  const thead = '<tr><th>#</th><th>Учасник</th><th>Бали</th></tr>';
+  const tbody = rows.map((r, i) =>
+    `<tr><td>${i + 1}</td><td>${escapeHtml(r.name)}</td><td>${escapeHtml(String(r.festPoints))}</td></tr>`
+  ).join('');
+
+  return `
+    <div class="table-wrap" role="region" aria-label="Бали за фест #${festNum}">
+      <table>
+        <thead>${thead}</thead>
+        <tbody>${tbody}</tbody>
+      </table>
+    </div>
+  `;
+}
+
+// ---- Festival History — mode tags ("Зміни лідерборду" / "Бали за фест") ----
+function initFestivalHistoryModeTags() {
+  const tagsWrap = $('#lbHistoryModeTags');
+  if (!tagsWrap) return;
+
+  tagsWrap.querySelectorAll('.fests-year-tag').forEach(tag => {
+    tag.addEventListener('click', () => {
+      const mode = tag.dataset.mode;
+      if (!mode || mode === activeHistoryMode) return;
+      haptic('light');
+
+      activeHistoryMode = mode;
+      tagsWrap.querySelectorAll('.fests-year-tag').forEach(t => t.classList.toggle('active', t === tag));
+
+      const panelChanges = $('#lbHistoryModeChanges');
+      const panelPoints = $('#lbHistoryModePoints');
+      if (panelChanges) panelChanges.style.display = mode === 'changes' ? '' : 'none';
+      if (panelPoints) panelPoints.style.display = mode === 'points' ? '' : 'none';
+
+      const subtitle = $('#lbHistorySubtitle');
+      if (subtitle) {
+        subtitle.textContent = mode === 'points'
+          ? 'Скільки балів набрав кожен учасник на кожному фестивалі PFL 2026'
+          : 'Як змінювались позиції учасників після кожного фестивалю PFL 2026';
+      }
+
+      loadActiveHistoryTab();
+    });
+  });
+}
+
+// Loads whichever fest tab is active within the currently active mode.
+function loadActiveHistoryTab() {
+  if (activeHistoryMode === 'points') {
+    const activeSeg = $('#lbHistoryPointsSeg .segment.active');
+    loadFestPointsTab(activeSeg ? Number(activeSeg.dataset.fest) : 1);
+  } else {
+    const activeSeg = $('#lbHistorySeg .segment.active');
+    loadFestTab(activeSeg ? Number(activeSeg.dataset.fest) : 1);
+  }
+}
+
 // ---- Festival History View (currently just a title placeholder) ----
 function openFestivalHistory() {
   const { mainView, historyView } = getElements();
@@ -205,9 +345,9 @@ function openFestivalHistory() {
 
   document.body.classList.add('leaderboard-history-open');
 
-  // Load whichever tab is currently active (fest #1 by default)
-  const activeSeg = $('#lbHistorySeg .segment.active');
-  loadFestTab(activeSeg ? Number(activeSeg.dataset.fest) : 1);
+  // Load whichever tab is currently active, in whichever mode is active
+  // (fest #1 / "Зміни лідерборду" by default)
+  loadActiveHistoryTab();
 }
 
 function closeFestivalHistory() {
