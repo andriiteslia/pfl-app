@@ -1256,6 +1256,10 @@
     const store = P.createFishingStore ? P.createFishingStore() : null;
     let records = store ? store.local().records : {};
     let applyingStore = false;            // setBag() from the store must not save itself back
+    // Nothing is saved until the saved bag has been put into the game: engine.reset()
+    // on start emits an EMPTY bag, and saving that (with a fresh time) wiped the
+    // player's bag on a new Telegram launch (fixed 06.10, before anyone lost a catch).
+    let progressReady = false;
     const BAG_COUNT_KEY = 'pfl.fishing.bagCount';   // the launcher's FAB badge reads it
     function setBagCount(n) { try { localStorage.setItem(BAG_COUNT_KEY, String(n)); } catch (e) { /* n/a */ } }
     function applyBag(bag) {
@@ -1267,8 +1271,9 @@
       if (!store) return;
       const loc = store.local();
       // first run of v1.25 on this device: keep what this launch already caught
-      if (!loc.bagUpd && session?.bag?.length) store.saveBag(session.bag);
+      if (!loc.bagUpd && session?.bag?.length) { applyBag(session.bag); store.saveBag(session.bag); }
       else applyBag(loc.bag);
+      progressReady = true;               // from now on every change of the bag is saved
       store.sync().then(({ snap, changed }) => {
         if (!changed) return;
         records = snap.records;
@@ -1278,7 +1283,7 @@
       });
     }
     engine.on('score', () => {
-      if (!store || applyingStore) return;
+      if (!store || applyingStore || !progressReady) return;
       store.saveBag(s.bag);
       setBagCount(s.bag.length);
     });
