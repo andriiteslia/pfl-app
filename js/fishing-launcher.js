@@ -1,7 +1,7 @@
 /* ============================================
    PFL App — Fishing mini-game launcher
    --------------------------------------------
-   - FAB «Рибалити!» above the tab bar, only on the Fests tab.
+   - FAB with the SPIN FISH logo (was «Рибалити!») above the tab bar, right side, only on the Fests tab.
    - Every open shows a splash (assets/fishing/spin-fish-logo.webp, levitating) for
      at least SPLASH_MIN_MS. On the first open the game is loaded lazily behind it:
      fishing/fishing.css, fishing-game.html, fishing-engine.js →
@@ -14,7 +14,7 @@
 
 import { haptic, showToast } from './utils.js';
 
-const GAME_VERSION = '20261007a';          // cache-busting for the game files (technical, bump on every change)
+const GAME_VERSION = '20261007b';          // cache-busting for the game files (technical, bump on every change)
 // Human version shown on the splash. Bump: small changes 1.1 → 1.2, big ones → 2.0.
 const GAME_RELEASE = { version: '1.25', date: '06.10.2026' };
 const BASE = 'fishing/';
