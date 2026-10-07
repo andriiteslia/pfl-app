@@ -621,56 +621,72 @@
 /* messages always above the rod / line / lure */
 .fg-toast, .fg-hint, .fg-catch, .fg-cast-dist { z-index: 5; }
 
-/* ---- Catch summary (tap the Улов/Вага pill) ------------------------------ */
+/* ---- Sheets: «Мій улов», «Мої рекорди», «Мої приманки», test ---------------
+   v1.27 (07.10) «Світанок»: a light sheet that slides up from the bottom, a grab
+   handle on top, more air, hairlines, segmented chips, 48px pill buttons.
+   The prize card stays a centred card (see PRIZE below). */
 .fg-bag {
   position: absolute; inset: 0;
   z-index: 20;
-  display: flex; align-items: center; justify-content: center;
-  padding: calc(var(--fg-safe-top) + 24px) 16px calc(var(--fg-safe-bottom) + 24px);
+  display: flex; align-items: flex-end; justify-content: center;
+  padding: calc(var(--fg-safe-top) + 24px) 0 0;
   font-family: var(--fg-font);
+  --sh-ink: #14203d;          /* titles, values */
+  --sh-label: #6c7896;        /* subtitles, labels */
+  --sh-meta: #7d89a6;         /* secondary row text */
+  --sh-faint: #b4bdd0;        /* row numbers */
+  --sh-line: #eef1f5;         /* hairlines */
+  --sh-soft: #eef1f6;         /* close button, segmented track */
 }
 .fg-bag[hidden] { display: none; }
 .fg-bag__backdrop {
   position: absolute; inset: 0;
-  background: rgba(8, 18, 30, .5);
+  background: rgba(12, 22, 40, .42);
   animation: fg-bag-fade .2s ease-out;
 }
 .fg-bag__sheet {
   position: relative;
-  width: 100%; max-width: 380px;
-  max-height: min(72vh, 560px);
+  width: 100%; max-width: 560px;
+  max-height: 88%;
   display: flex; flex-direction: column;
-  border-radius: 24px;
-  background: #eef3fb;                       /* solid (no blur over the moving scene) */
-  border: 1.5px solid rgba(255,255,255,.9);
-  box-shadow: 0 18px 50px rgba(8, 18, 40, .35);
-  color: var(--hud-ink);
+  border-radius: 30px 30px 0 0;
+  background: #fbfcfe;                       /* solid (no blur over the moving scene) */
+  box-shadow: 0 -14px 44px rgba(8, 18, 40, .28);
+  color: var(--sh-ink);
   overflow: hidden;
-  animation: fg-bag-pop .24s cubic-bezier(.2,.8,.2,1);
+  animation: fg-sheet-up .32s cubic-bezier(.2,.8,.2,1);
+}
+/* grab handle */
+.fg-bag__sheet::before {
+  content: ''; flex: none;
+  width: 38px; height: 5px; border-radius: 3px;
+  margin: 8px auto 0;
+  background: #d6dce7;
 }
 .fg-bag__head {
-  display: flex; align-items: center; justify-content: space-between; gap: 12px;
-  padding: 18px 20px 12px 20px;            /* PFL app: 20px on both sides, like the list */
-  border-bottom: 1px solid #d5ddf0;
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
+  padding: 14px 22px 14px;                 /* 22px on both sides, like the list */
+  border-bottom: 1px solid var(--sh-line);
 }
-.fg-bag__title { font-size: 20px; font-weight: 800; line-height: 1.1; }
+.fg-bag__title { font-size: 25px; font-weight: 800; line-height: 1.1; letter-spacing: -.025em; }
 .fg-bag__sub {
-  margin-top: 4px;
-  font-size: 13px; font-weight: 700; color: var(--hud-label);
+  margin-top: 5px;
+  font-size: 13px; font-weight: 600; color: var(--sh-label);
   font-variant-numeric: tabular-nums;
 }
 .fg-bag__close {
   flex: none;
-  width: 40px; height: 40px; border-radius: 50%;
+  width: 36px; height: 36px; border-radius: 50%;
   border: 0; padding: 0;
   display: grid; place-items: center;
-  background: #dde5f5; color: var(--hud-ink);
+  background: var(--sh-soft); color: #4a5677;
   cursor: pointer;
 }
+.fg-bag__close svg { width: 18px; height: 18px; }
 .fg-bag__close:active { transform: scale(.92); }
 .fg-bag__list {
   list-style: none; margin: 0;
-  padding: 6px 20px 12px;                   /* PFL app: rows on the same 20px edges as the header */
+  padding: 0 22px 12px;                     /* rows on the same 22px edges as the header */
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
@@ -678,12 +694,12 @@
 }
 .fg-bag__item {
   display: flex; align-items: center; gap: 12px;
-  padding: 8px 0;
+  padding: 10px 0;
 }
-.fg-bag__item + .fg-bag__item { border-top: 1px solid #dfe6f4; }
+.fg-bag__item + .fg-bag__item { border-top: 1px solid var(--sh-line); }
 .fg-bag__num {
-  flex: none; min-width: 18px;              /* PFL app: number starts on the title's left edge */
-  font-size: 13px; font-weight: 800; color: var(--hud-label);
+  flex: none; min-width: 16px;              /* number starts on the title's left edge */
+  font-size: 12px; font-weight: 700; color: var(--sh-faint);
   text-align: left; font-variant-numeric: tabular-nums;
 }
 .fg-bag__pic {
@@ -704,36 +720,39 @@
 .fg-bag__emoji { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); font-size: 28px; line-height: 1; }
 .fg-bag__name { flex: 1; min-width: 0; font-size: 15px; font-weight: 700; }
 .fg-bag__badge {
-  display: inline-block; margin-left: 6px;
-  padding: 2px 7px; border-radius: 8px;
-  background: #ffd76a; color: #5a4200;
-  font-size: 10px; font-weight: 800; letter-spacing: .02em; text-transform: uppercase;
+  display: inline-block; margin-left: 8px;
+  padding: 2px 6px; border-radius: 6px;
+  background: #fff3d1; color: #8a5a00; border: 1px solid #f1d998;
+  font-size: 9.5px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase;
   vertical-align: 2px;
 }
 .fg-bag__kg {
   flex: none;
-  font-size: 15px; font-weight: 800;
+  font-size: 17px; font-weight: 800; letter-spacing: -.01em;
   font-variant-numeric: tabular-nums;
 }
+/* «1,82 кг»: the unit smaller and lighter (weightHtml() in the view) */
+.fg-unit { margin-left: 2px; font-size: 12px; font-weight: 700; letter-spacing: 0; color: var(--sh-meta); }
 .fg-bag__empty {
   padding: 28px 20px 34px;
   text-align: center;
-  font-size: 15px; font-weight: 700; color: var(--hud-label);
+  font-size: 15px; font-weight: 700; color: var(--sh-label);
 }
 .fg-bag__empty[hidden] { display: none; }
 .fg-bag__empty-icon { font-size: 36px; margin-bottom: 8px; }
 @keyframes fg-bag-fade { from { opacity: 0; } to { opacity: 1; } }
 @keyframes fg-bag-pop  { from { opacity: 0; transform: translateY(14px) scale(.96); } to { opacity: 1; transform: none; } }
+@keyframes fg-sheet-up { from { transform: translateY(100%); } to { transform: none; } }
 
 /* ---- TEST (PFL app): fish on/off panel + "test on" badge ------------------- */
-.fg-test__list { padding: 4px 20px 0; }
+.fg-test__list { padding: 4px 22px 0; }
 .fg-test__row {
   display: flex; align-items: center; gap: 12px;
   padding: 10px 0;
   font-size: 16px; font-weight: 700;
   cursor: pointer;
 }
-.fg-test__row + .fg-test__row { border-top: 1px solid #dfe6f4; }
+.fg-test__row + .fg-test__row { border-top: 1px solid var(--sh-line); }
 .fg-test__pic { width: 44px; height: 30px; flex: none; position: relative; }
 .fg-test__pic img { width: 100%; height: 100%; object-fit: contain; }
 .fg-test__name { flex: 1; }
@@ -754,18 +773,18 @@
 .fg-test__row input:checked + .fg-test__switch { background: #2f9e5b; }
 .fg-test__row input:checked + .fg-test__switch::after { transform: translateX(18px); }
 .fg-test__hint {
-  margin: 6px 20px 0;
+  margin: 6px 22px 0;
   font-size: 12px; font-weight: 600; line-height: 1.35;
-  color: var(--hud-label);
+  color: var(--sh-label);
 }
-.fg-test__actions { display: flex; gap: 10px; padding: 14px 20px 20px; }
+.fg-test__actions { display: flex; gap: 10px; padding: 16px 22px calc(var(--fg-safe-bottom) + 20px); }
 .fg-test__btn {
-  flex: 1; height: 44px; border-radius: 22px;
-  border: 0; background: #dde5f5; color: var(--hud-ink);
-  font: 800 15px/1 var(--fg-font);
+  flex: 1; height: 48px; border-radius: 24px;
+  border: 0; background: var(--sh-soft); color: var(--sh-ink);
+  font: 800 16px/1 var(--fg-font);
   cursor: pointer;
 }
-.fg-test__btn--primary { background: var(--hud-ink); color: #fff; }
+.fg-test__btn--primary { background: var(--sh-ink); color: #fff; }
 .fg-test__btn:active { transform: scale(.97); }
 
 .fg-test-badge {
@@ -808,11 +827,8 @@
 /* the lure is in the water: the box can't be opened (a tap only shows a hint) */
 .fishing-game:not([data-state="idle"]):not([data-state="caught"]):not([data-state="empty"]):not([data-state="broken"]) .fg-lure-btn { opacity: .45; }
 
-.fg-lures__sheet { max-height: min(88vh, 720px); }
-.fg-lures__title { font-size: 24px; }
-.fg-lures__sub { font-size: 15px; font-weight: 600; }
 .fg-lures__body {
-  padding: 4px 20px 4px;
+  padding: 0 22px 4px;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
@@ -821,43 +837,51 @@
 .fg-lures__label {
   display: flex; align-items: baseline; justify-content: space-between; gap: 10px;
   flex-wrap: wrap;                           /* a narrow screen: the note goes under, never cut off */
-  margin: 18px 0 10px;
-  font-size: 15px; font-weight: 600; color: var(--hud-label);
+  margin: 16px 0 8px;
+  font-size: 13px; font-weight: 700; color: var(--sh-label);
 }
 .fg-lures__note { font-size: 13px; font-weight: 700; white-space: nowrap; font-variant-numeric: tabular-nums; }
-.fg-lures__name { font-size: 13px; font-weight: 800; color: var(--hud-ink); text-align: right; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.fg-lures__chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.fg-lures__name { font-size: 13px; font-weight: 800; color: var(--sh-ink); text-align: right; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* segmented control: a soft pill track, the chosen one is a white pill */
+.fg-lures__chips {
+  display: inline-flex; flex-wrap: wrap; gap: 2px;
+  padding: 4px; border-radius: 999px;
+  background: var(--sh-soft);
+}
 .fg-lures__chip {
-  min-width: 40px; height: 32px; padding: 0 12px;
-  border: 0; border-radius: 16px;
-  background: #dde5f5; color: var(--hud-ink);
-  font: 700 15px/32px var(--fg-font);
+  min-width: 44px; height: 34px; padding: 0 12px;
+  border: 0; border-radius: 999px;
+  background: transparent; color: #56627f;
+  font: 700 14px/34px var(--fg-font);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
   cursor: pointer;
-  transition: background .15s, color .15s, transform .12s;
+  transition: background .15s, color .15s, box-shadow .15s, transform .12s;
 }
 .fg-lures__chip:active { transform: scale(.94); }
-/* jig weights: all 7 in one row, like the design (chips share the width) */
-.fg-lures__chips--fit { flex-wrap: nowrap; gap: 6px; }
+/* jig weights: all 7 in one row (chips share the width) */
+.fg-lures__chips--fit { display: flex; flex-wrap: nowrap; }
 .fg-lures__chips--fit .fg-lures__chip { flex: 1 1 0; min-width: 0; padding: 0 2px; }
-.fg-lures__chip[aria-checked="true"] { background: var(--hud-ink); color: #fff; }
+.fg-lures__chip[aria-checked="true"] {
+  background: #fff; color: var(--sh-ink); font-weight: 800;
+  box-shadow: 0 1px 2px rgba(20, 32, 61, .12), 0 4px 10px rgba(20, 32, 61, .08);
+}
 .fg-lures__chip:disabled { opacity: .4; cursor: default; }
-.fg-lures__chip:disabled[aria-checked="true"] { background: #dde5f5; color: var(--hud-ink); }
+.fg-lures__chip:disabled[aria-checked="true"] { background: #fff; color: var(--sh-ink); box-shadow: none; }
 .fg-lures__grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 6px;
+  gap: 8px;
 }
 .fg-lures__item {
   position: relative;
   height: 74px;
   padding: 10px 8px;
-  border: 0; border-radius: 14px;
-  background: transparent;
+  border: 1.5px solid transparent; border-radius: 16px;
+  background: #f3f5f9;
   display: grid; place-items: center;
   cursor: pointer;
-  transition: background .15s, transform .12s;
+  transition: background .15s, border-color .15s, box-shadow .15s, transform .12s;
 }
 .fg-lures__item:active { transform: scale(.95); }
 .fg-lures__item img {
@@ -865,21 +889,23 @@
   object-fit: contain;                       /* a tall picture (Little Spider) keeps its shape */
   pointer-events: none;
 }
-.fg-lures__item[aria-checked="true"] { background: #dde5f5; }
+.fg-lures__item[aria-checked="true"] { background: #fff; border-color: var(--sh-ink); box-shadow: 0 6px 16px rgba(20, 32, 61, .12); }
 /* selected lure: tinted tile + a small check in the corner (no text) */
 .fg-lures__check {
   position: absolute; right: 6px; top: 6px;
   width: 20px; height: 20px; border-radius: 50%;
-  background: var(--hud-ink); color: #fff;
+  background: var(--sh-ink); color: #fff;
   display: none; place-items: center;
 }
 .fg-lures__item[aria-checked="true"] .fg-lures__check { display: grid; }
-.fg-lures__foot { padding: 16px 20px 20px; }
+.fg-lures__foot { padding: 16px 22px calc(var(--fg-safe-bottom) + 20px); }
+/* main button (Готово / Закрити): 48px, full pill */
 .fg-lures__done {
   width: 100%; height: 48px;
-  border: 0; border-radius: 24px;
-  background: var(--hud-ink); color: #fff;
-  font: 700 17px/48px var(--fg-font);
+  border: 0; border-radius: 999px;
+  background: var(--sh-ink, #14203d); color: #fff;
+  font: 800 16px/48px var(--fg-font);
+  box-shadow: 0 8px 18px rgba(20, 32, 61, .22);
   cursor: pointer;
 }
 .fg-lures__done:active { transform: scale(.98); }
@@ -899,43 +925,59 @@
 .fg-records-btn:active { transform: scale(.92); }
 .fg-records-btn img { display: block; max-width: 44px; max-height: 44px; width: auto; height: auto; filter: drop-shadow(0 3px 4px rgba(12, 31, 43, .28)); pointer-events: none; }
 
-.fg-records__list { padding-bottom: 16px; }
-.fg-records__item { display: flex; align-items: center; gap: 12px; padding: 10px 0; }
-.fg-records__item + .fg-records__item { border-top: 1px solid #dfe6f4; }
+.fg-records__list { padding-bottom: calc(var(--fg-safe-bottom) + 18px); }
+.fg-records__item { display: flex; align-items: center; gap: 12px; padding: 11px 0; }
+.fg-records__item + .fg-records__item { border-top: 1px solid var(--sh-line); }
 .fg-records__info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
-.fg-records__name { font-size: 15px; font-weight: 800; }
-.fg-records__meta, .fg-records__count { font-size: 12px; font-weight: 600; color: var(--hud-label); line-height: 1.3; }
+.fg-records__name { font-size: 15px; font-weight: 700; }
+.fg-records__meta { font-size: 12.5px; font-weight: 600; color: var(--sh-meta); line-height: 1.3; }
+.fg-records__count { font-size: 12px; font-weight: 600; color: #a3adc3; line-height: 1.3; }
 .fg-records__count:empty { display: none; }
-.fg-records__kg { flex: none; font-size: 17px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.fg-records__kg { flex: none; font-size: 17px; font-weight: 800; letter-spacing: -.01em; font-variant-numeric: tabular-nums; }
 .fg-records__item.is-empty .fg-bag__pic { opacity: .3; filter: grayscale(1); }
-.fg-records__item.is-empty .fg-records__kg { color: var(--hud-label); }
+.fg-records__item.is-empty .fg-records__kg { color: var(--sh-faint); }
 
-.fg-bag__foot { padding: 4px 20px 18px; }
+.fg-bag__foot { padding: 16px 22px calc(var(--fg-safe-bottom) + 20px); border-top: 1px solid var(--sh-line); }
 .fg-bag__foot:has(> [hidden]) { display: none; }
+/* «Відпустити весь улов»: a quiet red outline pill — hard to hit by accident */
 .fg-release {
-  width: 100%; height: 44px;
-  border: 0; border-radius: 22px;
-  background: var(--hud-ink); color: #fff;    /* active blue, like «Готово» */
-  font: 800 15px/44px var(--fg-font);
+  width: 100%; height: 48px;
+  border: 1.5px solid #f0d9d7; border-radius: 999px;
+  background: transparent; color: #c33d36;
+  font: 800 16px/45px var(--fg-font);
   cursor: pointer;
-  transition: transform .12s;
+  transition: transform .12s, background .15s;
 }
 .fg-release[hidden] { display: none; }
-.fg-release:active { transform: scale(.98); }
+.fg-release:active { transform: scale(.98); background: #fdf3f2; }
 
 /* ---- PRIZE card (07.10) ------------------------------------------------------- */
-.fg-prize { z-index: 30; }
-.fg-prize__sheet { align-items: center; text-align: center; padding: 22px 20px 0; max-width: 340px; overflow: visible; }
-.fg-prize__burst { position: absolute; top: -26px; left: 50%; transform: translateX(-50%); font-size: 46px; line-height: 1; }
-.fg-prize__pic { width: 180px; height: 180px; object-fit: contain; display: block; margin: 6px auto 4px;
+.fg-prize { z-index: 30; align-items: center; padding: calc(var(--fg-safe-top) + 24px) 18px calc(var(--fg-safe-bottom) + 24px); }
+/* a centred card (not a bottom sheet), a soft golden glow behind the picture */
+.fg-prize__sheet {
+  align-items: center; text-align: center;
+  padding: 28px 24px 0; max-width: 340px; max-height: none;
+  border-radius: 30px; overflow: visible;
+  background: radial-gradient(circle at 50% 118px, #fff1c2 0, rgba(255, 241, 194, 0) 112px), #fbfcfe;
+  box-shadow: 0 24px 60px rgba(8, 18, 40, .35);
+  animation: fg-bag-pop .24s cubic-bezier(.2,.8,.2,1);
+}
+.fg-prize__sheet::before { display: none; }
+.fg-prize__burst { display: none; }
+.fg-prize__pic { width: 170px; height: 170px; object-fit: contain; display: block; margin: 0 auto 6px;
   filter: drop-shadow(0 8px 16px rgba(12, 31, 43, .25)); animation: fg-prize-pop .5s cubic-bezier(.34,1.56,.64,1) both; }
-.fg-prize__title { font-size: 28px; font-weight: 800; line-height: 1.1; margin-top: 6px; }
-.fg-prize__name { margin-top: 6px; font-size: 18px; font-weight: 800; }
-.fg-prize__note { font-size: 14px; font-weight: 600; color: var(--hud-label); }
+.fg-prize__title { font-size: 30px; font-weight: 800; line-height: 1.1; letter-spacing: -.025em; margin-top: 10px; }
+.fg-prize__name { margin-top: 8px; font-size: 17px; font-weight: 800; }
+.fg-prize__note { font-size: 13px; font-weight: 600; color: var(--sh-meta); }
 .fg-prize__note:empty { display: none; }
-.fg-prize__cta { margin-top: 14px; padding: 10px 14px; border-radius: 14px; background: #ffd76a; color: #4a3600; font-size: 16px; font-weight: 800; }
+.fg-prize__cta {
+  align-self: stretch; margin-top: 16px; padding: 12px 14px;
+  border-radius: 16px; border: 1.5px dashed #e6c26a; background: #fffaf0;
+  color: #7a5200; font-size: 15px; font-weight: 800;
+}
+.fg-prize__cta::before { content: '📸 '; }
 .fg-prize__test { margin-top: 8px; font-size: 12px; font-weight: 800; color: #b35c00; }
 .fg-prize__test[hidden] { display: none; }
-.fg-prize__foot { width: 100%; padding: 16px 0 20px; }
+.fg-prize__foot { width: 100%; padding: 16px 0 24px; }
 .fg-records__item--prize .fg-records__meta { color: #b35c00; font-weight: 800; }
 @keyframes fg-prize-pop { from { opacity: 0; transform: scale(.6) rotate(-8deg); } to { opacity: 1; transform: none; } }
