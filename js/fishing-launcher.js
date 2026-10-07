@@ -2,7 +2,7 @@
    PFL App — Fishing mini-game launcher
    --------------------------------------------
    - FAB «Рибалити!» above the tab bar, only on the Fests tab.
-   - Every open shows a splash (assets/fishing/game-logo.png, levitating) for
+   - Every open shows a splash (assets/fishing/spin-fish-logo.webp, levitating) for
      at least SPLASH_MIN_MS. On the first open the game is loaded lazily behind it:
      fishing/fishing.css, fishing-game.html, fishing-engine.js →
      fishing-audio.js → fishing-view.js, all artwork (fish too) and sounds.
@@ -14,7 +14,7 @@
 
 import { haptic, showToast } from './utils.js';
 
-const GAME_VERSION = '20261006i';          // cache-busting for the game files (technical, bump on every change)
+const GAME_VERSION = '20261007a';          // cache-busting for the game files (technical, bump on every change)
 // Human version shown on the splash. Bump: small changes 1.1 → 1.2, big ones → 2.0.
 const GAME_RELEASE = { version: '1.25', date: '06.10.2026' };
 const BASE = 'fishing/';
@@ -94,7 +94,7 @@ function createRoot() {
   root.innerHTML = `
     <div class="fishing-splash" aria-live="polite" aria-label="Завантаження гри">
       <div class="fishing-splash__logo">
-        <img src="./assets/fishing/game-logo.png" alt="Рибалка" draggable="false">
+        <img src="./assets/fishing/spin-fish-logo.webp" alt="Spin Fish" draggable="false">
         <span class="fishing-splash__fallback">Рибалка</span>
       </div>
       <div class="fishing-splash__version">v${GAME_RELEASE.version} · ${GAME_RELEASE.date}</div>
