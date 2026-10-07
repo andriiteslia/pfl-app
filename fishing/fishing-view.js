@@ -1227,6 +1227,48 @@
     // Opening again mid-close cancels it. instant = hide at once.
     const SHEET_OUT_MS = 240;
     const sheetTimers = new WeakMap();
+    // ---- Smooth (iOS-like) sheet corners, 60% smoothing (v1.27, 08.10) -----------
+    // A "squircle" corner like Figma's corner smoothing: the arc is shorter and
+    // eases into the straight edge. CSS can't do it on iOS yet, so the shape is
+    // drawn as a clip-path from the element's border-radius (Figma's math, as in
+    // the figma-squircle library) and redrawn when the size changes. Without
+    // clip-path: path() support the plain border-radius stays.
+    const CORNER_SMOOTHING = 0.6;
+    function squirclePath(w, h, r, smoothing) {
+      const rad = (deg) => deg * Math.PI / 180;
+      const budget = Math.min(w, h) / 2;
+      r = Math.min(r, budget);
+      let p = (1 + smoothing) * r;
+      if (p > budget) { smoothing = Math.max(0, Math.min(budget / r - 1, smoothing)); p = Math.min(p, budget); }
+      const arcMeasure = 90 * (1 - smoothing);
+      const arc = Math.sin(rad(arcMeasure / 2)) * r * Math.SQRT2;
+      const alpha = (90 - arcMeasure) / 2;
+      const p3p4 = r * Math.tan(rad(alpha / 2));
+      const beta = 45 * smoothing;
+      const c = p3p4 * Math.cos(rad(beta));
+      const d = c * Math.tan(rad(beta));
+      const b = (p - arc - c - d) / 3;
+      const a = 2 * b;
+      const n = (v) => +v.toFixed(2);
+      const [A, AB, ABC, C, D, BC, ARC, R] = [a, a + b, a + b + c, c, d, b + c, arc, r].map(n);
+      return `M ${n(w - p)} 0` +
+        ` c ${A} 0 ${AB} 0 ${ABC} ${D} a ${R} ${R} 0 0 1 ${ARC} ${ARC} c ${D} ${C} ${D} ${BC} ${D} ${ABC}` +
+        ` L ${n(w)} ${n(h - p)}` +
+        ` c 0 ${A} 0 ${AB} ${-D} ${ABC} a ${R} ${R} 0 0 1 ${-ARC} ${ARC} c ${-C} ${D} ${-BC} ${D} ${-ABC} ${D}` +
+        ` L ${n(p)} ${n(h)}` +
+        ` c ${-A} 0 ${-AB} 0 ${-ABC} ${-D} a ${R} ${R} 0 0 1 ${-ARC} ${-ARC} c ${-D} ${-C} ${-D} ${-BC} ${-D} ${-ABC}` +
+        ` L 0 ${n(p)}` +
+        ` c 0 ${-A} 0 ${-AB} ${D} ${-ABC} a ${R} ${R} 0 0 1 ${ARC} ${-ARC} c ${C} ${-D} ${BC} ${-D} ${ABC} ${-D} Z`;
+    }
+    const canSmooth = !!window.ResizeObserver && !!window.CSS?.supports?.('clip-path', 'path("M0 0 L1 0 L1 1 Z")');
+    const smoothRO = canSmooth && new ResizeObserver((entries) => entries.forEach(({ target: t }) => {
+      const w = t.offsetWidth, h = t.offsetHeight;
+      if (!w || !h) return;
+      const r = parseFloat(getComputedStyle(t).borderTopLeftRadius) || 0;
+      t.style.clipPath = r > 0 ? `path('${squirclePath(w, h, r, CORNER_SMOOTHING)}')` : '';
+    }));
+    if (smoothRO) document.querySelectorAll('#fishingGame .fg-bag__sheet').forEach((sh) => smoothRO.observe(sh));
+
     function showSheet(root) {
       if (!root) return;
       clearTimeout(sheetTimers.get(root));
