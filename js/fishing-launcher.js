@@ -14,7 +14,7 @@
 
 import { haptic, showToast } from './utils.js';
 
-const GAME_VERSION = '20261007b';          // cache-busting for the game files (technical, bump on every change)
+const GAME_VERSION = '20261007c';          // cache-busting for the game files (technical, bump on every change)
 // Human version shown on the splash. Bump: small changes 1.1 → 1.2, big ones → 2.0.
 const GAME_RELEASE = { version: '1.25', date: '06.10.2026' };
 const BASE = 'fishing/';
@@ -426,7 +426,7 @@ function catchCount() {
 function updateBadge() {
   const badge = fab?.querySelector('.fab-fishing__badge');
   if (!badge) return;
-  const n = isOpen || opening ? 0 : catchCount();
+  const n = isOpen ? 0 : catchCount();      // 07.10: badge stays while the splash comes up
   const text = n > 99 ? '99+' : String(n);
   if (n > 0) {
     if (badge.hidden || badge.textContent !== text) {
@@ -441,10 +441,12 @@ function updateBadge() {
 }
 
 // ---- FAB visibility: Fests tab only, hidden while the game is open ----
+// 07.10: NOT hidden while opening — the splash (z-index 2000) covers it. Hiding it
+// on the tap made it blink away for a frame or two before the splash was painted.
 function updateFab() {
   if (!fab) return;
   const festsActive = document.getElementById('tab-fests')?.classList.contains('active');
-  const show = !!festsActive && !isOpen && !opening;
+  const show = !!festsActive && !isOpen;
   fab.classList.toggle('is-visible', show);
   document.body.classList.toggle('fishing-fab-visible', show);
   updateBadge();
