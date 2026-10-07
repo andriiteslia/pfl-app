@@ -652,6 +652,11 @@
       if (kg < 1) return `${Math.round(kg * 1000)} г`;
       return `${(Math.round(kg * 100) / 100).toString().replace('.', ',')} кг`;
     }
+    // 07.10 (v1.27 sheets): the number + a smaller unit — «1,82<span>кг</span>»
+    function weightHtml(kg) {
+      const [num, unit] = formatWeight(kg).split(' ');
+      return `${num}<span class="fg-unit">${unit}</span>`;
+    }
     function bump(node) {
       node.classList.remove('is-bump');
       void node.offsetWidth;
@@ -1201,7 +1206,7 @@
           `<span class="fg-bag__num">${i + 1}</span>` +
           `<span class="fg-bag__pic"><img src="${fishPic(f.species)}" alt="" draggable="false" loading="lazy"></span>` +
           `<span class="fg-bag__name"></span>` +
-          `<span class="fg-bag__kg">${formatWeight(f.kg)}</span>`;
+          `<span class="fg-bag__kg">${weightHtml(f.kg)}</span>`;
         li.querySelector('.fg-bag__name').textContent = name;
         const img = li.querySelector('.fg-bag__pic img');   // no picture yet (catfish) → emoji
         img.onerror = () => { const em = document.createElement('span'); em.className = 'fg-bag__emoji'; em.textContent = CATCH_EMOJI[f.species] || '🐟'; img.replaceWith(em); };
@@ -1342,7 +1347,7 @@
         if (r?.kg) {
           li.querySelector('.fg-records__meta').textContent = fmtLure(r.lure) || '—';
           li.querySelector('.fg-records__count').textContent = `Всього піймано: ${r.n || 1}`;   // no date (Андрій, 06.10)
-          li.querySelector('.fg-records__kg').textContent = formatWeight(r.kg);
+          li.querySelector('.fg-records__kg').innerHTML = weightHtml(r.kg);
         } else {
           li.querySelector('.fg-records__meta').textContent = 'ще не піймано';
           li.querySelector('.fg-records__kg').textContent = '—';
