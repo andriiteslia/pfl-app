@@ -1224,8 +1224,7 @@
     // ---- Sheets: slide in on open, slide out on close (v1.27) --------------------
     // showSheet / hideSheet instead of toggling `hidden`: on close the sheet gets
     // .is-closing (CSS plays the slide-down / fade) and is hidden when it ends.
-    // Opening again mid-close cancels it. instant = hide at once (after a swipe,
-    // which already moved the sheet away).
+    // Opening again mid-close cancels it. instant = hide at once.
     const SHEET_OUT_MS = 240;
     const sheetTimers = new WeakMap();
     function showSheet(root) {
@@ -1656,77 +1655,6 @@
     } else {
       try { localStorage.removeItem(TEST_KEY); } catch (e) { /* n/a */ }
     }
-
-    // ---- Swipe down to close a bottom sheet (v1.27) ------------------------------
-    // Drag the sheet down: it follows the finger. Let go far enough (or flick it) →
-    // it slides away and the sheet closes like the ✕; otherwise it springs back.
-    // From the list / lure box body the drag starts only when that is scrolled to
-    // the top, so scrolling the list still works. Touch only (desktop has the ✕).
-    function enableSwipeClose(root, close) {
-      const sheet = root?.querySelector('.fg-bag__sheet');
-      const backdrop = root?.querySelector('.fg-bag__backdrop');
-      if (!sheet) return;
-      const CLOSE_DIST = 110, CLOSE_SPEED = 0.6;          // px, px/ms
-      let g = null, swallowClick = false;
-      const setY = (y, anim) => {
-        sheet.style.transition = anim ? `transform ${anim}` : 'none';
-        sheet.style.transform = y > 0 ? `translateY(${y}px)` : '';
-        if (backdrop) {
-          backdrop.style.transition = anim ? `opacity ${anim}` : 'none';
-          backdrop.style.opacity = String(Math.max(0, 1 - y / (sheet.offsetHeight || 1)));
-        }
-      };
-      const reset = () => {
-        sheet.style.transition = sheet.style.transform = '';
-        if (backdrop) backdrop.style.transition = backdrop.style.opacity = '';
-      };
-      sheet.addEventListener('touchstart', (e) => {
-        if (e.touches.length !== 1) { g = null; return; }
-        const t = e.touches[0];
-        const scroller = e.target.closest('.fg-bag__list, .fg-lures__body, .fg-test__list');
-        g = { x0: t.clientX, y0: t.clientY, scroller, mode: 'wait', dy: 0, lastY: t.clientY, lastT: performance.now(), v: 0 };
-      }, { passive: true });
-      sheet.addEventListener('touchmove', (e) => {
-        if (!g || e.touches.length !== 1) return;
-        const t = e.touches[0];
-        const dx = t.clientX - g.x0, dy = t.clientY - g.y0;
-        if (g.mode === 'wait') {
-          if (Math.abs(dx) < 6 && Math.abs(dy) < 6) return;
-          const atTop = !g.scroller || g.scroller.scrollTop <= 0;
-          if (dy > 0 && Math.abs(dy) > Math.abs(dx) && atTop) { g.mode = 'drag'; g.y0 = t.clientY; }
-          else { g.mode = 'off'; return; }
-        }
-        if (g.mode !== 'drag') return;
-        e.preventDefault();                                 // the list must not scroll / bounce under the drag
-        const now = performance.now(), dt = now - g.lastT;
-        if (dt > 0) g.v = (t.clientY - g.lastY) / dt;
-        g.lastY = t.clientY; g.lastT = now;
-        g.dy = Math.max(0, t.clientY - g.y0);
-        setY(g.dy);
-      }, { passive: false });
-      const end = () => {
-        if (!g) return;
-        const was = g; g = null;
-        if (was.mode !== 'drag') return;
-        swallowClick = true; setTimeout(() => { swallowClick = false; }, 350);
-        if (was.dy > CLOSE_DIST || (was.v > CLOSE_SPEED && was.dy > 20)) {
-          setY(sheet.offsetHeight + 40, '.22s cubic-bezier(.4,0,1,1)');
-          haptic('light');
-          setTimeout(() => { close(); hideSheet(root, true); reset(); }, 220);   // already off-screen: no second slide
-        } else {
-          setY(0, '.28s cubic-bezier(.2,.8,.2,1)');
-          setTimeout(reset, 300);
-        }
-      };
-      sheet.addEventListener('touchend', end);
-      sheet.addEventListener('touchcancel', end);
-      // a drag that ended on a button must not also press it
-      root.addEventListener('click', (e) => { if (swallowClick) { e.stopPropagation(); e.preventDefault(); } }, true);
-    }
-    enableSwipeClose(el.bag, closeBag);
-    enableSwipeClose(el.records, closeRecords);
-    if (HAS_LURES) enableSwipeClose(el.lures, () => closeLures());
-    if (TEST_PANEL) enableSwipeClose(testEl.panel, closeTest);
 
     // ---- Bind ---------------------------------------------------------------
     el.stage.addEventListener('pointerdown', onStageDown);

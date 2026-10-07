@@ -61,6 +61,7 @@
     top: 20px;
     bottom: 20px;
     border-radius: 32px;               /* 07.10: was 24px */
+    --fg-sheet-r: 16px;                /* sheets 16px in from the card's 32px corners → concentric */
     box-shadow: 0 12px 40px rgba(15, 23, 42, 0.18);
   }
 }
@@ -622,14 +623,16 @@
 .fg-toast, .fg-hint, .fg-catch, .fg-cast-dist { z-index: 5; }
 
 /* ---- Sheets: «Мій улов», «Мої рекорди», «Мої приманки», test ---------------
-   v1.27 (07.10) «Світанок»: a light sheet that slides up from the bottom, a grab
-   handle on top, more air, hairlines, segmented chips, 48px pill buttons.
+   v1.27 «Світанок»: a light floating sheet 16px from the screen edges, all corners
+   round and concentric with the iPhone's screen corners (≈55px − 16px = 40px),
+   slides up with a tiny bounce, slides down on close. Closed only with ✕ / buttons
+   / backdrop (no swipe). More air, hairlines, segmented chips, 48px pill buttons.
    The prize card stays a centred card (see PRIZE below). */
 .fg-bag {
   position: absolute; inset: 0;
   z-index: 20;
   display: flex; align-items: flex-end; justify-content: center;
-  padding: calc(var(--fg-safe-top) + 24px) 0 0;
+  padding: calc(var(--fg-safe-top) + 24px) 16px 16px;   /* 16px from the screen edges (the home bar sits in the gap) */
   font-family: var(--fg-font);
   --sh-ink: #14203d;          /* titles, values */
   --sh-label: #6c7896;        /* subtitles, labels */
@@ -649,24 +652,16 @@
   width: 100%; max-width: 560px;
   max-height: 88%;
   display: flex; flex-direction: column;
-  border-radius: 30px 30px 0 0;
+  border-radius: var(--fg-sheet-r, 40px);   /* concentric with the phone's screen corners (≈55 − 16) */
   background: #fbfcfe;                       /* solid (no blur over the moving scene) */
-  /* 2nd shadow = the sheet's colour under its bottom edge, so the bounce never shows a gap */
-  box-shadow: 0 -14px 44px rgba(8, 18, 40, .28), 0 24px 0 #fbfcfe;
+  box-shadow: 0 18px 50px rgba(8, 18, 40, .32);
   color: var(--sh-ink);
   overflow: hidden;
   animation: fg-sheet-up .44s both;
 }
-/* grab handle */
-.fg-bag__sheet::before {
-  content: ''; flex: none;
-  width: 38px; height: 5px; border-radius: 3px;
-  margin: 8px auto 0;
-  background: #d6dce7;
-}
 .fg-bag__head {
   display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
-  padding: 14px 22px 14px;                 /* 22px on both sides, like the list */
+  padding: 22px 22px 14px 24px;            /* title a bit further in from the round corner */
   border-bottom: 1px solid var(--sh-line);
 }
 .fg-bag__title { font-size: 25px; font-weight: 800; line-height: 1.1; letter-spacing: -.025em; }
@@ -745,7 +740,7 @@
 @keyframes fg-bag-pop  { from { opacity: 0; transform: translateY(14px) scale(.96); } to { opacity: 1; transform: none; } }
 /* open: slide up with a tiny bounce (overshoots 6px, settles) */
 @keyframes fg-sheet-up {
-  0%   { transform: translateY(100%); animation-timing-function: cubic-bezier(.2, .8, .3, 1); }
+  0%   { transform: translateY(calc(100% + 24px)); animation-timing-function: cubic-bezier(.2, .8, .3, 1); }
   70%  { transform: translateY(-6px); animation-timing-function: ease-in-out; }
   100% { transform: none; }
 }
@@ -755,7 +750,7 @@
   100% { opacity: 1; transform: none; }
 }
 /* closing (showSheet / hideSheet in the view): slide down + fade the backdrop */
-@keyframes fg-sheet-down { from { transform: none; } to { transform: translateY(100%); } }
+@keyframes fg-sheet-down { from { transform: none; } to { transform: translateY(calc(100% + 24px)); } }
 @keyframes fg-bag-fade-out { from { opacity: 1; } to { opacity: 0; } }
 @keyframes fg-bag-pop-out { from { opacity: 1; transform: none; } to { opacity: 0; transform: translateY(14px) scale(.96); } }
 .fg-bag.is-closing { pointer-events: none; }
@@ -796,7 +791,7 @@
   font-size: 12px; font-weight: 600; line-height: 1.35;
   color: var(--sh-label);
 }
-.fg-test__actions { display: flex; gap: 10px; padding: 16px 22px calc(var(--fg-safe-bottom) + 20px); }
+.fg-test__actions { display: flex; gap: 10px; padding: 16px 22px 22px; }
 .fg-test__btn {
   flex: 1; height: 48px; border-radius: 24px;
   border: 0; background: var(--sh-soft); color: var(--sh-ink);
@@ -917,7 +912,7 @@
   display: none; place-items: center;
 }
 .fg-lures__item[aria-checked="true"] .fg-lures__check { display: grid; }
-.fg-lures__foot { padding: 16px 22px calc(var(--fg-safe-bottom) + 20px); }
+.fg-lures__foot { padding: 16px 22px 22px; }
 /* main button (Готово / Закрити): 48px, full pill */
 .fg-lures__done {
   width: 100%; height: 48px;
@@ -944,7 +939,7 @@
 .fg-records-btn:active { transform: scale(.92); }
 .fg-records-btn img { display: block; max-width: 44px; max-height: 44px; width: auto; height: auto; filter: drop-shadow(0 3px 4px rgba(12, 31, 43, .28)); pointer-events: none; }
 
-.fg-records__list { padding-bottom: calc(var(--fg-safe-bottom) + 18px); }
+.fg-records__list { padding-bottom: 22px; }
 .fg-records__item { display: flex; align-items: center; gap: 12px; padding: 11px 0; }
 .fg-records__item + .fg-records__item { border-top: 1px solid var(--sh-line); }
 .fg-records__info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
@@ -956,7 +951,7 @@
 .fg-records__item.is-empty .fg-bag__pic { opacity: .3; filter: grayscale(1); }
 .fg-records__item.is-empty .fg-records__kg { color: var(--sh-faint); }
 
-.fg-bag__foot { padding: 16px 22px calc(var(--fg-safe-bottom) + 20px); border-top: 1px solid var(--sh-line); }
+.fg-bag__foot { padding: 16px 22px 22px; border-top: 1px solid var(--sh-line); }
 .fg-bag__foot:has(> [hidden]) { display: none; }
 /* «Відпустити весь улов»: a quiet red outline pill — hard to hit by accident */
 .fg-release {
@@ -981,7 +976,6 @@
   box-shadow: 0 24px 60px rgba(8, 18, 40, .35);
   animation: fg-card-in .4s both;
 }
-.fg-prize__sheet::before { display: none; }
 .fg-prize__burst { display: none; }
 .fg-prize__pic { width: 170px; height: 170px; object-fit: contain; display: block; margin: 0 auto 6px;
   filter: drop-shadow(0 8px 16px rgba(12, 31, 43, .25)); animation: fg-prize-pop .5s cubic-bezier(.34,1.56,.64,1) both; }
