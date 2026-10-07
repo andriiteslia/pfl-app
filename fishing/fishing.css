@@ -699,6 +699,8 @@
 }
 /* the crab is almost square: the 70×70 crop above cut its claws and legs → fit it whole (v1.25) */
 [data-species="crab"] > .fg-bag__pic img { width: 50px; height: 50px; }
+/* the prize pack is tall: fit it whole in the records row (07.10) */
+[data-species="prize"] > .fg-bag__pic img { width: 48px; height: 48px; }
 .fg-bag__emoji { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); font-size: 28px; line-height: 1; }
 .fg-bag__name { flex: 1; min-width: 0; font-size: 15px; font-weight: 700; }
 .fg-bag__badge {
