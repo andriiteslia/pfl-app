@@ -11,10 +11,11 @@
   left: auto;
   right: max(22px, calc((100vw - 520px) / 2 + 2px));   /* = right edge of the tab bar's «Arena» circle (.tabs-bar: left/right 20px, max-width 520px) */
   bottom: calc(28px + env(safe-area-inset-bottom, 0px) + 64px + 20px); /* tab bar: bottom 28 + pill 64 */
-  width: auto;
-  height: 52px;
+  width: 64px;                       /* 07.10: a 64×64 circle, like the tab bar's «Arena» */
+  height: 64px;
   margin: 0;
-  padding: 0 10px;                   /* 07.10: narrower (was 16px) → ~89px wide */
+  padding: 0;
+  border-radius: 50%;
   z-index: 101;
   display: none;
   box-shadow:
@@ -36,8 +37,8 @@
 
 .fab-fishing__logo {
   display: block;
-  height: 38px;                      /* SPIN FISH logo (assets/fishing/spin-fish-logo.webp, 720×398) → ~69px wide */
-  width: auto;
+  width: 56px;                       /* SPIN FISH logo (assets/fishing/spin-fish-logo.webp, 720×398) → 31px tall */
+  height: auto;
   max-width: none;
   filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.25));
   pointer-events: none;
@@ -96,7 +97,7 @@
 
 /* keep the last rows of Fests reachable above the FAB */
 body.fishing-fab-visible #app-content {
-  padding-bottom: 168px; /* 96 (tab bar) + 52 (FAB) + 20 (gap) */
+  padding-bottom: 180px; /* 96 (tab bar) + 64 (FAB) + 20 (gap) */
 }
 
 /* ---- Full-screen game container (above everything in the app) ---- */
