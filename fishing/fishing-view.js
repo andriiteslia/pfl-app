@@ -1221,6 +1221,27 @@
       el.bagList.replaceChildren(frag);
       el.bagList.scrollTop = 0;
     }
+    // ---- Sheets: slide in on open, slide out on close (v1.27) --------------------
+    // showSheet / hideSheet instead of toggling `hidden`: on close the sheet gets
+    // .is-closing (CSS plays the slide-down / fade) and is hidden when it ends.
+    // Opening again mid-close cancels it. instant = hide at once (after a swipe,
+    // which already moved the sheet away).
+    const SHEET_OUT_MS = 240;
+    const sheetTimers = new WeakMap();
+    function showSheet(root) {
+      if (!root) return;
+      clearTimeout(sheetTimers.get(root));
+      root.classList.remove('is-closing');
+      root.hidden = false;
+    }
+    function hideSheet(root, instant = false) {
+      if (!root || root.hidden) return;
+      clearTimeout(sheetTimers.get(root));
+      if (instant || document.hidden) { root.classList.remove('is-closing'); root.hidden = true; return; }
+      root.classList.add('is-closing');
+      sheetTimers.set(root, setTimeout(() => { root.classList.remove('is-closing'); root.hidden = true; }, SHEET_OUT_MS));
+    }
+
     function openBag() {
       if (bagOpen) return;
       closeRecords();
@@ -1228,13 +1249,13 @@
       stopBiteVibration();
       renderBag();
       bagOpen = true;
-      el.bag.hidden = false;
+      showSheet(el.bag);
       haptic('light');
     }
     function closeBag() {
       if (!bagOpen) return;
       bagOpen = false;
-      el.bag.hidden = true;
+      hideSheet(el.bag);
       lastTs = 0;                         // no time jump after the pause
     }
     el.stats.addEventListener('click', () => { if (statsHoldFired) return; openBag(); });   // a 5 s hold is not a tap
@@ -1387,12 +1408,12 @@
       el2.querySelector('[data-prize-note]').textContent = P0.note || '';
       el2.querySelector('[data-prize-test]').hidden = !test;
       prizeOpen = true;
-      el2.hidden = false;
+      showSheet(el2);
     }
     function closePrize() {
       if (!prizeOpen) return;
       prizeOpen = false;
-      document.getElementById('fgPrize').hidden = true;
+      hideSheet(document.getElementById('fgPrize'));
       lastTs = 0;
     }
     document.getElementById('fgPrize')?.addEventListener('click', (e) => { if (e.target.closest('[data-close]')) closePrize(); });
@@ -1403,13 +1424,13 @@
       stopBiteVibration();
       renderRecords();
       recordsOpen = true;
-      el.records.hidden = false;
+      showSheet(el.records);
       haptic('light');
     }
     function closeRecords() {
       if (!recordsOpen) return;
       recordsOpen = false;
-      el.records.hidden = true;
+      hideSheet(el.records);
       lastTs = 0;
     }
     el.recordsBtn.addEventListener('click', openRecords);
@@ -1511,7 +1532,7 @@
       stopBiteVibration();
       renderLures();
       luresOpen = true;
-      el.lures.hidden = false;
+      showSheet(el.lures);
       audio.unlock();                     // this tap is a user gesture
       audio.boxOpen?.();
       haptic('light');
@@ -1520,7 +1541,7 @@
       if (!luresOpen) return;
       luresOpen = false;
       if (!silent) audio.boxClose?.();
-      el.lures.hidden = true;
+      hideSheet(el.lures);
       lastTs = 0;                         // no time jump after the pause
     }
     if (HAS_LURES) {
@@ -1595,13 +1616,13 @@
       stopBiteVibration();
       renderTest();
       testOpen = true;
-      testEl.panel.hidden = false;
+      showSheet(testEl.panel);
       rawWarn();                                            // felt on iPhone too
     }
     function closeTest() {
       if (!testOpen) return;
       testOpen = false;
-      testEl.panel.hidden = true;
+      hideSheet(testEl.panel);
       lastTs = 0;
     }
     if (TEST_PANEL) {
@@ -1691,7 +1712,7 @@
         if (was.dy > CLOSE_DIST || (was.v > CLOSE_SPEED && was.dy > 20)) {
           setY(sheet.offsetHeight + 40, '.22s cubic-bezier(.4,0,1,1)');
           haptic('light');
-          setTimeout(() => { close(); reset(); }, 220);
+          setTimeout(() => { close(); hideSheet(root, true); reset(); }, 220);   // already off-screen: no second slide
         } else {
           setY(0, '.28s cubic-bezier(.2,.8,.2,1)');
           setTimeout(reset, 300);

@@ -651,10 +651,11 @@
   display: flex; flex-direction: column;
   border-radius: 30px 30px 0 0;
   background: #fbfcfe;                       /* solid (no blur over the moving scene) */
-  box-shadow: 0 -14px 44px rgba(8, 18, 40, .28);
+  /* 2nd shadow = the sheet's colour under its bottom edge, so the bounce never shows a gap */
+  box-shadow: 0 -14px 44px rgba(8, 18, 40, .28), 0 24px 0 #fbfcfe;
   color: var(--sh-ink);
   overflow: hidden;
-  animation: fg-sheet-up .32s cubic-bezier(.2,.8,.2,1);
+  animation: fg-sheet-up .44s both;
 }
 /* grab handle */
 .fg-bag__sheet::before {
@@ -742,7 +743,25 @@
 .fg-bag__empty-icon { font-size: 36px; margin-bottom: 8px; }
 @keyframes fg-bag-fade { from { opacity: 0; } to { opacity: 1; } }
 @keyframes fg-bag-pop  { from { opacity: 0; transform: translateY(14px) scale(.96); } to { opacity: 1; transform: none; } }
-@keyframes fg-sheet-up { from { transform: translateY(100%); } to { transform: none; } }
+/* open: slide up with a tiny bounce (overshoots 6px, settles) */
+@keyframes fg-sheet-up {
+  0%   { transform: translateY(100%); animation-timing-function: cubic-bezier(.2, .8, .3, 1); }
+  70%  { transform: translateY(-6px); animation-timing-function: ease-in-out; }
+  100% { transform: none; }
+}
+@keyframes fg-card-in {
+  0%   { opacity: 0; transform: translateY(14px) scale(.94); animation-timing-function: cubic-bezier(.2, .8, .3, 1); }
+  65%  { opacity: 1; transform: translateY(-2px) scale(1.015); animation-timing-function: ease-in-out; }
+  100% { opacity: 1; transform: none; }
+}
+/* closing (showSheet / hideSheet in the view): slide down + fade the backdrop */
+@keyframes fg-sheet-down { from { transform: none; } to { transform: translateY(100%); } }
+@keyframes fg-bag-fade-out { from { opacity: 1; } to { opacity: 0; } }
+@keyframes fg-bag-pop-out { from { opacity: 1; transform: none; } to { opacity: 0; transform: translateY(14px) scale(.96); } }
+.fg-bag.is-closing { pointer-events: none; }
+.fg-bag.is-closing .fg-bag__backdrop { animation: fg-bag-fade-out .24s ease-in forwards; }
+.fg-bag.is-closing .fg-bag__sheet { animation: fg-sheet-down .24s cubic-bezier(.4, 0, 1, 1) forwards; }
+.fg-prize.is-closing .fg-prize__sheet { animation: fg-bag-pop-out .2s ease-in forwards; }
 
 /* ---- TEST (PFL app): fish on/off panel + "test on" badge ------------------- */
 .fg-test__list { padding: 4px 22px 0; }
@@ -960,7 +979,7 @@
   border-radius: 30px; overflow: visible;
   background: radial-gradient(circle at 50% 118px, #fff1c2 0, rgba(255, 241, 194, 0) 112px), #fbfcfe;
   box-shadow: 0 24px 60px rgba(8, 18, 40, .35);
-  animation: fg-bag-pop .24s cubic-bezier(.2,.8,.2,1);
+  animation: fg-card-in .4s both;
 }
 .fg-prize__sheet::before { display: none; }
 .fg-prize__burst { display: none; }
