@@ -3,16 +3,18 @@
    (the game's own styles live in fishing/fishing.css, loaded lazily)
    ============================================ */
 
-/* ---- FAB «Рибалити!» — the .btn look (like «Оновити»),
-        20px above the tab bar, centred, levitating ---- */
+/* ---- FAB «SPIN FISH» (07.10: was the «Рибалити!» text, centred) — the .btn
+        blue pill with the game logo, 20px above the tab bar, on the RIGHT edge of
+        the content (so it doesn't cover the tables), levitating ---- */
 .fab-fishing {
   position: fixed;
-  left: 0;
-  right: 0;
+  left: auto;
+  right: max(22px, calc((100vw - 520px) / 2 + 2px));   /* = right edge of the tab bar's «Arena» circle (.tabs-bar: left/right 20px, max-width 520px) */
   bottom: calc(28px + env(safe-area-inset-bottom, 0px) + 64px + 20px); /* tab bar: bottom 28 + pill 64 */
-  width: max-content;
-  margin: 0 auto;
-  padding: 0 22px;
+  width: auto;
+  height: 52px;
+  margin: 0;
+  padding: 0 10px;                   /* 07.10: narrower (was 16px) → ~89px wide */
   z-index: 101;
   display: none;
   box-shadow:
@@ -30,6 +32,16 @@
 
 .fab-fishing:active {
   transform: scale(0.95);
+}
+
+.fab-fishing__logo {
+  display: block;
+  height: 38px;                      /* SPIN FISH logo (assets/fishing/spin-fish-logo.webp, 720×398) → ~69px wide */
+  width: auto;
+  max-width: none;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.25));
+  pointer-events: none;
+  -webkit-user-drag: none;
 }
 
 /* catch counter while the game is minimised (like an unread badge) */
@@ -84,7 +96,7 @@
 
 /* keep the last rows of Fests reachable above the FAB */
 body.fishing-fab-visible #app-content {
-  padding-bottom: 160px; /* 96 (tab bar) + 44 (FAB) + 20 (gap) */
+  padding-bottom: 168px; /* 96 (tab bar) + 52 (FAB) + 20 (gap) */
 }
 
 /* ---- Full-screen game container (above everything in the app) ---- */
