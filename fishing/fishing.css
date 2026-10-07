@@ -920,3 +920,20 @@
 }
 .fg-release[hidden] { display: none; }
 .fg-release:active { transform: scale(.98); }
+
+/* ---- PRIZE card (07.10) ------------------------------------------------------- */
+.fg-prize { z-index: 30; }
+.fg-prize__sheet { align-items: center; text-align: center; padding: 22px 20px 0; max-width: 340px; overflow: visible; }
+.fg-prize__burst { position: absolute; top: -26px; left: 50%; transform: translateX(-50%); font-size: 46px; line-height: 1; }
+.fg-prize__pic { width: 180px; height: 180px; object-fit: contain; display: block; margin: 6px auto 4px;
+  filter: drop-shadow(0 8px 16px rgba(12, 31, 43, .25)); animation: fg-prize-pop .5s cubic-bezier(.34,1.56,.64,1) both; }
+.fg-prize__title { font-size: 28px; font-weight: 800; line-height: 1.1; margin-top: 6px; }
+.fg-prize__name { margin-top: 6px; font-size: 18px; font-weight: 800; }
+.fg-prize__note { font-size: 14px; font-weight: 600; color: var(--hud-label); }
+.fg-prize__note:empty { display: none; }
+.fg-prize__cta { margin-top: 14px; padding: 10px 14px; border-radius: 14px; background: #ffd76a; color: #4a3600; font-size: 16px; font-weight: 800; }
+.fg-prize__test { margin-top: 8px; font-size: 12px; font-weight: 800; color: #b35c00; }
+.fg-prize__test[hidden] { display: none; }
+.fg-prize__foot { width: 100%; padding: 16px 0 20px; }
+.fg-records__item--prize .fg-records__meta { color: #b35c00; font-weight: 800; }
+@keyframes fg-prize-pop { from { opacity: 0; transform: scale(.6) rotate(-8deg); } to { opacity: 1; transform: none; } }

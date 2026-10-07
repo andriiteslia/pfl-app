@@ -91,6 +91,16 @@
           // The very first fish (guaranteed bite on the 2nd cast) is a special nice
           // perch — it does NOT define the school.
           firstFish: { species: 'perch', kg: 0.68, spread: 0.04 },
+          // PRIZE (07.10): a real item to win — Decoy Single 32 (a pack of hooks).
+          // Bites ONLY on Cheater 1.2" with a 1–2 g jig, `chance` of the fish bites
+          // there (3% of fish bites ≈ one per ~17 min of non-stop fishing that setup — bot test), once per player.
+          // Another prize later: change name / picture (assets/fishing/prize.webp) / lure.
+          prize: {
+            name: 'Decoy Single 32', nameAcc: 'Decoy Single 32', note: 'пачка гачків',
+            power: 0.35, kg: [0.01, 0.01], tiers: [[1, 0.01, 0.01]],
+            lure: 'cheater', sizes: [1.2], maxWeightG: 2,
+            chance: 0.03,
+          },
         },
       },
     },

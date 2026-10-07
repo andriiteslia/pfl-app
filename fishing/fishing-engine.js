@@ -122,6 +122,8 @@
         zander: { turn: 0.35, dart: 0.25, side: 0.35, sideBias: 0, away: 0.6, swim: 0.35, press: 0.9, start: 0.9,
                   forceMul: 1.25 },
         crab:   { turn: 0.6, dart: 0.4, side: 0.6, sideBias: 0.6, away: 0.4, swim: 0.7, press: 0.3, start: 0.6 },
+        // PFL app (07.10): the PRIZE item (a pack of hooks) — light, just comes in
+        prize:  { turn: 0.3, dart: 0.1, side: 0.3, sideBias: 0, away: 0.3, swim: 0.4, press: 0.15, start: 0.4 },
         // catfish: heavy and stubborn — slow, long, straight runs away from the shore,
         // leans on the line hard even standing still. Takes a lot of line. Reel slowly:
         //   extraLineM     – line it can take beyond the cast (others: fight.maxExtraLineM)
@@ -292,7 +294,7 @@
       score: 0,
       totalKg: 0,          // total weight of the fish in the bag
       bag: [],             // fish caught this session: { species, kg } — score = bag.length
-      stats: { casts: 0, bites: 0, fish: 0, crabs: 0, missed: 0, empty: 0, broken: 0, escaped: 0, snags: 0, freed: 0 },
+      stats: { casts: 0, bites: 0, fish: 0, crabs: 0, prizes: 0, missed: 0, empty: 0, broken: 0, escaped: 0, snags: 0, freed: 0 },
       castPower: 0,
       castAim: 0,          // -1 left .. 0 straight .. 1 right
       castDistance: 0,
@@ -625,6 +627,10 @@
         s.catchType = 'fish';
         key = sp.firstFish.species;
         kg = sp.firstFish.kg + (rng() * 2 - 1) * sp.firstFish.spread;
+      } else if (s.catchType === 'fish' && prizeAvailable() && rng() < (speciesFilter && onlyPrizeTest() ? 1 : sp.prize.chance)) {
+        key = 'prize';                    // PFL app (07.10): the prize item — only on its lure setup, once per player
+        s.catchType = 'prize';
+        kg = sp.prize.kg[0];
       } else if (s.catchType === 'fish' && s.lureDistance >= sp.catfishBite.minDistM
                  && (s.biteOnPause || s.reelSpeed <= sp.catfishBite.slowReel)
                  && !L.noBottom && rng() < oddsAdj(sp.catfishBite.chance, m.catfish)) {
@@ -664,7 +670,7 @@
       const cap = L.capKg[key];
       if (cap && kg > cap) kg = d.kg[0] + rng() * (Math.max(d.kg[0], cap) - d.kg[0]);
       kg = clamp(kg, d.kg[0], d.kg[1]);
-      const w = (kg - d.kg[0]) / (d.kg[1] - d.kg[0]);  // 0 = lightest, 1 = heaviest
+      const w = d.kg[1] > d.kg[0] ? (kg - d.kg[0]) / (d.kg[1] - d.kg[0]) : 0;  // 0 = lightest, 1 = heaviest
       s.species = key;
       s.weightKg = Math.round(kg * 1000) / 1000;
       s.fishPower = d.power * (sp.weightPower[0] + w * (sp.weightPower[1] - sp.weightPower[0]));
@@ -728,7 +734,7 @@
       const sp = config.species;
       const st = { ...(sp.styles[s.species] || sp.styles.perch) };
       const d = sp[s.species];
-      const w = d ? clamp((s.weightKg - d.kg[0]) / (d.kg[1] - d.kg[0])) : 0;
+      const w = d && d.kg[1] > d.kg[0] ? clamp((s.weightKg - d.kg[0]) / (d.kg[1] - d.kg[0])) : 0;
       if (st.bigTurn != null) st.turn += (st.bigTurn - st.turn) * w;
       if (st.bigSide != null) st.side += (st.bigSide - st.side) * w;
       if (st.bigAway != null) st.away += (st.bigAway - st.away) * w;
@@ -762,6 +768,23 @@
       return fish + crab > 0 ? fc * fish / (fc * fish + (1 - fc) * crab) : fc;
     }
 
+    // ---- PRIZE (PFL app, 07.10) -------------------------------------------------
+    // A real prize item (config.species.prize, per lake): bites only on its lure
+    // setup (e.g. Cheater 1.2" on 1–2 g), with a tiny chance per fish bite, and
+    // only until the player has won it once (setPrizeWon — the view keeps that in
+    // the player's records). In the test panel it ignores "already won".
+    let prizeWon = false;
+    function prizeQualifies() {
+      const P = config.species.prize;
+      const c = s.lure?.choice;
+      return !!(P && c && c.lure === P.lure && P.sizes.includes(+c.size) && +c.weight <= P.maxWeightG);
+    }
+    function prizeAvailable() {
+      if (speciesFilter) return speciesFilter.has('prize') && prizeQualifies();
+      return !prizeWon && prizeQualifies();
+    }
+    const onlyPrizeTest = () => speciesFilter && speciesFilter.size === 1 && speciesFilter.has('prize');
+
     // ---- TEST (PFL app): only some species can bite ----------------------------
     // setSpeciesFilter(['catfish']) → only catfish bite; null → normal game.
     // The usual rules pick the fish; a pick that isn't enabled is re-rolled within
@@ -769,7 +792,7 @@
     // (far + bottom / slow reel); if catfish is the only fish enabled it is a
     // catfish every time those conditions are met — otherwise no bite at all.
     // While testing, the 1st-cast "no bite" and 2nd-cast "nice perch" rules are off.
-    const TEST_SPECIES = ['perch', 'pike', 'zander', 'catfish', 'crab'];
+    const TEST_SPECIES = ['perch', 'pike', 'zander', 'catfish', 'crab', 'prize'];
     let speciesFilter = null;
     function setSpeciesFilter(list) {
       const on = Array.isArray(list) ? TEST_SPECIES.filter((k) => list.includes(k)) : TEST_SPECIES;
@@ -781,13 +804,14 @@
     function prepareBiteFiltered() {
       const E = speciesFilter;
       const fishOn = ['perch', 'pike', 'zander', 'catfish'].filter((k) => E.has(k));
-      if (!fishOn.length && !E.has('crab')) return false;          // everything off → no bites
+      const prizeOn = E.has('prize') && prizeQualifies();
+      if (!fishOn.length && !E.has('crab') && !prizeOn) return false;          // everything off → no bites
       const cb = config.species.catfishBite;
       const keepChance = cb.chance;
       if (fishOn.length === 1 && fishOn[0] === 'catfish') cb.chance = 1;   // catfish-only test
       let ok = false;
       for (let i = 0; i < 60 && !ok; i++) {
-        s.catchType = !fishOn.length ? 'crab' : !E.has('crab') ? 'fish'
+        s.catchType = (!fishOn.length && !prizeOn) ? 'crab' : !E.has('crab') ? 'fish'
           : (rng() < config.bite.fishChance ? 'fish' : 'crab');
         pickSpecies();
         ok = E.has(s.species);
@@ -1081,7 +1105,9 @@
     function land() {
       let delta = 0;
       let eaten = null;
-      if (s.catchType === 'fish') {
+      if (s.catchType === 'prize') {
+        s.stats.prizes++;                 // PFL app: the prize item — not a fish, the bag doesn't change
+      } else if (s.catchType === 'fish') {
         s.bag.push({ species: s.species, kg: s.weightKg });
         if (s.catchFromSchool) schoolCatch();
         s.stats.fish++;
@@ -1304,6 +1330,8 @@
       exportSession,
       importSession,
       setBag,                         // PFL app (v1.25): saved bag
+      setPrizeWon(v) { prizeWon = !!v; },   // PFL app (07.10): the player already won the prize item
+      prizeQualifies,
     };
   }
 

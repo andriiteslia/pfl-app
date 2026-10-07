@@ -479,8 +479,8 @@
     // Works exactly like pressing the button: hold longer = stronger twitch.
     function onKey(e) {
       if (!running) return;                 // game closed: keys belong to the app
-      if (bagOpen || testOpen || luresOpen || recordsOpen) { // a sheet is open: Esc/Space close it, no game input
-        if (e.type === 'keydown' && (e.key === 'Escape' || e.code === 'Space')) { e.preventDefault(); closeBag(); closeTest(); closeLures(); closeRecords(); }
+      if (bagOpen || testOpen || luresOpen || recordsOpen || prizeOpen) { // a sheet is open: Esc/Space close it, no game input
+        if (e.type === 'keydown' && (e.key === 'Escape' || e.code === 'Space')) { e.preventDefault(); closeBag(); closeTest(); closeLures(); closeRecords(); closePrize(); }
         return;
       }
       if (e.code !== 'Space' && e.key !== ' ') return;
@@ -510,7 +510,7 @@
     }
 
     // Catch card: picture + name + weight. PNGs: assets/fishing/<species>.png
-    const CATCH_EMOJI = { perch: '🐟', zander: '🐟', pike: '🐟', catfish: '🐟', crab: '🦀' };   // emoji = fallback until the picture exists
+    const CATCH_EMOJI = { perch: '🐟', zander: '🐟', pike: '🐟', catfish: '🐟', crab: '🦀', prize: '🎁' };   // emoji = fallback until the picture exists
     // One <img> per species, created once and fully loaded up front. On a catch
     // we only switch which one is visible, so the right picture shows at once
     // (swapping one <img>'s src briefly showed the previous fish).
@@ -644,6 +644,7 @@
     });
     const CATCH_CARD_MS = 2100;   // .fg-catch animation length
     engine.on('catch', (info) => {
+      if (info.type === 'prize') { hapticNotify('success'); openPrize(info); return; }   // 07.10: the prize item
       hapticNotify(info.type === 'fish' ? 'success' : 'error');
       showCatch(info);
     });
@@ -1077,7 +1078,7 @@
       nextFrameTs = lastTs && nextFrameTs + FRAME_MS > ts ? nextFrameTs + FRAME_MS : ts + FRAME_MS;
       const dt = lastTs ? Math.min(0.05, (ts - lastTs) / 1000) : 0;
       lastTs = ts;
-      const paused = bagOpen || testOpen || luresOpen || recordsOpen;
+      const paused = bagOpen || testOpen || luresOpen || recordsOpen || prizeOpen;
       if (!paused) engine.update(dt);    // the game is paused while the catch summary / test panel is open
       audio.drag(!paused && s.state === 'hooked' ? dragIntensity(dt) : 0);
       render(dt);
@@ -1255,6 +1256,7 @@
     // how many were caught in total; «Відпустити весь улов» doesn't touch them.
     const store = P.createFishingStore ? P.createFishingStore() : null;
     let records = store ? store.local().records : {};
+    engine.setPrizeWon(!!records.prize?.at);   // 07.10: the prize item — once per player
     let applyingStore = false;            // setBag() from the store must not save itself back
     // Nothing is saved until the saved bag has been put into the game: engine.reset()
     // on start emits an EMPTY bag, and saving that (with a fresh time) wiped the
@@ -1277,6 +1279,7 @@
       store.sync().then(({ snap, changed }) => {
         if (!changed) return;
         records = snap.records;
+        engine.setPrizeWon(!!records.prize?.at);
         applyBag(snap.bag);               // a fish on the hook simply lands into the newer bag
         if (snap.lure && !luresOpen && ['idle', 'caught', 'empty', 'broken'].includes(s.state)) applyLure(snap.lure, false);
         if (recordsOpen) renderRecords();
@@ -1291,6 +1294,15 @@
     let recordToastTimer = 0;
     engine.on('catch', (info) => {
       const sp = info.species;
+      if (sp === 'prize') {                 // the prize item: remembered as WON (not in the test panel)
+        if (engine.getSpeciesFilter()) return;
+        const prev = records.prize;
+        records = { ...records, prize: { won: true, at: prev?.at || Date.now(), lure: prev?.lure || (lureChoice ? { ...lureChoice } : null), n: (prev?.n || 0) + 1 } };
+        engine.setPrizeWon(true);
+        store?.saveRecords(records);
+        store?.flush();                     // write it to Telegram right away
+        return;
+      }
       if (!sp || !(info.weightKg > 0)) return;
       const prev = records[sp];
       const rec = { ...(prev || {}), n: (prev?.n || 0) + 1 };
@@ -1337,8 +1349,48 @@
         }
         frag.appendChild(li);
       });
+      // the prize item, once won (07.10)
+      const pr = records.prize;
+      if (pr?.at) {
+        const li = document.createElement('li');
+        li.className = 'fg-records__item fg-records__item--prize';
+        li.dataset.species = 'prize';
+        li.innerHTML =
+          `<span class="fg-bag__pic"><img src="${fishPic('prize')}" alt="" draggable="false"></span>` +
+          '<span class="fg-records__info"><span class="fg-records__name"></span><span class="fg-records__meta"></span><span class="fg-records__count"></span></span>' +
+          '<span class="fg-records__kg">🎁</span>';
+        const P0 = FISHING_CONFIG.species.prize;
+        li.querySelector('.fg-records__name').textContent = P0?.name || 'Приз';
+        li.querySelector('.fg-records__meta').textContent = 'Приз виграно! 🎉';
+        li.querySelector('.fg-records__count').textContent = fmtLure(pr.lure);
+        frag.appendChild(li);
+      }
       el.recordsList.replaceChildren(frag);
     }
+
+    // ---- PRIZE card (07.10): «Ти виграв!» — stays until closed, so it can be screenshotted
+    let prizeOpen = false;
+    function openPrize(info) {
+      const el2 = document.getElementById('fgPrize');
+      if (!el2) return;
+      closeBag(); closeTest(); closeLures(true); closeRecords();
+      releaseAllInputs();
+      stopBiteVibration();
+      const P0 = FISHING_CONFIG.species.prize || {};
+      const test = !!engine.getSpeciesFilter();
+      el2.querySelector('[data-prize-name]').textContent = P0.name || info.name || 'Приз';
+      el2.querySelector('[data-prize-note]').textContent = P0.note || '';
+      el2.querySelector('[data-prize-test]').hidden = !test;
+      prizeOpen = true;
+      el2.hidden = false;
+    }
+    function closePrize() {
+      if (!prizeOpen) return;
+      prizeOpen = false;
+      document.getElementById('fgPrize').hidden = true;
+      lastTs = 0;
+    }
+    document.getElementById('fgPrize')?.addEventListener('click', (e) => { if (e.target.closest('[data-close]')) closePrize(); });
     function openRecords() {
       if (recordsOpen) return;
       closeBag(); closeTest(); closeLures(true);
@@ -1495,7 +1547,7 @@
     const TEST_PANEL = true;
     const TEST_HOLD_MS = 5000;
     const TEST_KEY = 'pfl.fishing.testFish';
-    const TEST_FISH = [['perch', 'Окунь'], ['pike', 'Щука'], ['zander', 'Судак'], ['catfish', 'Сом'], ['crab', 'Краб']];
+    const TEST_FISH = [['perch', 'Окунь'], ['pike', 'Щука'], ['zander', 'Судак'], ['catfish', 'Сом'], ['crab', 'Краб'], ['prize', 'Приз (Decoy)']];
     const testEl = {
       panel: document.getElementById('fgTest'),
       list: document.getElementById('fgTestList'),

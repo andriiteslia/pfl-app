@@ -187,6 +187,21 @@
       </div>
     </div>
 
+    <!-- PRIZE card (07.10): the prize item is caught. Stays until «Закрити» (for a screenshot). -->
+    <div id="fgPrize" class="fg-bag fg-prize" hidden>
+      <div class="fg-bag__backdrop"></div>
+      <div class="fg-bag__sheet fg-prize__sheet" role="dialog" aria-modal="true" aria-labelledby="fgPrizeTitle">
+        <div class="fg-prize__burst" aria-hidden="true">🎉</div>
+        <img class="fg-prize__pic" src="./assets/fishing/prize.webp?v=5" alt="" draggable="false">
+        <div id="fgPrizeTitle" class="fg-prize__title">Ти виграв!</div>
+        <div class="fg-prize__name" data-prize-name></div>
+        <div class="fg-prize__note" data-prize-note></div>
+        <div class="fg-prize__cta">Скрінь та пиши адміну!</div>
+        <div class="fg-prize__test" data-prize-test hidden>🧪 Тест — не рахується</div>
+        <div class="fg-prize__foot"><button type="button" class="fg-lures__done" data-close>Закрити</button></div>
+      </div>
+    </div>
+
     <!-- Records «Мої рекорди» (v1.25): heaviest fish per species + total caught. Game paused. -->
     <div id="fgRecords" class="fg-bag fg-records" hidden>
       <div class="fg-bag__backdrop" data-close></div>
@@ -253,7 +268,7 @@
           </button>
         </div>
         <div id="fgTestList" class="fg-test__list"></div>
-        <div class="fg-test__hint">Сом клює лише далі 35 м — коли приманка лежить на дні або на повільній проводці (важіль до 30%).</div>
+        <div class="fg-test__hint">Сом клює лише далі 35 м — коли приманка лежить на дні або на повільній проводці (важіль до 30%). Приз — лише на Cheater 1.2′ з вантажком 1–2 г (у тесті — навіть якщо вже виграно, і не зберігається).</div>
         <div class="fg-test__actions">
           <button type="button" class="fg-test__btn" data-all>Увімкнути всіх</button>
           <button type="button" class="fg-test__btn fg-test__btn--primary" data-close>Готово</button>
