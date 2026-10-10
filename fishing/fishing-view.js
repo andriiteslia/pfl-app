@@ -176,6 +176,7 @@
       stage: document.getElementById('fgStage'),
       svg: document.getElementById('fgPlaceholder'),
       rod: document.getElementById('fgRod'),
+      rodHi: [...document.querySelectorAll('#fgRodHi path')],
       grip: document.getElementById('fgGrip'),
       line: document.getElementById('fgLine'),
       lineRod: document.getElementById('fgLineRod'),
@@ -748,21 +749,34 @@
         3*u*u*(P[1][1]-P[0][1]) + 6*u*t*(P[2][1]-P[1][1]) + 3*t*t*(P[3][1]-P[2][1]),
       ];
     }
-    function rodPath(tip) {
+    // Centre line samples: point + unit normal × half-width (shared by the blank
+    // and its highlight strips, computed once per frame).
+    function rodSamples(tip) {
       const P = rodCtrl(tip);
-      const N = 28;
-      const left = [], right = [];
+      const N = 28, out = [];
       for (let i = 0; i <= N; i++) {
         const t = i / N;
         const [x, y, tx, ty] = rodAt(P, t);
         const len = Math.hypot(tx, ty) || 1;
         const w = lerp(L.rodButtWidth, L.rodTipWidth, Math.pow(t, 0.7)) / 2;
-        const nx = -ty / len * w, ny = tx / len * w;
-        left.push(`${(x + nx).toFixed(2)},${(y + ny).toFixed(2)}`);
-        right.push(`${(x - nx).toFixed(2)},${(y - ny).toFixed(2)}`);
+        out.push([x, y, -ty / len * w, tx / len * w]);   // +normal = right side on screen
       }
-      return `M${left.join(' L')} L${right.reverse().join(' L')} Z`;
+      return out;
     }
+    // A strip along the blank between offsets a and b (−1 = left edge … 1 = right edge).
+    function rodStrip(S, a, b) {
+      const one = [], two = [];
+      for (const [x, y, nx, ny] of S) {
+        one.push(`${(x + nx * a).toFixed(2)},${(y + ny * a).toFixed(2)}`);
+        two.push(`${(x + nx * b).toFixed(2)},${(y + ny * b).toFixed(2)}`);
+      }
+      return `M${one.join(' L')} L${two.reverse().join(' L')} Z`;
+    }
+    function rodPath(tip) { return rodStrip(rodSamples(tip), 1, -1); }
+    // v1.28 (11.10): black blank with volume — light from the upper left like the
+    // grip: a soft specular band on the left (3 nested strips = soft falloff,
+    // no blur filter) + a faint reflected rim on the shadow side.
+    const ROD_HI = [[-0.8, -0.08], [-0.66, -0.24], [-0.54, -0.36], [0.62, 0.9]];
 
     // ---- Guides + line along the rod ------------------------------------------
     // Visual only. Guides sit under the blank (the lower-left side on screen),
@@ -971,7 +985,9 @@
       const tip = tipPos();
       const lure = lurePos(tip);
 
-      el.rod.setAttribute('d', rodPath(tip));
+      const rodS = rodSamples(tip);
+      el.rod.setAttribute('d', rodStrip(rodS, 1, -1));
+      el.rodHi?.forEach((p, i) => p.setAttribute('d', rodStrip(rodS, ROD_HI[i][0], ROD_HI[i][1])));
       updateRodLine(tip);
 
       // Quadratic line; control point below the chord midpoint by 2×sag.

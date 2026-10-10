@@ -57,6 +57,8 @@
         <path id="fgLineRod" class="fg-line fg-line--rod" d="" />
         <path id="fgGuides" class="fg-guides" d="" />
         <path id="fgRod" class="fg-rod" d="" />
+        <!-- volume on the blank (v1.28): soft highlight band on the lit (left) side + faint rim on the shadow side; JS draws them along the bent blank -->
+        <g id="fgRodHi" class="fg-rod-hi"><path d=""/><path d=""/><path d=""/><path class="fg-rod-rim" d=""/></g>
         <!-- rod grip (PFL app): EVA fore grip → glossy hood → chrome locking nut → thread → winding check,
              drawn along the blank in a local frame (y up the rod, 0 = blank butt at the screen bottom).
              JS sets the outer transform (rod tip position + scale), as for rod.svg. -->
