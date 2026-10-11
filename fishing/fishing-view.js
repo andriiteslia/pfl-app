@@ -828,8 +828,10 @@
     // In perspective a straight cast line keeps the same screen x while the
     // lure comes closer, so the lure retrieves straight down the screen along
     // the cast direction and only converges to the angler in the last metres.
+    const WATER_PERSP = 0.42;
     function waterPoint(p, aim, withDrift = true) {
-      const y = lerp(L.lureNearY, L.lureFarY, Math.pow(clamp(p, 0, 1), 0.55)); // never above the far edge
+      // perspective: 0.42 (v1.28, 11.10; was 0.55) — near metres sit further out on the water, far ones a bit tighter
+      const y = lerp(L.lureNearY, L.lureFarY, Math.pow(clamp(p, 0, 1), WATER_PERSP)); // never above the far edge
       const converge = clamp(p / 0.08);                // only the last few metres converge to the angler
       const spread = aim < 0 ? L.aimSpreadLeft : L.aimSpreadRight;
       const x = L.lureX + aim * spread * lerp(0.35, 1, converge);

@@ -31,7 +31,7 @@
       lengthWeight: 0.6,       // power = length * 0.6 + speed * 0.4
       minDistanceM: 3.5,       // weakest cast ("під ноги"), lands right at the bottom of the screen
       maxDistanceM: 74,        // strongest cast, lands at the far edge of the water (v1.24: 74, was 73; the lure sets its own max)
-      jitterM: 1,              // ± random metres around the lure's max
+      jitterM: 1,              // ± random metres (capped at the lure's max)
       flightBaseS: 0.45,       // lure flight time = base + distance * perM
       flightPerM: 0.018,
       directions: 0,           // PFL app: 0 = any direction (no snapping); N > 1 = snap to N fixed directions (was 9)
@@ -385,7 +385,7 @@
       const maxM = castMaxDistance();
       s.castDistance = clamp(
         c.minDistanceM + s.castPower * (maxM - c.minDistanceM) + (rng() * 2 - 1) * c.jitterM,
-        3, Math.min(maxM + c.jitterM, c.maxDistanceM + c.jitterM),
+        3, Math.min(maxM, c.maxDistanceM),   // 11.10: the jitter never goes past the lure's max (was +1 m → 75 m casts)
       );
       s.lureDistance = s.castDistance;
       s.flightDuration = c.flightBaseS + s.castDistance * c.flightPerM;
