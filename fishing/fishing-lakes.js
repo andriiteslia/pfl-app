@@ -25,13 +25,13 @@
       nameEn: 'Prylbychi',
       // scene: sky (top), water (bottom 60% of the screen), far bank on the horizon
       art: {
-        sky: './assets/fishing/sky.webp',
-        water: './assets/fishing/water.webp',
-        land: './assets/fishing/land.webp',
+        sky: './assets/fishing/sky.webp?v=2',
+        water: './assets/fishing/water.webp?v=2',
+        land: './assets/fishing/land.webp?v=2',
       },
       config: {
         bite: {
-          fishChance: 0.75,        // 75% fish (+1), 25% crab (-1)
+          fishChance: 0.89,        // 89% fish, 11% crab → ~1 catch in 8 is a crab (11.10; was 0.75 = 1 in 4). Bot, default lure, 8 h: crabs/h 24.6 → 11.6
           pausePerchChance: 0.85,  // a bite on a pause is a perch with this chance
         },
         species: {
