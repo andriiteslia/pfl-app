@@ -378,6 +378,19 @@ tbody tr.row-highlight td {
   cursor: not-allowed;
 }
 
+/* 5+ segments (extra view) — compact so all fit on a phone */
+.segment {
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.segment:first-child:nth-last-child(n+5),
+.segment:first-child:nth-last-child(n+5) ~ .segment {
+  padding: var(--spacing-sm) 4px;
+  font-size: 13px;
+}
+
 /* ---- Pills & Tags ---- */
 .pill {
   display: inline-flex;
