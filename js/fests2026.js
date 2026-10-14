@@ -11,7 +11,10 @@ import { $, $$, escapeHtml, haptic, parseDividers, shareCard, buildShareLink, SH
 const CONFIG_2026 = {
   SHEET_ID: '1BbRlP6S2OejgiCkQKdoTRqm-przP_qz1Ge17BTmnIbs',
   SHEET_NAME: 'CONFIG_2026',
-  RANGE: 'A1:AF30',
+  // AF:AH = extraRange / extraDividers / extraLabel (5th segment)
+  RANGE: 'A1:AH30',
+  // Fallback while the Supabase sync script still caches only the old range
+  LEGACY_RANGE: 'A1:AF30',
 };
 
 // ---- State ----
@@ -92,6 +95,7 @@ function buildViews(fest) {
     { key: 'tours', defaultLabel: 'Тури', rangeKey: 'toursRange', labelKey: 'toursLabel', dividersKey: 'toursDividers' },
     { key: 'personal', defaultLabel: 'Особисті', rangeKey: 'personalRange', labelKey: 'personalLabel', dividersKey: 'personalDividers' },
     { key: 'teams', defaultLabel: 'Командні', rangeKey: 'teamsRange', labelKey: 'teamsLabel', dividersKey: 'teamsDividers' },
+    { key: 'extra', defaultLabel: 'Ще', rangeKey: 'extraRange', labelKey: 'extraLabel', dividersKey: 'extraDividers' },
   ];
 
   const views = [];
@@ -113,7 +117,7 @@ function pickDefaultView(fest, views) {
   const preferred = normStr(fest.defaultView).toLowerCase();
   if (preferred && views.some(v => v.key === preferred)) return preferred;
 
-  const order = ['results', 'personal', 'teams', 'tours'];
+  const order = ['results', 'personal', 'teams', 'tours', 'extra'];
   const hit = order.find(k => views.some(v => v.key === k));
   return hit || views[0]?.key || 'results';
 }
@@ -122,11 +126,25 @@ function pickDefaultView(fest, views) {
 async function loadConfig2026({ force = false } = {}) {
   // Use liveUpdate=true so the app auto-refreshes if Supabase has newer data
   const fetchFn = force ? fetchSheetData : fetchSheetDataLive;
-  const data = await fetchFn({
-    sheetId: CONFIG_2026.SHEET_ID,
-    sheetName: CONFIG_2026.SHEET_NAME,
-    range: CONFIG_2026.RANGE,
-  }, { force });
+  let data = null;
+  try {
+    data = await fetchFn({
+      sheetId: CONFIG_2026.SHEET_ID,
+      sheetName: CONFIG_2026.SHEET_NAME,
+      range: CONFIG_2026.RANGE,
+    }, { force });
+  } catch (e) {
+    console.warn('[Fests2026] New config range failed, trying legacy:', e.message);
+  }
+
+  // Fallback: Supabase has no row for the new range yet → use the old one
+  if (!data?.ok || !Array.isArray(data.values) || data.values.length < 2) {
+    data = await fetchFn({
+      sheetId: CONFIG_2026.SHEET_ID,
+      sheetName: CONFIG_2026.SHEET_NAME,
+      range: CONFIG_2026.LEGACY_RANGE,
+    }, { force });
+  }
 
   if (!data?.ok || !Array.isArray(data.values) || data.values.length < 2) {
     return [];
@@ -159,10 +177,13 @@ async function loadConfig2026({ force = false } = {}) {
       personalDividers: normStr(o.personalDividers),
       teamsRange: normStr(o.teamsRange),
       teamsDividers: normStr(o.teamsDividers),
+      extraRange: normStr(o.extraRange),
+      extraDividers: normStr(o.extraDividers),
       resultsLabel: normStr(o.resultsLabel),
       toursLabel: normStr(o.toursLabel),
       personalLabel: normStr(o.personalLabel),
       teamsLabel: normStr(o.teamsLabel),
+      extraLabel: normStr(o.extraLabel),
       defaultView: normStr(o.defaultView),
       registerBtn: normBool(o.registerBtn) && !!normStr(o.registerBtnLink),
       registerBtnLabel: normStr(o.registerBtnLabel),
@@ -507,13 +528,14 @@ export function resetFests2026() {
 // When background fetch detects newer CONFIG_2026 data in Supabase,
 // silently re-mount so users see fresh cards without manual refresh.
 (function () {
-  const CONFIG_CACHE_ID = `${CONFIG_2026.SHEET_ID}__${CONFIG_2026.SHEET_NAME}__${CONFIG_2026.RANGE}`;
+  const CONFIG_CACHE_IDS = [CONFIG_2026.RANGE, CONFIG_2026.LEGACY_RANGE]
+    .map(r => `${CONFIG_2026.SHEET_ID}__${CONFIG_2026.SHEET_NAME}__${r}`);
 
   document.addEventListener('pflCacheUpdated', async (e) => {
     if (!mounted) return;
     const cid = e.detail?.cacheId;
 
-    if (cid === CONFIG_CACHE_ID) {
+    if (CONFIG_CACHE_IDS.includes(cid)) {
       // CONFIG changed — full re-mount
       console.log('[Fests2026] Live update: config changed, re-mounting...');
       resetFests2026();
