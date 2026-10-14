@@ -99,7 +99,7 @@
             name: 'Decoy Single 32', nameAcc: 'Decoy Single 32', note: 'пачка гачків',
             power: 0.35, kg: [0.01, 0.01], tiers: [[1, 0.01, 0.01]],
             lure: 'cheater', sizes: [1.2], maxWeightG: 2,
-            chance: 0.03,
+            chance: 0,           // 14.10: prize OFF (was 0.03). To turn it on again — a chance > 0 (0.03 = 3% of fish bites on that setup)
           },
         },
       },
