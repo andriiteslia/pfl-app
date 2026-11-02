@@ -10,9 +10,10 @@ import { initLeaderboard, loadLeaderboard, isLeaderboardLoaded } from './leaderb
 import { initArena, loadArena, isArenaLoaded, renderArenaIfReady } from './arena.js';
 import { initDidyliv, loadDidyliv, isDidylivLoaded, renderDidylivIfReady } from './didyliv.js';
 import { initPartners } from './partners.js';
-import { fetchAppStyles, trackVisit } from './api.js';
+import { fetchAppStyles } from './api.js';
 import { $ } from './utils.js';
 import { initPullToRefresh } from './pull-to-refresh.js';
+import { initFishingLauncher } from './fishing-launcher.js?v=20261011c';
 
 // ---- Theme Management ----
 function updateMetaThemeColor(color) {
@@ -329,6 +330,43 @@ function setupTabCallbacks() {
   });
 }
 
+// ---- Visit Statistics (аркуш «Статистика») ----
+// Самодостатній блок: нічого не імпортує, ніколи не кидає помилку
+// і не блокує апку. Шле юзера Telegram у Supabase RPC `track_visit`.
+// Сервер сам рахує входи і ігнорує повтори протягом 2 хв.
+const STATS_SUPABASE_URL = 'https://wehepxiajsdtsaslexqm.supabase.co';
+const STATS_SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndlaGVweGlhanNkdHNhc2xleHFtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4MTg0NjcsImV4cCI6MjA5MDM5NDQ2N30.4n-AfS-tg_XQ3_kxVJpEhecqQ3qS7NXWttI3X_war8I';
+
+function trackVisit() {
+  try {
+    const tg = window.Telegram?.WebApp;
+    const user = tg?.initDataUnsafe?.user;
+    if (!user?.id || typeof fetch !== 'function') return; // не з Telegram — пропускаємо
+
+    fetch(`${STATS_SUPABASE_URL}/rest/v1/rpc/track_visit`, {
+      method: 'POST',
+      headers: {
+        'apikey': STATS_SUPABASE_ANON,
+        'Authorization': `Bearer ${STATS_SUPABASE_ANON}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        p_tg_id: user.id,
+        p_first_name: user.first_name || null,
+        p_last_name: user.last_name || null,
+        p_username: user.username || null,
+        p_language: user.language_code || null,
+        p_is_premium: !!user.is_premium,
+        p_platform: tg.platform || null,
+        p_app_version: tg.version || null,
+        p_start_param: tg.initDataUnsafe?.start_param || null,
+      }),
+    }).catch(() => {});
+  } catch (e) {
+    console.warn('[Stats] trackVisit failed:', e);
+  }
+}
+
 // ---- Main Init ----
 async function init() {
   console.log('[PFL App] Starting...');
@@ -339,9 +377,6 @@ async function init() {
   
   // 2. Telegram integration
   initTelegram();
-  
-  // 2.1 Visit statistics (non-blocking, fire-and-forget)
-  trackVisit();
   
   // 3. Load styles from Google Sheets (async, non-blocking)
   loadAppStylesFromSheet();
@@ -365,6 +400,9 @@ async function init() {
   
   // 8. Row highlight in tables
   initRowHighlight();
+
+  // 8b. Fishing mini-game FAB (game loads lazily on the first tap)
+  initFishingLauncher();
   
   // 9. Load initial data for visible tab
   const activeTab = getActiveTab();
@@ -376,6 +414,9 @@ async function init() {
   
   // 10. Deep link via Telegram start_param
   handleDeepLink();
+
+  // 11. Visit statistics (fire-and-forget, after everything else)
+  trackVisit();
   
   console.log('[PFL App] Ready!');
 }
