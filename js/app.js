@@ -10,10 +10,9 @@ import { initLeaderboard, loadLeaderboard, isLeaderboardLoaded } from './leaderb
 import { initArena, loadArena, isArenaLoaded, renderArenaIfReady } from './arena.js';
 import { initDidyliv, loadDidyliv, isDidylivLoaded, renderDidylivIfReady } from './didyliv.js';
 import { initPartners } from './partners.js';
-import { fetchAppStyles } from './api.js';
+import { fetchAppStyles, trackVisit } from './api.js';
 import { $ } from './utils.js';
 import { initPullToRefresh } from './pull-to-refresh.js';
-import { initFishingLauncher } from './fishing-launcher.js?v=20261011c';
 
 // ---- Theme Management ----
 function updateMetaThemeColor(color) {
@@ -341,6 +340,9 @@ async function init() {
   // 2. Telegram integration
   initTelegram();
   
+  // 2.1 Visit statistics (non-blocking, fire-and-forget)
+  trackVisit();
+  
   // 3. Load styles from Google Sheets (async, non-blocking)
   loadAppStylesFromSheet();
   
@@ -363,9 +365,6 @@ async function init() {
   
   // 8. Row highlight in tables
   initRowHighlight();
-
-  // 8b. Fishing mini-game FAB (game loads lazily on the first tap)
-  initFishingLauncher();
   
   // 9. Load initial data for visible tab
   const activeTab = getActiveTab();

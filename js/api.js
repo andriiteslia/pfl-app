@@ -262,29 +262,39 @@ export async function fetchLeaderboardDeltas() {
   }
 }
 
-// ---- Festival History (leaderboard_fest_snapshots) ----
-// Reads the cumulative standings right after a given festival (fest_number),
-// as computed and seeded by leaderboard_fest_history_seed.sql.
-// Returns an array of rows sorted by position, or [] on any failure
-// (e.g. that fest hasn't been seeded yet).
-export async function fetchFestSnapshot(festNumber) {
-  const url = `${SUPABASE_URL}/rest/v1/leaderboard_fest_snapshots?fest_number=eq.${encodeURIComponent(festNumber)}&select=participant_name,position,points,weight,fests_count&order=position.asc`;
-
+// ---- Visit Tracking (Статистика) ----
+// Sends the Telegram user of this session to Supabase RPC `track_visit`.
+// The RPC upserts app_users (visits counter, first/last seen) and logs
+// a row in app_visits. Server ignores repeat opens within 2 minutes.
+// Never throws and never blocks the UI.
+export function trackVisit() {
   try {
-    const response = await fetch(url, {
+    const tg = window.Telegram?.WebApp;
+    const user = tg?.initDataUnsafe?.user;
+    if (!user?.id) return; // opened outside Telegram (web) — skip
+
+    fetch(`${SUPABASE_URL}/rest/v1/rpc/track_visit`, {
+      method: 'POST',
       headers: {
         'apikey': SUPABASE_KEY,
         'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Content-Type': 'application/json',
       },
-    });
-
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-
-    const rows = await response.json();
-    return Array.isArray(rows) ? rows : [];
-  } catch (error) {
-    console.warn(`[API] Failed to fetch fest #${festNumber} snapshot:`, error.message);
-    return [];
+      body: JSON.stringify({
+        p_tg_id: user.id,
+        p_first_name: user.first_name || null,
+        p_last_name: user.last_name || null,
+        p_username: user.username || null,
+        p_language: user.language_code || null,
+        p_is_premium: !!user.is_premium,
+        p_platform: tg.platform || null,
+        p_app_version: tg.version || null,
+        p_start_param: tg.initDataUnsafe?.start_param || null,
+      }),
+      keepalive: true,
+    }).catch(() => {});
+  } catch (e) {
+    console.warn('[Stats] trackVisit failed:', e);
   }
 }
 
