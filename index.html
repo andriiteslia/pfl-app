@@ -45,7 +45,7 @@
   <link rel="stylesheet" href="css/components.css?v=20260922">
   <link rel="stylesheet" href="css/tabs.css?v=20260922">
   <link rel="stylesheet" href="css/leaderboard.css?v=20260922">
-  <link rel="stylesheet" href="css/partners.css?v=20260922">
+  <link rel="stylesheet" href="css/partners.css?v=20261106">
   <link rel="stylesheet" href="css/skeleton.css?v=20260922">
   <link rel="stylesheet" href="css/animations.css?v=20260922">
   <link rel="stylesheet" href="css/fishing-fab.css?v=20261007e">
@@ -418,11 +418,16 @@
           <article class="partner-tile partner-tile--featured"
                    data-partner="ibis">
             <div class="partner-tile__logo">
-              <img src="./assets/logos/ibis_logo.svg" alt="IBIS"
+              <img src="./assets/logos/ibis_big_logo.svg" alt="IBIS"
                    onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
               <div class="logo-fallback">IBIS</div>
             </div>
             <div class="partner-tile__body partner-tile__body--featured">
+              <!-- Select promo chip (6–20.11) -->
+              <span class="partner-deal-chip" aria-label="Знижка -10% на Select">
+                <img src="./assets/logos/select_logo.svg" alt="Select">
+                <b>-10%</b>
+              </span>
               <div class="partner-tile__featured-arrow" aria-hidden="true">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
                   <path d="M13.707 5.293a1 1 0 00-1.414 1.414L16.586 11H5a1 1 0 000 2h11.586l-4.293 4.293a1 1 0 001.414 1.414l6-6a1 1 0 000-1.414l-6-6z" fill="currentColor"/>
@@ -516,6 +521,10 @@
           <!-- Logo Header -->
           <div class="partner-details__header" id="partnerDetailsLogo">
             <img id="partnerDetailsLogoImg" src="" alt="">
+            <span class="partner-deal-chip partner-deal-chip--header" id="partnerDetailsDeal" style="display:none;">
+              <img id="partnerDetailsDealLogo" src="" alt="">
+              <b id="partnerDetailsDealText"></b>
+            </span>
           </div>
 
           <!-- Body -->
@@ -525,7 +534,7 @@
 
             <!-- Promo Block -->
             <div class="partner-promo" id="partnerDetailsPromoWrap" style="display:none;">
-              <div class="partner-promo__badge">-10%</div>
+              <div class="partner-promo__badge" id="partnerDetailsPromoBadge">-10%</div>
               <div class="partner-promo__body">
                 <span class="partner-promo__label" id="partnerDetailsPromoLabel">Промокод для знижки</span>
                 <div class="partner-promo__row">
@@ -536,6 +545,7 @@
                     <span class="partner-promo__copy-text">Копіювати</span>
                   </button>
                 </div>
+                <span class="partner-promo__terms" id="partnerDetailsPromoTerms" style="display:none;"></span>
               </div>
             </div>
 

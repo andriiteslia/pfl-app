@@ -498,3 +498,118 @@ body.partners-details-open::after {
   width: 24px;
   height: 24px;
 }
+
+
+/* ============================================
+   Deal chip: brand logo + discount (IBIS × Select)
+   ============================================ */
+.partner-deal-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 4px 4px 8px;
+  background: #fff;
+  border-radius: var(--radius-full);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.partner-deal-chip img {
+  display: block;
+  height: 16px;
+  width: auto;
+}
+
+.partner-deal-chip b {
+  background: #D72A4D;
+  color: #fff;
+  font-family: var(--font-ui);
+  font-size: 12px;
+  font-weight: 800;
+  padding: 4px 8px;
+  border-radius: var(--radius-full);
+}
+
+/* On the featured IBIS banner: sits left of the arrow */
+.partner-tile--featured .partner-tile__body--featured {
+  flex-direction: row;
+  align-items: center;
+}
+
+.partner-tile--featured .partner-deal-chip {
+  margin: 0 10px 0 10px;
+  padding: 4px 4px 4px 9px;
+  gap: 6px;
+}
+
+.partner-tile--featured .partner-deal-chip img {
+  height: 18px;
+}
+
+.partner-tile--featured .partner-deal-chip b {
+  font-size: 13px;
+  padding: 5px 9px;
+}
+
+/* IBIS banner: compact logo (no slogan), chip + arrow grouped on the right */
+.partner-tile--featured .partner-tile__logo {
+  flex: 0 1 auto;
+  min-width: 0;
+  height: 32px;
+}
+
+.partner-tile--featured .partner-tile__logo img {
+  max-width: 100%;
+}
+
+.partner-tile--featured .partner-deal-chip {
+  margin: 0 12px 0 auto;
+}
+
+/* In the details header: top-right corner */
+.partner-deal-chip--header {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  padding: 5px 5px 5px 10px;
+}
+
+.partner-details__header .partner-deal-chip--header img {
+  height: 20px;
+  max-width: none;
+  max-height: none;
+}
+
+.partner-deal-chip--header b {
+  font-size: 14px;
+  padding: 5px 10px;
+}
+
+/* ---- Promo block: Select theme ---- */
+.partner-promo--select {
+  border-color: rgba(215, 42, 77, 0.22);
+  box-shadow: 0 2px 8px rgba(215, 42, 77, 0.07);
+}
+
+.partner-promo--select .partner-promo__badge {
+  background: linear-gradient(180deg, #E2486A 0%, #C21E40 100%);
+}
+
+:root[data-theme="dark"] .partner-promo--select {
+  border-color: rgba(226, 72, 106, 0.28);
+}
+
+.partner-promo__label .partner-promo__brand {
+  display: inline-block;
+  height: 13px;
+  width: auto;
+  vertical-align: -2px;
+  margin: 0 1px;
+}
+
+.partner-promo__terms {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--muted);
+}

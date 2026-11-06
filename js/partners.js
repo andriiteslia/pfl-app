@@ -22,6 +22,12 @@ const getElements = () => ({
   detailsPromoWrap: $('#partnerDetailsPromoWrap'),
   detailsPromoCode: $('#partnerDetailsPromoCode'),
   detailsPromoCopy: $('#partnerDetailsPromoCopy'),
+  detailsPromoBadge: $('#partnerDetailsPromoBadge'),
+  detailsPromoLabel: $('#partnerDetailsPromoLabel'),
+  detailsPromoTerms: $('#partnerDetailsPromoTerms'),
+  detailsDeal: $('#partnerDetailsDeal'),
+  detailsDealLogo: $('#partnerDetailsDealLogo'),
+  detailsDealText: $('#partnerDetailsDealText'),
   detailsInfo: $('#partnerDetailsInfo'),
   fabBack: $('#fabBack'),
 });
@@ -30,14 +36,20 @@ const getElements = () => ({
 const PARTNER_DATA = {
   ibis: {
     title: 'IBIS',
-    subtitle: '🏕️ IBIS — мережа спеціалізованих магазинів для активного відпочинку, туризму та риболовлі. Тут знайдеш все необхідне для пригод на природі: спорядження, одяг, взуття та аксесуари від провідних світових брендів 🎒🌲<br>Знижка за промокодом діє на приманки бренду Select 🎣<br>🗓 Термін дії: 6 – 20 листопада<br>🛒 Онлайн і офлайн',
+    subtitle: '🏕️ IBIS — мережа спеціалізованих магазинів для активного відпочинку, туризму та риболовлі. Тут знайдеш все необхідне для пригод на природі: спорядження, одяг, взуття та аксесуари від провідних світових брендів 🎒🌲',
     info: '📱 093 33 26 444<br>📱 099 33 26 444<br>📱 097 33 26 444<br>💬 097 33 26 400 (тільки для повідомлень)<br><br>🕘 Пн – Пт: 09:00–20:00<br>🕘 Сб – Нд: 10:00–19:00',
     ctaText: 'В магазин 🐟',
     ctaHref: 'https://ibis-gear.com/',
     instagram: 'https://www.instagram.com/ibisfishing/',
     logoBg: '#00785F',
     detailsLogoSrc: './assets/logos/ibis_big_logo.svg',
+    // Акція Select: 6 – 20 листопада (після 20.11 видалити блок нижче)
     promo: 'PFL2026_10',
+    promoBadge: '-10%',
+    promoTheme: 'select',
+    promoBrandLogo: './assets/logos/select_logo.svg',
+    promoLabel: 'Промокод на {logo} Select',
+    promoTerms: 'Знижка на приманки бренду Select<br>🗓 6 – 20 листопада · 🛒 онлайн і офлайн',
   },
   upstream: {
     title: 'Upstream',
@@ -198,10 +210,35 @@ function openPartnerDetails(tile) {
     }
   }
 
+  // Set deal chip in header (logo + discount)
+  if (els.detailsDeal) {
+    if (data.promo && data.promoBrandLogo) {
+      els.detailsDeal.style.display = 'inline-flex';
+      if (els.detailsDealLogo) els.detailsDealLogo.src = data.promoBrandLogo;
+      if (els.detailsDealText) els.detailsDealText.textContent = data.promoBadge || '-10%';
+    } else {
+      els.detailsDeal.style.display = 'none';
+    }
+  }
+
   // Set promo code
   if (els.detailsPromoWrap) {
     if (data.promo) {
       els.detailsPromoWrap.style.display = 'flex';
+      els.detailsPromoWrap.classList.toggle('partner-promo--select', data.promoTheme === 'select');
+      if (els.detailsPromoBadge) {
+        els.detailsPromoBadge.textContent = data.promoBadge || '-10%';
+      }
+      if (els.detailsPromoLabel) {
+        const logo = data.promoBrandLogo
+          ? `<img class="partner-promo__brand" src="${data.promoBrandLogo}" alt="">`
+          : '';
+        els.detailsPromoLabel.innerHTML = (data.promoLabel || 'Промокод для знижки').replace('{logo}', logo);
+      }
+      if (els.detailsPromoTerms) {
+        els.detailsPromoTerms.innerHTML = data.promoTerms || '';
+        els.detailsPromoTerms.style.display = data.promoTerms ? 'block' : 'none';
+      }
       if (els.detailsPromoCode) {
         els.detailsPromoCode.textContent = data.promo;
       }
@@ -290,7 +327,7 @@ async function handlePromoCopy(code) {
   const block = els.detailsPromoCopy?.closest('.partner-promo');
   const label = block?.querySelector('.partner-promo__label');
   const copyText = els.detailsPromoCopy?.querySelector('.partner-promo__copy-text');
-  const prevLabel = label?.textContent || '';
+  const prevLabel = label?.innerHTML || '';
   const prevCopyText = copyText?.textContent || '';
 
   if (block) block.classList.add('is-copied');
@@ -299,7 +336,7 @@ async function handlePromoCopy(code) {
 
   setTimeout(() => {
     if (block) block.classList.remove('is-copied');
-    if (label) label.textContent = prevLabel;
+    if (label) label.innerHTML = prevLabel;
     if (copyText) copyText.textContent = prevCopyText;
   }, 2500);
 }
