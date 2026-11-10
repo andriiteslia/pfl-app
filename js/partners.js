@@ -44,7 +44,7 @@ const PARTNER_DATA = {
     logoBg: '#00785F',
     detailsLogoSrc: './assets/logos/ibis_big_logo.svg',
     // Акція Select: 6 – 20 листопада (після 20.11 видалити блок нижче)
-    promo: 'PFL2026_10',
+    promo: 'PPL2026_10',
     promoBadge: '-10%',
     promoTheme: 'select',
     promoBrandLogo: './assets/logos/select_logo.svg',
