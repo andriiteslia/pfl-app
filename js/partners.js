@@ -43,13 +43,6 @@ const PARTNER_DATA = {
     instagram: 'https://www.instagram.com/ibisfishing/',
     logoBg: '#00785F',
     detailsLogoSrc: './assets/logos/ibis_big_logo.svg',
-    // Акція Select: 6 – 20 листопада (після 20.11 видалити блок нижче)
-    promo: 'PPL2026_10',
-    promoBadge: '-10%',
-    promoTheme: 'select',
-    promoBrandLogo: './assets/logos/select_logo.svg',
-    promoLabel: 'Промокод на {logo} Select',
-    promoTerms: 'Знижка на приманки бренду Select<br>🗓 6 – 20 листопада · 🛒 онлайн і офлайн',
   },
   upstream: {
     title: 'Upstream',
